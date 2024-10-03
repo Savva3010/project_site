@@ -1,0 +1,59 @@
+.header {
+    width: 100dvw;
+    height: 63px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #F8F9FA;
+    color: #337AB7;
+}
+
+.title {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.title span {
+    font-size: 1.25rem;
+}
+
+.title-txt {
+    font-weight: 100;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.25rem;
+}
+
+.title-txt::before {
+    content: "";
+    background: url("https://anoo.ftl.name/images/fl-logo-min.png");
+    background-size: contain;
+    display: inline-block;
+    width: 32px;
+    aspect-ratio: 1;
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile span {
+    font-size: 1.25rem;
+}
+
+.profile::after {
+    display: inline-block;
+    margin-left: -.3em;
+    vertical-align: .255em;
+    content: "";
+    border-top: .3em solid;
+    border-right: .3em solid transparent;
+    border-bottom: 0;
+    border-left: .3em solid transparent;
+}
