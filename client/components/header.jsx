@@ -5,13 +5,15 @@ export default function Header() {
   return (
     <header className={`${css["header"]}`}>
       <div className={`${css["title"]}`}>
-        <a href="https://cabinet.ftl.name" className={`${css["title-txt"]}`}>Кабинет</a>
-        <span className={`bi bi-layout-text-sidebar`}></span>
+        <button className={`${css["title-txt"]}`}>Кабинет</button>
+        <button>
+          <span className={`bi bi-layout-text-sidebar`}></span>
+        </button>
       </div>
-      <div className={`${css["profile"]}`}>
+      <button className={`${css["profile"]}`}>
         <p>Серебренников Савва</p>
         <span className={`bi bi-person-circle`}></span>
-      </div>
+      </button>
     </header>
   )
 }

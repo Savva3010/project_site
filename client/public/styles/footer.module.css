@@ -1,0 +1,22 @@
+.footer {
+    width: 100dvw;
+    height: var(--footer-height);
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #F8F9FA;
+    color: #212529;
+}
+
+.footer button {
+    color: #DC3545;
+}
+
+.footer button span::before {
+    margin-right: .3rem;
+}
+
+.footer a {
+    color: #337AB7;
+}

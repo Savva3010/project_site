@@ -1,0 +1,22 @@
+.sidebar {
+    background-color: #3B4654;
+    width: 210px;
+    height: calc(100dvh - var(--header-height) - var(--footer-height));
+    padding: 5px 10px;
+    font-size: 1.2rem;
+}
+
+.sidebar-catalog-name {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-catalog {
+    color: #A4A6A8;
+    padding: 5px 0 5px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    
+}

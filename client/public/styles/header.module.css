@@ -1,6 +1,6 @@
 .header {
     width: 100dvw;
-    height: 63px;
+    height: var(--header-height);
     padding: 0 20px;
     display: flex;
     align-items: center;
@@ -37,10 +37,15 @@
     aspect-ratio: 1;
 }
 
+.title button {
+    color: #337AB7;
+}
+
 .profile {
     display: flex;
     align-items: center;
     gap: 10px;
+    color: #337AB7;
 }
 
 .profile span {
