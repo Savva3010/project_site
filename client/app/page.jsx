@@ -1,6 +1,16 @@
-import Image from "next/image";
-import styles from "@/styles/index.module.css";
+import Header from "@/cmponents/header";
+import Footer from "@/cmponents/footer";
+import Sidebar from "@/cmponents/sidebar";
 
 export default function Home() {
-  return (<></>);
+  return (<>
+    <Header />
+    <div>
+        <Sidebar />
+        <main>
+        {children}
+        </main>
+    </div>
+    <Footer />
+  </>);
 }

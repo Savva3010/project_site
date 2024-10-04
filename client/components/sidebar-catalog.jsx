@@ -1,20 +1,43 @@
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import css from "@/styles/sidebar.module.css"
 
-export default function SidebarCatalog({name, subCategories = []}) {
+import { Children, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-  return (
-    <div className={`${css["sidebar-catalog"]}`}>
-        <span className={`${css["sidebar-catalog-name"]}`}>
-            {name}
-            {subCategories.length != 0
-            ? <span className={`bi bi-caret-right-fill`}></span>
-            : <span></span>
-            }
-        </span>
-      {subCategories.map((element, key) => {
-        return <SidebarCatalog key={key} name={element["name"]} subCategories={element.subCategories} />
-      })}
-    </div>
-  )
+export default function SidebarCatalog({name, href, children = []}) {
+
+    const [ expanded, setExpanded ] = useState(false)
+    const router = useRouter()
+
+    function showExpanded() {
+        if (!expanded) return (<></>)
+
+        return (<>
+            {Children.map(children, (element, key) => {
+                return <SidebarCatalog key={key} name={element.props.name} href={element.props.href}>{element.props.children}</SidebarCatalog>
+            })}
+        </>)
+    }
+
+    function handleClick() {
+        if (Children.count(children) != 0) {
+            setExpanded(prev => prev = !prev)
+        } else {
+
+            router.push(href)
+        }
+    }
+
+    return (
+        <div className={`${css["sidebar-catalog"]}`}>
+            <button onClick={handleClick} className={`${css["sidebar-catalog-name"]}`}>
+                {name}
+                {Children.count(children) != 0
+                    ? <span className={`bi ${expanded ? "bi-caret-down-fill" : "bi-caret-right-fill"}`}></span>
+                    : <></>
+                }
+            </button>
+            {showExpanded()}
+        </div>
+    )
 }
