@@ -1,7 +1,8 @@
 .sidebar {
     background-color: #3B4654;
-    width: 210px;
+    width: var(--sidebar-width);
     height: calc(100dvh - var(--header-height) - var(--footer-height));
+    overflow-y: auto;
     padding: 5px 10px;
     font-size: 1.2rem;
 }

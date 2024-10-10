@@ -5,6 +5,7 @@
 
   --header-height: 63px;
   --footer-height: 35px;
+  --sidebar-width: 210px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -21,11 +22,26 @@ body {
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: #212529;
+  background: #FFFFFF;
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+    color: #212529;
+}
+
+body > div {
+    display: flex;
+}
+
+main {
+    padding: 10ppx 50px;
+    width: calc(100dvw - var(--sidebar-width));
+    height: calc(100dvh - var(--header-height) - var(--footer-height));
+    overflow-y: auto;
 }
 
 * {

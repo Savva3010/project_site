@@ -1,0 +1,76 @@
+.loading {
+    font-size: 2rem;
+}
+.error {
+    font-size: 1.5rem;
+    color: #CC0000;
+}
+.empty {
+    font-size: 2rem;
+}
+
+.list ul {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.list li {
+    list-style: none;
+    display: flex;
+    height: 40px;
+}
+
+.columns {
+    font-weight: 700;
+}
+
+.list li div {
+    border: solid 1px #000000;
+    border-right: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    min-width: max-content;
+}
+
+.list li div:nth-child(1) {
+    width: 4rem;
+}
+.list li div:nth-child(2) {
+    width: 27rem;
+}
+.list li div:nth-child(3) {
+    width: 12rem;
+}
+.list li div:nth-child(4) {
+    width: 16rem;
+}
+.list li div:nth-child(5) {
+    width: 16rem;
+}
+.list li div:nth-child(6) {
+    width: 13rem;
+}
+.list li div:nth-child(7) {
+    width: 7rem;
+    border-right: solid 1px #000000;
+}
+
+.list li div:nth-child(7) button {
+    color: #337AB7;
+}
+
+.status-inside {
+    background: #80FF80;
+}
+.status-isolator {
+    background: #DDFF80;
+}
+.status-outside {
+    background: #FF8080;
+}
+.status-school {
+    background: #FF8080;
+}

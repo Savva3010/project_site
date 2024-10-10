@@ -5,7 +5,8 @@
       "@/*": ["./*"],
       "@/styles/*": ["../public/styles/*"],
       "@/fonts/*": ["../public/fonts/*"],
-      "@/cmponents/*": ["../components/*"]
+      "@/cmponents/*": ["../components/*"],
+      "@/enums": ["../enums.js"]
     }
   }
 }
