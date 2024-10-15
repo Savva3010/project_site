@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 
 import { location } from '@/enums';
 
-const URL = "https://localhost:3001"
+const URL = "http://localhost:3001"
 
 export default function Residents() {
 
@@ -23,12 +23,13 @@ export default function Residents() {
             signal: controller.signal
         })
         .then(res => res.json())
-        .then(data => console.log(data))
+        .then(data => {
+            setResidents(data.data)
+        })
         .catch(err => {
             if (err.name == "AbortError") return
             console.error(err)
-            //setResidents(err)
-            setResidents(["ASD", "ASD"])
+            setResidents(err)
         })
 
         return () => {
@@ -68,42 +69,21 @@ export default function Residents() {
                         <div>Статус</div>
                         <div></div>
                 </li>
-                <li>
-                    <div>211/2</div>
-                    <div>Серебренников Савва Андреевич</div>
-                    <div>+7 123 456 78 90</div>
-                    <div>yes@example.com</div>
-                    <div>@Savva3010</div>
-                    <div className={`${css["status-inside"]}`}>Сейчас в интернате</div>
-                    <div><button>Подробнее</button></div>
-                </li>
-                <li>
-                    <div>211/2</div>
-                    <div>Серебренников Савва Андреевич</div>
-                    <div>+7 123 456 78 90</div>
-                    <div>yes@example.com</div>
-                    <div>@Savva3010</div>
-                    <div className={`${css["status-isolator"]}`}>Сейчас в изоляторе</div>
-                    <div><button>Подробнее</button></div>
-                </li>
-                <li>
-                    <div>211/2</div>
-                    <div>Серебренников Савва Андреевич</div>
-                    <div>+7 123 456 78 90</div>
-                    <div>yes@example.com</div>
-                    <div>@Savva3010</div>
-                    <div className={`${css["status-outside"]}`}>Сейчас не в интернате</div>
-                    <div><button>Подробнее</button></div>
-                </li>
-                <li>
-                    <div>211/2</div>
-                    <div>Серебренников Савва Андреевич</div>
-                    <div>+7 123 456 78 90</div>
-                    <div>yes@example.com</div>
-                    <div>@Savva3010</div>
-                    <div className={`${css["status-school"]}`}>Сейчас в ФТЛ</div>
-                    <div><button>Подробнее</button></div>
-                </li>
+                {residents.map((resident, idx) => {
+                    return (
+                        <li key={idx}>
+                            <div>STATIC</div>
+                            <div>{resident["full_name"]}</div>
+                            <div>{resident["mobile"]}</div>
+                            <div>{resident["email"]}</div>
+                            <div>{resident["telegram"]}</div>
+                            <div className={`${css[`status-${location.getInfo(resident.status.status)[1]}`]}`}>
+                                {location.getInfo(resident.status.status)[0]}
+                            </div>
+                            <div><button>Подробнее</button></div>
+                        </li>
+                    )
+                })}
             </ul>
         )
     }

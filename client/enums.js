@@ -6,12 +6,20 @@ export const location = {
 
     "getInfo": (val) => {
         switch (val) {
+            case "INSIDE":
+            case "inside":
             case location.INSIDE:
                 return ["Сейчас в интернате", "inside"]
+            case "ISOLATOR":
+            case "isolator":
             case location.ISOLATOR:
                 return ["Сейчас в изоляторе", "isolator"]
+            case "OUTSIDE":
+            case "outside":
             case location.OUTSIDE:
                 return ["Сейчас не в интернате", "outside"]
+            case "SCHOOL":
+            case "school":
             case location.SCHOOL:
                 return ["Сейчас в ФТЛ", "school"]
             default:

@@ -9,16 +9,23 @@
     font-size: 2rem;
 }
 
+.list {
+    width: 100%;
+    padding: 0 20px;
+}
+
 .list ul {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    width: 100%;
 }
 
 .list li {
     list-style: none;
     display: flex;
-    height: 40px;
+    height: 35px;
+    width: 100%;
 }
 
 .columns {
@@ -32,26 +39,26 @@
     display: flex;
     align-items: center;
     padding: 10px;
-    min-width: max-content;
+    text-wrap: nowrap;
 }
 
 .list li div:nth-child(1) {
     width: 4rem;
 }
 .list li div:nth-child(2) {
-    width: 27rem;
+    width: 20rem;
 }
 .list li div:nth-child(3) {
-    width: 12rem;
+    width: 10rem;
 }
 .list li div:nth-child(4) {
-    width: 16rem;
+    width: 10rem;
 }
 .list li div:nth-child(5) {
-    width: 16rem;
+    width: 10rem;
 }
 .list li div:nth-child(6) {
-    width: 13rem;
+    width: 12rem;
 }
 .list li div:nth-child(7) {
     width: 7rem;
