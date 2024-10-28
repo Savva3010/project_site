@@ -3,17 +3,41 @@
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import css from "@/styles/residents/page.module.css"
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useReducer } from 'react';
 
 import { location } from '@/enums';
 
 const URL = "http://localhost:3001"
 
+function useLoader() {
+    const INITIAL_STATE = {
+        status: "INITIALIZE",
+        data: null,
+        error: null
+    }
+
+    function reducer(state, { type, payload }) {
+        switch (type) {
+            case "LOADING":
+                return {...state, status: "LOADING"}
+            case "ERROR":
+                return {...state, status: "ERROR", error: payload}
+            case "SUCCESS":
+                return {...state, status: "SUCCESS", data: payload}
+            default:
+                return {...state}
+        }
+    }
+
+    return useReducer(reducer, INITIAL_STATE) 
+}
+
 export default function Residents() {
 
-    const [ residents, setResidents ] = useState(null)
+    const [ residents, setResidents ] = useLoader()
 
     useEffect(() => {
+        setResidents({type: "LOADING"})
         let controller = new AbortController()
         fetch(URL + "/residents", {
             method: "GET",
@@ -24,12 +48,12 @@ export default function Residents() {
         })
         .then(res => res.json())
         .then(data => {
-            setResidents(data.data)
+            setResidents({type: "SUCCESS", payload: data.data})
         })
         .catch(err => {
             if (err.name == "AbortError") return
             console.error(err)
-            setResidents(err)
+            setResidents({type: "ERROR", payload: err})
         })
 
         return () => {
@@ -38,23 +62,24 @@ export default function Residents() {
     }, [])
 
     function showResidents() {
-        if (residents == null) {
+        if (residents.status == "INITIALIZE") return <></>
+        if (residents.status == "LOADING") {
             return <p className={`${css["loading"]}`}>Загружаем список . . .</p>
         }
-        if (residents instanceof Error) {
+        if (residents.status == "ERROR") {
             return <p style={{whiteSpace: "pre-wrap", height: "max-content"}} className={`${css["error"]}`}>Произошла ошибка (да, и такое бывает) ¯\_(ツ)_/¯ 
                 <br/>
                 Обратитесь к специалисту и попробуйте позже
                 <br/>
                 <br/>                           
-                {residents.name}
+                {residents.error.name}
                 <br/>
-                {residents.message}
+                {residents.error.message}
                 <br/>
-                {residents.stack}
+                {residents.error.stack}
             </p>
         }
-        if (residents.length == 0) {
+        if (residents.data.length == 0) {
             return <p className={`${css["empty"]}`}>Проживающих нет, меньше работы ^_^</p>
         }
 
@@ -69,7 +94,7 @@ export default function Residents() {
                         <div>Статус</div>
                         <div></div>
                 </li>
-                {residents.map((resident, idx) => {
+                {residents.data.map((resident, idx) => {
                     return (
                         <li key={idx}>
                             <div>STATIC</div>
