@@ -43,25 +43,25 @@
 }
 
 .list li div:nth-child(1) {
-    width: 4rem;
+    width: 75px;
 }
 .list li div:nth-child(2) {
-    width: 20rem;
+    width: 450px;
 }
 .list li div:nth-child(3) {
-    width: 10rem;
+    width: 200px;
 }
 .list li div:nth-child(4) {
-    width: 10rem;
+    width: 275px;
 }
 .list li div:nth-child(5) {
-    width: 10rem;
+    width: 275px;
 }
 .list li div:nth-child(6) {
-    width: 12rem;
+    width: 225px;
 }
 .list li div:nth-child(7) {
-    width: 7rem;
+    width: 110px;
     border-right: solid 1px #000000;
 }
 

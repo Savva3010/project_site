@@ -1,0 +1,11 @@
+.profile-wrapper {
+    background: #FFFFFF;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    width: 1410px;
+    height: 682px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 15px 10px rgba(0, 0, 0, 0.5);
+}
