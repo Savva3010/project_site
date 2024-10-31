@@ -38,10 +38,16 @@ body > div {
 }
 
 main {
-    padding: 10ppx 50px;
+    padding: 10px 20px;
     width: calc(100dvw - var(--sidebar-width));
     height: calc(100dvh - var(--header-height) - var(--footer-height));
     overflow-y: auto;
+}
+
+@media (max-width: 575px) {
+    main {
+        width: 100dvw;
+    }
 }
 
 * {

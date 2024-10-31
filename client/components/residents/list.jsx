@@ -1,7 +1,7 @@
 "use client"
 
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import css from "@/styles/residents/page.module.css"
+import css from "@/styles/residents/list.module.css"
 
 import { useEffect, useState, useReducer } from 'react';
 
@@ -34,7 +34,7 @@ function useLoader() {
     return useReducer(reducer, INITIAL_STATE) 
 }
 
-export default function List({ openedProfileId }) {
+export default function List() {
 
     const [ residents, setResidents ] = useLoader()
 
@@ -88,17 +88,18 @@ export default function List({ openedProfileId }) {
         return (
             <ul>
                 <li className={`${css["columns"]}`}>
-                        <div>№</div>
-                        <div>ФИО</div>
-                        <div>Номер тел.</div>
-                        <div>Почта</div>
-                        <div>Telegram</div>
-                        <div>Статус</div>
+                        <div><p>№</p></div>
+                        <div><p>ФИО</p></div>
+                        <div><p>Номер тел.</p></div>
+                        <div><p>Почта</p></div>
+                        <div><p>Telegram</p></div>
+                        <div><p>Статус</p></div>
                         <div></div>
                 </li>
                 {residents.data.map((resident, idx) => {
+                    console.log("RENDER", resident.id)
                     return (
-                        <ListEl key={idx} info={resident} openedProfileId={openedProfileId}/>
+                        <ListEl key={idx} info={resident}/>
                     )
                 })}
             </ul>

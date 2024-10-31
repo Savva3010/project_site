@@ -7,6 +7,8 @@ import { useEffect, useState, useReducer } from 'react';
 
 import { location } from '@/enums';
 
+import ProfileColumn1 from './profile-column1';
+
 const URL = "http://localhost:3001"
 
 function useLoader() {
@@ -32,18 +34,22 @@ function useLoader() {
     return useReducer(reducer, INITIAL_STATE) 
 }
 
-export default function Profile({ id }) {
+export default function Profile({ openedProfileId, setOpenedProfileId }) {
 
     const [ resident, setResident ] = useLoader()
 
+    function closePanel() {
+        setOpenedProfileId(null)
+    }
+
     useEffect(() => {
-        if (id.current == null) {
+        if (openedProfileId == null) {
             setResident({type: "INITIALIZE"})
             return
         }
         setResident({type: "LOADING"})
         let controller = new AbortController()
-        fetch(URL + "/residents", {
+        fetch(URL + "/residents/" + openedProfileId, {
             method: "GET",
             header: {
 
@@ -63,7 +69,7 @@ export default function Profile({ id }) {
         return () => {
             controller.abort()
         }
-    }, [id.current])
+    }, [openedProfileId])
 
     function showResident() {
         if (resident.status == "INITIALIZE") return <></>
@@ -83,37 +89,29 @@ export default function Profile({ id }) {
                 {resident.error.stack}
             </p>
         }
-        if (resident.data.length == 0) {
-            return <p className={`${css["empty"]}`}>Проживающих нет, меньше работы ^_^</p>
-        }
 
         return (
             <ul>
-                <li className={`${css["columns"]}`}>
-                        <div>№</div>
-                        <div>ФИО</div>
-                        <div>Номер тел.</div>
-                        <div>Почта</div>
-                        <div>Telegram</div>
-                        <div>Статус</div>
-                        <div></div>
-                </li>
-                {resident.data.map((resident, idx) => {
-                    return (<>
-                        {id.current}
-                    </>)
-                })}
+                <ProfileColumn1 info={resident.data} />
             </ul>
         )
     }
 
     return (<>
-        {id.current == null ?
+        {openedProfileId == null ?
             <></> :
 
-            <div className={`${css["profile-wrapper"]}`}>
-                {showResident()}
-            </div>
+            <>
+                <div className={`${css["profile-disable-bg"]}`}></div>
+                <div className={`${css["profile-wrapper"]}`}>
+                    <button className={`${css["profile-close"]}`} onClick={closePanel}>
+                        <svg width="32" height="30" viewBox="0 0 32 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M30 27.6154L2.25745 2M29.2927 2.38462L0.999999 28" stroke="#AAAAAA" stroke-width="3"/>
+                        </svg>
+                    </button>
+                    {showResident()}
+                </div>
+            </>
         }
     </>);
 }

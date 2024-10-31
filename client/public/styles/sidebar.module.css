@@ -22,3 +22,9 @@
     gap: 10px;
     
 }
+
+@media (max-width: 575px) {
+    .sidebar {
+        display: none;
+    }
+}

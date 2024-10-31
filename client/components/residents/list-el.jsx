@@ -1,31 +1,35 @@
 "use client"
 
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import css from "@/styles/residents/page.module.css"
+import css from "@/styles/residents/list.module.css"
 
-import { useEffect, useState, useReducer } from 'react';
+import { useEffect, useState, useReducer, useContext } from 'react';
 
 import { location } from '@/enums';
 
-export default function ListEl({ info, openedProfileId }) {
+import { ProfileContext } from '@/residents/page';
+
+export default function ListEl({ info }) {
+
+    const setOpenedProfileId = useContext(ProfileContext)
 
     function openProfile() {
         setOpenedProfileId(info.id)
     }
 
-    console.log("RERENDER" + info.id)
+    console.log("RENDER-EL", info.id)
 
     return (<>
         <li>
-            <div>STATIC</div>
-            <div>{info["full_name"]}</div>
-            <div>{info["mobile"]}</div>
-            <div>{info["email"]}</div>
-            <div>{info["telegram"]}</div>
+            <div><p>{info["room"]}</p></div>
+            <div><p>{info["full_name"] + " " + info["class"]}</p></div>
+            <div><p>{info["mobile"]}</p></div>
+            <div><p>{info["email"]}</p></div>
+            <div><p>{info["telegram"]}</p></div>
             <div className={`${css[`status-${location.getInfo(info.status.status)[1]}`]}`}>
-                {location.getInfo(info.status.status)[0]}
+                <p>{location.getInfo(info.status.status)[0]}</p>
             </div>
-            <div><button onClick={() => openedProfileId.current = info.id}>Подробнее</button></div>
+            <div><button onClick={openProfile}>Подробнее</button></div>
         </li>
     </>);
 }
