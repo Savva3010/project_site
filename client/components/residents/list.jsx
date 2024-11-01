@@ -9,7 +9,7 @@ import { location } from '@/enums';
 
 import ListEl from './list-el';
 
-const URL = "http://localhost:3001"
+import { SERVER_URL } from '@/globals';
 
 function useLoader() {
     const INITIAL_STATE = {
@@ -41,7 +41,7 @@ export default function List() {
     useEffect(() => {
         setResidents({type: "LOADING"})
         let controller = new AbortController()
-        fetch(URL + "/residents", {
+        fetch(SERVER_URL + "/residents", {
             method: "GET",
             header: {
 
@@ -96,10 +96,10 @@ export default function List() {
                         <div><p>Статус</p></div>
                         <div></div>
                 </li>
-                {residents.data.map((resident, idx) => {
+                {residents.data.map((resident, _) => {
                     console.log("RENDER", resident.id)
                     return (
-                        <ListEl key={idx} info={resident}/>
+                        <ListEl key={resident["id"]} info={resident}/>
                     )
                 })}
             </ul>

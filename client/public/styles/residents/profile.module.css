@@ -1,4 +1,9 @@
-.profile-disable-bg {
+.error {
+    font-size: 1.5rem;
+    color: #CC0000;
+}
+
+.disable-bg {
     position: absolute;
     top: var(--header-height);
     left: 0;
@@ -7,7 +12,7 @@
     background: rgba(0, 0, 0, 0.25);
 }
 
-.profile-wrapper {
+.wrapper {
     background: #FFFFFF;
     position: absolute;
     top: 50%;
@@ -26,29 +31,72 @@
     justify-content: space-between;
     height: 100%;
     width: 100%;
+    overflow-y: auto;
 }
 
-.profile-close {
+.close {
     position: absolute;
     top: 15px;
     right: 15px;
 }
 
-.profile-col1 {
+.col {
     display: flex;
     flex-direction: column;
-    gap: 10px;
     justify-content: flex-start;
     height: 100%;
 }
 
-.profile-col1 img, .profile-col1-blur-img {
+
+.col1 {
+    gap: 10px;
+}
+
+.col1 img, .col1-blur-img {
     width: 400px;
     aspect-ratio: 1;
     border: 1px solid #000000;
     border-radius: 10px;
 }
 
-.profile-col1-blur-img canvas {
+.col1-blur-img canvas {
     border-radius: 10px;
+}
+
+
+.col2 {
+    gap: 10px;
+}
+
+.col2-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.col2-resident {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    width: 300px;
+}
+
+.col2-parents {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 40px;
+    width: 300px;
+}
+
+.col2-parent {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.col2-parents > p {
+    margin-bottom: -30px;
 }

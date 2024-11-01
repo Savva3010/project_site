@@ -184,7 +184,7 @@ app.get("/residents/:id", (req, res) => {
             }
             break;
     
-        case 3:
+        case 4:
             json = {
                 "profile_image": {
                     "src": "/no_img.png",

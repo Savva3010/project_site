@@ -10,7 +10,7 @@ import { location } from '@/enums';
 import Column1 from './column1';
 import Column2 from './column2';
 
-const SERVER_URL = "http://localhost:3001"
+import { SERVER_URL } from '@/globals';
 
 function useLoader() {
     const INITIAL_STATE = {
@@ -21,6 +21,8 @@ function useLoader() {
 
     function reducer(state, { type, payload }) {
         switch (type) {
+            case "INITIALIZE":
+                return INITIAL_STATE
             case "LOADING":
                 return {...state, status: "LOADING"}
             case "ERROR":
@@ -91,12 +93,10 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
             </p>
         }
 
-        return (
-            <div className={`${css["profile"]}`}>
+        return (<>
                 <Column1 info={resident.data} />
                 <Column2 info={resident.data} />
-            </div>
-        )
+        </>)
     }
 
     return (<>
@@ -104,15 +104,18 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
             <></> :
 
             <>
-                <div className={`${css["profile-disable-bg"]}`} onClick={closePanel}></div>
-                <div className={`${css["profile-wrapper"]}`}>
-                    <button className={`${css["profile-close"]}`} onClick={closePanel}>
+                <div className={`${css["disable-bg"]}`} onClick={closePanel}></div>
+                <div className={`${css["wrapper"]}`}>
+                    <button className={`${css["close"]}`} onClick={closePanel}>
                         <svg width="32" height="30" viewBox="0 0 32 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M30 27.6154L2.25745 2M29.2927 2.38462L0.999999 28" stroke="#AAAAAA" stroke-width="3"/>
                         </svg>
                     </button>
+
                     
-                    {showResident()}
+                    <div className={`${css["profile"]}`}>
+                        {showResident()}
+                    </div>
                 </div>
             </>
         }
