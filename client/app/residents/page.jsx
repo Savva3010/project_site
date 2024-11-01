@@ -8,7 +8,7 @@ import { useEffect, useState, useReducer, useRef, createContext } from 'react';
 import { location } from '@/enums';
 
 import List from "@/cmponents/residents/list"
-import Profile from '@/cmponents/residents/profile';
+import Profile from '@/cmponents/residents/profile/profile';
 
 export const ProfileContext = createContext(null)
 
@@ -16,7 +16,6 @@ export default function Residents() {
 
     const [openedProfileId, setOpenedProfileId] = useState(null)
     
-
     return (<>
         <ProfileContext.Provider value={setOpenedProfileId}>
             <Profile openedProfileId={openedProfileId} setOpenedProfileId={setOpenedProfileId} />

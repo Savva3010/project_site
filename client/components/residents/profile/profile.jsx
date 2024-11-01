@@ -7,9 +7,10 @@ import { useEffect, useState, useReducer } from 'react';
 
 import { location } from '@/enums';
 
-import ProfileColumn1 from './profile-column1';
+import Column1 from './column1';
+import Column2 from './column2';
 
-const URL = "http://localhost:3001"
+const SERVER_URL = "http://localhost:3001"
 
 function useLoader() {
     const INITIAL_STATE = {
@@ -49,7 +50,7 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
         }
         setResident({type: "LOADING"})
         let controller = new AbortController()
-        fetch(URL + "/residents/" + openedProfileId, {
+        fetch(SERVER_URL + "/residents/" + openedProfileId, {
             method: "GET",
             header: {
 
@@ -91,9 +92,10 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
         }
 
         return (
-            <ul>
-                <ProfileColumn1 info={resident.data} />
-            </ul>
+            <div className={`${css["profile"]}`}>
+                <Column1 info={resident.data} />
+                <Column2 info={resident.data} />
+            </div>
         )
     }
 
@@ -102,13 +104,14 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
             <></> :
 
             <>
-                <div className={`${css["profile-disable-bg"]}`}></div>
+                <div className={`${css["profile-disable-bg"]}`} onClick={closePanel}></div>
                 <div className={`${css["profile-wrapper"]}`}>
                     <button className={`${css["profile-close"]}`} onClick={closePanel}>
                         <svg width="32" height="30" viewBox="0 0 32 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M30 27.6154L2.25745 2M29.2927 2.38462L0.999999 28" stroke="#AAAAAA" stroke-width="3"/>
                         </svg>
                     </button>
+                    
                     {showResident()}
                 </div>
             </>

@@ -95,7 +95,10 @@ app.get("/residents/:id", (req, res) => {
     switch (id) {
         case 1:
             json = {
-                "profile_image": "/no_img.png",
+                "profile_image": {
+                    "src": "/no_img.png",
+                    "blur_hash" : "|RRMb$of_3ay-;j[WBt7M{xuayRjofj[ayoffQay~qWBIUofIUj[j[Rjt7IUof%MRjayofRjayj[%Mj[M{WBj[j[ofoft7-;WBM{t7j[Rjt7j[ay9Fay%Moft7WBWBj[RjWBofofRjj[t7WBayj[ofj[ayWBj[ofWBWBj["
+                },
                 "full_name": "AAAAAAAAA AAA AAAAAA",
                 "age": 15,
                 "room": "201",
@@ -116,7 +119,10 @@ app.get("/residents/:id", (req, res) => {
 
         case 2:
             json = {
-                "profile_image": "/no_img.png",
+                "profile_image": {
+                    "src": "/no_img.png",
+                    "blur_hash" : "|RRMb$of_3ay-;j[WBt7M{xuayRjofj[ayoffQay~qWBIUofIUj[j[Rjt7IUof%MRjayofRjayj[%Mj[M{WBj[j[ofoft7-;WBM{t7j[Rjt7j[ay9Fay%Moft7WBWBj[RjWBofofRjj[t7WBayj[ofj[ayWBj[ofWBWBj["
+                },
                 "full_name": "BBBBBBBBB BBB BBBBBB",
                 "age": 25,
                 "room": "202",
@@ -142,7 +148,10 @@ app.get("/residents/:id", (req, res) => {
 
         case 3:
             json = {
-                "profile_image": "/no_img.png",
+                "profile_image": {
+                    "src": "/no_img.png",
+                    "blur_hash" : "|RRMb$of_3ay-;j[WBt7M{xuayRjofj[ayoffQay~qWBIUofIUj[j[Rjt7IUof%MRjayofRjayj[%Mj[M{WBj[j[ofoft7-;WBM{t7j[Rjt7j[ay9Fay%Moft7WBWBj[RjWBofofRjj[t7WBayj[ofj[ayWBj[ofWBWBj["
+                },
                 "full_name": "CCCCCCCCC CCC CCCCCC",
                 "age": 35,
                 "room": "211/1",
@@ -170,6 +179,43 @@ app.get("/residents/:id", (req, res) => {
                         "mobile": "+7 032 032 32 32",
                         "email": "parent_of_3@parent_2.com",
                         "telegram": "@3_parent_2"
+                    }
+                ]
+            }
+            break;
+    
+        case 3:
+            json = {
+                "profile_image": {
+                    "src": "/no_img.png",
+                    "blur_hash" : "|RRMb$of_3ay-;j[WBt7M{xuayRjofj[ayoffQay~qWBIUofIUj[j[Rjt7IUof%MRjayofRjayj[%Mj[M{WBj[j[ofoft7-;WBM{t7j[Rjt7j[ay9Fay%Moft7WBWBj[RjWBofofRjj[t7WBayj[ofj[ayWBj[ofWBWBj["
+                },
+                "full_name": "DDDDDDDDD DDD DDDDDD",
+                "age": 35,
+                "room": "211/2",
+                "class": "9D",
+                "class_teacher": "yes cuz ok 4",
+                "class_mentor": "mentor cool 4",
+                "mobile": "+7 444 444 44 44",
+                "email": "444444@444.444",
+                "telegram": "@444444",
+                "status": {
+                    "status": "school",
+                    "until": "01.11.2024 19:52",
+                    "lateness": 0
+                },
+                "parents": [
+                    {
+                        "full_name": "PARENT OF 4_1",
+                        "mobile": "+7 041 041 41 41",
+                        "email": "parent_of_4@parent_1.com",
+                        "telegram": "@4_parent_1"
+                    },
+                    {
+                        "full_name": "PARENT OF 4_2",
+                        "mobile": "+7 042 042 42 42",
+                        "email": "parent_of_4@parent_2.com",
+                        "telegram": "@4_parent_2"
                     }
                 ]
             }

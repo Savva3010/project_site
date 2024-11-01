@@ -20,6 +20,14 @@
     padding: 100px 20px 20px 20px;
 }
 
+.profile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    width: 100%;
+}
+
 .profile-close {
     position: absolute;
     top: 15px;
@@ -30,11 +38,17 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    justify-content: flex-start;
+    height: 100%;
 }
 
-.profile-col1 img {
+.profile-col1 img, .profile-col1-blur-img {
     width: 400px;
     aspect-ratio: 1;
     border: 1px solid #000000;
+    border-radius: 10px;
+}
+
+.profile-col1-blur-img canvas {
     border-radius: 10px;
 }
