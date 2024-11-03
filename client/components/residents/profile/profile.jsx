@@ -9,6 +9,7 @@ import { location } from '@/enums';
 
 import Column1 from './column1';
 import Column2 from './column2';
+import Column3 from './column3';
 
 import { SERVER_URL } from '@/globals';
 
@@ -75,12 +76,8 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
     }, [openedProfileId])
 
     function showResident() {
-        if (resident.status == "INITIALIZE") return <></>
-        if (resident.status == "LOADING") {
-            return <p className={`${css["loading"]}`}>Загружаем список . . .</p>
-        }
         if (resident.status == "ERROR") {
-            return <p style={{whiteSpace: "pre-wrap", height: "max-content"}} className={`${css["error"]}`}>Произошла ошибка (да, и такое бывает) ¯\_(ツ)_/¯ 
+            return <p style={{whiteSpace: "pre-wrap", height: "100%"}} className={`${css["error"]}`}>Произошла ошибка (да, и такое бывает) ¯\_(ツ)_/¯ 
                 <br/>
                 Обратитесь к специалисту и попробуйте позже
                 <br/>
@@ -96,6 +93,7 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
         return (<>
                 <Column1 info={resident.data} />
                 <Column2 info={resident.data} />
+                <Column3 info={resident.data} />
         </>)
     }
 
@@ -108,11 +106,18 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
                 <div className={`${css["wrapper"]}`}>
                     <button className={`${css["close"]}`} onClick={closePanel}>
                         <svg width="32" height="30" viewBox="0 0 32 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M30 27.6154L2.25745 2M29.2927 2.38462L0.999999 28" stroke="#AAAAAA" stroke-width="3"/>
+                            <path d="M30 27.6154L2.25745 2M29.2927 2.38462L0.999999 28" stroke="#AAAAAA" strokeWidth="3"/>
                         </svg>
                     </button>
 
-                    
+                    {resident.status != "LOADING" ?
+                    <></> :
+
+                    <div className={`${css["loading-bg"]}`}>
+                        <p>Загрузка...</p>
+                    </div>
+                    }
+
                     <div className={`${css["profile"]}`}>
                         {showResident()}
                     </div>

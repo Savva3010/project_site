@@ -5,6 +5,8 @@ import css from "@/styles/residents/profile.module.css"
 
 import { useEffect, useState, useReducer } from 'react';
 
+import Status from './status';
+
 export default function Column2({ info }) {
 
     return (<>
@@ -24,8 +26,13 @@ export default function Column2({ info }) {
 
                 <div className={`${css["col2-parents"]}`}>
                     <p><b>Родители</b></p>
+                    {info?.parents?.length ?
+                    <></> :
+
+                    <p className={`${css["col2-no-parents"]}`}>Пусто</p>
+                    }
                     {info?.parents?.map((parent, idx) => {
-                        return (<div className={`${css["col2-parent"]}`}>
+                        return (<div key={idx} className={`${css["col2-parent"]}`}>
                             <p>{parent?.full_name ? parent["full_name"] : <b>&minus;</b>}</p>
                             <p>{parent?.mobile    ? parent["mobile"]    : <b>&minus;</b>}</p>
                             <p>{parent?.email     ? parent["email"]     : <b>&minus;</b>}</p>
@@ -34,6 +41,7 @@ export default function Column2({ info }) {
                     })}
                 </div>
             </div>
+            <Status info={info} />
         </div>
     </>);
 }

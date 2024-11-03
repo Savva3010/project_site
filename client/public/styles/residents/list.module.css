@@ -37,30 +37,33 @@
 
 .list li div:nth-child(1) {
     width: 75px;
+    max-width: 75px;
     min-width: 75px;
 }
 .list li div:nth-child(2) {
-    width: 500px;
+    width: 900px;
     min-width: 200px;
 }
 .list li div:nth-child(3) {
-    width: 200px;
+    width: 400px;
     min-width: 175px;
 }
 .list li div:nth-child(4) {
-    width: 275px;
+    width: 550px;
     min-width: 100px;
 }
 .list li div:nth-child(5) {
-    width: 275px;
+    width: 550px;
     min-width: 100px;
 }
 .list li div:nth-child(6) {
     width: 225px;
+    max-width: 225px;
     min-width: 225px;
 }
 .list li div:nth-child(7) {
     width: 110px;
+    max-width: 110px;
     min-width: 110px;
     border-right: solid 1px #000000;
 }
@@ -70,13 +73,13 @@
 }
 
 @media (max-width: 1350px) {
-    .list li div:nth-child(5) {
+    .list li div:nth-child(4) {
         display: none;
     }
 }
 
 @media (max-width: 1200px) {
-    .list li div:nth-child(4) {
+    .list li div:nth-child(5) {
         display: none;
     }
 }

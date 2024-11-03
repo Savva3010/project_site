@@ -15,8 +15,8 @@
 .wrapper {
     background: #FFFFFF;
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 50dvh;
+    left: 50dvw;
     transform: translateY(-50%) translateX(-50%);
     width: 1410px;
     height: 682px;
@@ -40,6 +40,23 @@
     right: 15px;
 }
 
+.loading-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.loading-bg p {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2.5rem;
+}
+
 .col {
     display: flex;
     flex-direction: column;
@@ -48,12 +65,14 @@
 }
 
 
+
 .col1 {
     gap: 10px;
+    width: 400px;
 }
 
 .col1 img, .col1-blur-img {
-    width: 400px;
+    width: 100%;
     aspect-ratio: 1;
     border: 1px solid #000000;
     border-radius: 10px;
@@ -64,14 +83,17 @@
 }
 
 
+
 .col2 {
     gap: 10px;
+    width: min-content;
 }
 
 .col2-row {
     display: flex;
     align-items: flex-start;
     gap: 20px;
+    width: min-content;
 }
 
 .col2-resident {
@@ -90,6 +112,11 @@
     width: 300px;
 }
 
+.col2-no-parents {
+    color: #C0C0C0;
+    font-size: 2rem;
+}
+
 .col2-parent {
     display: flex;
     flex-direction: column;
@@ -99,4 +126,57 @@
 
 .col2-parents > p {
     margin-bottom: -30px;
+}
+
+.col2-no-status {
+    color: #C0C0C0;
+    font-size: 2rem;
+}
+
+.col2-status-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 5px;
+    box-sizing: content-box;
+    padding: 10px;
+    width: max-content;
+    max-width: 100%;
+}
+
+.col2-status-wrapper-late {
+    background: #FFFFBB;
+}
+
+.col2-status-wrapper-late-30 {
+    background: #FFBBBB;
+}
+
+.col2-status-status {
+    width: 225px;
+    height: 40px;
+    border: 1px solid #000000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.col2-status-status-inside {
+    background: #80FF80;
+}
+
+.col2-status-status-isolator {
+    background: #DDFF80;
+}
+
+.col2-status-status-school, .col2-status-status-outside {
+    background: #FF8080;
+}
+
+.col2-status-status-late {
+    background: #FFFF80;
+}
+
+.col2-status-status-late-30 {
+    background: #FF8080;
 }
