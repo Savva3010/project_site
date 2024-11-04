@@ -87,16 +87,16 @@ export default function List() {
 
         return (
             <ul>
-                <li className={`${css["columns"]}`}>
-                        <div><p>№</p></div>
-                        <div><p>ФИО</p></div>
-                        <div><p>Номер тел.</p></div>
-                        <div><p>Почта</p></div>
-                        <div><p>Telegram</p></div>
-                        <div><p>Статус</p></div>
+                <li>
+                        <div><p><b>№</b></p></div>
+                        <div><p><b>ФИО</b></p></div>
+                        <div><p><b>Номер тел.</b></p></div>
+                        <div><p><b>Почта</b></p></div>
+                        <div><p><b>Telegram</b></p></div>
+                        <div><p><b>Статус</b></p></div>
                         <div></div>
                 </li>
-                {residents.data.map((resident, _) => {
+                {residents.data.map((resident) => {
                     console.log("RENDER", resident.id)
                     return (
                         <ListEl key={resident["id"]} info={resident}/>

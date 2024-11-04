@@ -40,16 +40,17 @@
     right: 15px;
 }
 
-.loading-bg {
+.disable-profile-bg {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.25);
+    z-index: 10;
 }
 
-.loading-bg p {
+.disable-profile-bg p {
     position: absolute;
     top: 10px;
     left: 50%;
@@ -179,4 +180,113 @@
 
 .col2-status-status-late-30 {
     background: #FF8080;
+}
+
+
+
+.col3 {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+    width: 300px;
+    justify-content: flex-start;
+    height: 100%;
+}
+
+.col3-btns {
+    display: flex;
+}
+
+.col3-btn {
+    width: max-content;
+    padding: 10px;
+    height: 40px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.col3-btn-notes-active {
+    background: #FFEEAA;
+}
+
+.col3-btn-warns-active {
+    background: #F0F0F0;
+}
+
+.col3-btn-add {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    padding: 10px;
+    border: 1px solid #337AB7;
+    color: #337AB7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.col3-column {
+    display: flex;
+    width: calc(15px + 100%);
+    flex-direction: column;
+    gap: 10px;
+    max-height: calc(15px + 500px);
+    overflow-y: auto;
+    padding-left: 15px;
+    margin-left: -15px;
+    padding-top: 15px;
+    margin-top: -15px;
+}
+
+.col3-notes-empty {
+    color: #C0C0C0;
+    font-size: 2rem;
+}
+
+.col3-note {
+    width: 100%;
+    border-radius: 10px;
+    background: #FFEEAA;
+    padding: 10px;
+    position: relative;
+    height: max-content;
+}
+
+.col3-note-corner {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    top: -15px;
+    left: -15px;
+}
+
+.col3-note p {
+    text-wrap: wrap;
+    width: 100%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.col3-warns-empty {
+    color: #C0C0C0;
+    font-size: 2rem;
+}
+
+.col3-warn {
+    width: 100%;
+    border-radius: 10px;
+    background: #F0F0F0;
+    padding: 10px;
+    height: max-content;
+}
+
+.col3-warn p {
+    text-wrap: wrap;
+    width: 100%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }

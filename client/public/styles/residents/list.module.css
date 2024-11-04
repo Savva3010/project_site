@@ -16,10 +16,6 @@
     width: 100%;
 }
 
-.columns {
-    font-weight: 700;
-}
-
 .list li div {
     border: solid 1px #000000;
     border-right: 0;

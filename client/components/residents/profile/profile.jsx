@@ -42,6 +42,8 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
 
     const [ resident, setResident ] = useLoader()
 
+    const [ column3AddPanel, setColumn3AddPanel ] = useState(null)
+
     function closePanel() {
         setOpenedProfileId(null)
     }
@@ -49,6 +51,7 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
     useEffect(() => {
         if (openedProfileId == null) {
             setResident({type: "INITIALIZE"})
+            setColumn3AddPanel(null)
             return
         }
         setResident({type: "LOADING"})
@@ -93,7 +96,7 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
         return (<>
                 <Column1 info={resident.data} />
                 <Column2 info={resident.data} />
-                <Column3 info={resident.data} />
+                <Column3 info={resident.data} setAddPanel={setColumn3AddPanel}/>
         </>)
     }
 
@@ -113,8 +116,16 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
                     {resident.status != "LOADING" ?
                     <></> :
 
-                    <div className={`${css["loading-bg"]}`}>
+                    <div className={`${css["disable-profile-bg"]}`}>
                         <p>Загрузка...</p>
+                    </div>
+                    }
+
+                    {column3AddPanel == null ?
+                    <></> :
+
+                    <div className={`${css["disable-profile-bg"]}`} onClick={() => setColumn3AddPanel(null)}>
+                        
                     </div>
                     }
 
