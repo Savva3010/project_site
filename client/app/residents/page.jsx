@@ -21,7 +21,7 @@ export default function Residents() {
             <Profile openedProfileId={openedProfileId} setOpenedProfileId={setOpenedProfileId} />
             <div className={`${css["title"]}`}>
                 <div className={`${css["summary"]}`}></div>
-                <p>Список проживающих</p>
+                <p>РЎРїРёСЃРѕРє РїСЂРѕР¶РёРІР°СЋС‰РёС…</p>
                 <div className={`${css["filter"]}`}></div>
             </div>
             <List />
