@@ -105,6 +105,10 @@
     width: 300px;
 }
 
+.col2-link {
+    color: #007BFF;
+}
+
 .col2-parents {
     display: flex;
     flex-direction: column;
@@ -170,7 +174,8 @@
     background: #DDFF80;
 }
 
-.col2-status-status-school, .col2-status-status-outside {
+.col2-status-status-school,
+.col2-status-status-outside {
     background: #FF8080;
 }
 
@@ -222,8 +227,8 @@
     height: 20px;
     border-radius: 5px;
     padding: 10px;
-    border: 1px solid #337AB7;
-    color: #337AB7;
+    border: 1px solid #007BFF;
+    color: #007BFF;
     display: flex;
     align-items: center;
     justify-content: center;

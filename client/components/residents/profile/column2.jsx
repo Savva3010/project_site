@@ -22,6 +22,10 @@ export default function Column2({ info }) {
                     <p><b>Номер тел.: </b>{           info?.mobile        ? info["mobile"]        : <b>&minus;</b>}</p>
                     <p><b>Почта: </b>{                info?.email         ? info["email"]         : <b>&minus;</b>}</p>
                     <p><b>Telegram: </b>{             info?.telegram      ? info["telegram"]      : <b>&minus;</b>}</p>
+                    <p>&nbsp;</p>
+                    <button className={`${css["col2-link"]}`}>Комната</button>
+                    <button className={`${css["col2-link"]}`}>Заявления</button>
+                    <button className={`${css["col2-link"]}`}>Журнал входов/выходов</button>
                 </div>
 
                 <div className={`${css["col2-parents"]}`}>

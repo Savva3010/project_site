@@ -65,7 +65,7 @@
 }
 
 .list li div:nth-child(7) button {
-    color: #337AB7;
+    color: #007BFF;
 }
 
 @media (max-width: 1350px) {

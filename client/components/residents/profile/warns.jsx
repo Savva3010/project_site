@@ -15,7 +15,7 @@ export default function Warns({ warns }) {
         {warns.map((warn, idx) => {
             return <div key={idx} className={`${css["col3-warn"]}`}>
                 <p>{warn?.text}</p>
-                <p></p>
+                <p>&nbsp;</p>
                 <p>От {warn?.author}</p>
                 <p>{warn?.date}</p>
             </div>
