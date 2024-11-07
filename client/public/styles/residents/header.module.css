@@ -1,0 +1,66 @@
+.header {
+    height: 25px;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    color: #808080;
+}
+
+.header button {
+    color: #007BFF;
+    font-size: 1.3rem;
+}
+
+.summary {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    height: 100%;
+}
+
+.header > p {
+    color: #212529;
+}
+
+.sort {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    height: 100%;
+}
+
+.sort-filter {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.sort-filter input {
+    height: 100%;
+    padding: 5px;
+    font-size: 1.3rem;
+    width: 200px;
+}
+
+.sort-filter input::placeholder {
+    font-size: 1.3rem;
+    color: #808080;
+}
+
+.sort-filter button {
+    height: 25px;
+    aspect-ratio: 1;
+}
+
+.sort-sort {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    gap: 5px;
+}
+
+.sort-sort-selected {
+    text-decoration: underline;
+}

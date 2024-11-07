@@ -5,7 +5,7 @@ import css from "@/styles/residents/profile.module.css"
 
 import { useEffect, useState, useReducer } from 'react';
 
-import ImgBlurLoad from '@/cmponents/shared/img-blur-load';
+import ImgBlurLoad from '@/components/shared/img-blur-load';
 
 import { SERVER_URL, CLIENT_URL, IMG_PLACEHOLDER } from '@/globals';
 

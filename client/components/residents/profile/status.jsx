@@ -7,10 +7,6 @@ import { useEffect, useState, useReducer, useRef } from 'react';
 
 import { location } from '@/enums';
 
-import List from "@/cmponents/residents/list"
-import Profile from '@/cmponents/residents/profile/profile';
-
-
 export default function Status({ info }) {
     
     const status = location.getInfo(info?.status?.status)

@@ -1,3 +1,5 @@
+"use client"
+
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import css from "@/styles/footer.module.css"
 

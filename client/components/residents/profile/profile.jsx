@@ -4,6 +4,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import css from "@/styles/residents/profile.module.css"
 
 import { useEffect, useState, useReducer } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { location } from '@/enums';
 
@@ -39,6 +40,8 @@ function useLoader() {
 }
 
 export default function Profile({ openedProfileId, setOpenedProfileId }) {
+    const router = useRouter()
+    const searchParams = useSearchParams()
 
     const [ resident, setResident ] = useLoader()
 
@@ -46,6 +49,9 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
 
     function closePanel() {
         setOpenedProfileId(null)
+        let newParams = new URLSearchParams(searchParams.toString())
+        newParams.delete("profile")
+        router.replace(`/residents/?${newParams.toString()}`, undefined, {shallow: true})
     }
 
     useEffect(() => {
@@ -99,7 +105,6 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
                 <Column3 info={resident.data} setAddPanel={setColumn3AddPanel}/>
         </>)
     }
-
     return (<>
         {openedProfileId == null ?
             <></> :

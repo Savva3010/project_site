@@ -7,7 +7,7 @@
       "@/styles/*": ["../public/styles/*"],
       "@/fonts/*": ["../public/fonts/*"],
       "@/images/*": ["../public/images/*"],
-      "@/cmponents/*": ["../components/*"],
+      "@/components/*": ["../components/*"],
       "@/enums": ["../enums.js"],
       "@/globals": ["../globals.js"]
     }

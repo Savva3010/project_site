@@ -70,9 +70,10 @@ button {
   font-size: 1rem;
   cursor: pointer;
 }
-
+/*
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
   }
 }
+*/

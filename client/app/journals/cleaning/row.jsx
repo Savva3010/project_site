@@ -11,7 +11,7 @@ export default function Row({ className, dates, room } ) {
         <tr className={`${css["row"]} ${className || ""}`}>
             <th className={`${css["first_cell"]}`}>{room.room_number}</th>
             {dates.map((date, idx) => {
-                    return <th key={idx} className={`${css["cell"]}`}>{room.marks.find(mark => mark.date == date)?.mark || ""}</th>
+                return <th key={idx} className={`${css["cell"]}`}>{room.marks.find(mark => mark.date == date)?.mark || ""}</th>
             })}
         </tr>
         );

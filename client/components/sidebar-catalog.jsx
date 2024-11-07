@@ -1,3 +1,5 @@
+"use client"
+
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import css from "@/styles/sidebar.module.css"
 
@@ -23,7 +25,6 @@ export default function SidebarCatalog({name, href, children = []}) {
         if (Children.count(children) != 0) {
             setExpanded(prev => prev = !prev)
         } else {
-
             router.push(href)
         }
     }

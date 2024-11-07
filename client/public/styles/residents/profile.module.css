@@ -4,25 +4,36 @@
 }
 
 .disable-bg {
-    position: absolute;
-    top: var(--header-height);
+    position: fixed;
     left: 0;
+    top: 0;
     width: 100dvw;
-    height: calc(100dvh - var(--header-height) - var(--footer-height));
-    background: rgba(0, 0, 0, 0.25);
+    height: 100dvh;
+    background: #000000;
+    opacity: 0.5;
+    z-index: 50;
+}
+
+.modal {
+    transition: -webkit-transform .3s ease-out;
+    transition: transform .3s ease-out;
+    transition: transform .3s ease-out, -webkit-transform .3s ease-out;
+    -webkit-transform: translate(0, -50px);
+    transform: translate(0, -50px);
 }
 
 .wrapper {
     background: #FFFFFF;
-    position: absolute;
+    position: fixed;
     top: 50dvh;
     left: 50dvw;
     transform: translateY(-50%) translateX(-50%);
     width: 1410px;
     height: 682px;
-    border-radius: 10px;
+    border-radius: 5px;
     box-shadow: 0px 0px 15px 10px rgba(0, 0, 0, 0.5);
     padding: 100px 20px 20px 20px;
+    z-index: 55;
 }
 
 .profile {
@@ -47,7 +58,7 @@
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.25);
-    z-index: 10;
+    z-index: 50;
 }
 
 .disable-profile-bg p {
