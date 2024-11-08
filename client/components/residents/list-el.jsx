@@ -19,16 +19,14 @@ export default function ListEl({ info }) {
     function openProfile() {
         setOpenedProfileId(info.id)
         let newParams = new URLSearchParams(searchParams.toString())
-        newParams.append("profile", info.id)
+        newParams.set("profile", info.id)
         router.replace(`/residents/?${newParams.toString()}`, undefined, {shallow: true})
     }
-
-    console.log("RENDER-EL", info.id)
 
     return (<>
         <li>
             <div><p>{info?.room ? info["room"] : <b>&minus;</b>}</p></div>
-            <div><p>{info?.full_name ? info["full_name"] : <b>&minus;</b>}</p></div>
+            <div><p>{info?.full_name ? `${info["full_name"]} ${info?.class}` : <b>&minus;</b>}</p></div>
             <div><p>{info?.mobile ? info["mobile"] : <b>&minus;</b>}</p></div>
             <div><p>{info?.email ? info["email"] : <b>&minus;</b>}</p></div>
             <div><p>{info?.telegram ? info["telegram"] : <b>&minus;</b>}</p></div>

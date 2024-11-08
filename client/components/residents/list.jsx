@@ -3,7 +3,7 @@
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import css from "@/styles/residents/list.module.css"
 
-import { useEffect, useState, useReducer } from 'react';
+import { useEffect, useState, useReducer, useMemo } from 'react';
 
 import { location } from '@/enums';
 
@@ -34,9 +34,59 @@ function useLoader() {
     return useReducer(reducer, INITIAL_STATE) 
 }
 
-export default function List() {
+export default function List({ sortParams }) {
 
     const [ residents, setResidents ] = useLoader()
+
+    const processedResidents = useMemo(() => {
+        let sorted = residents.data
+        if (!sorted) return []
+
+        if (sortParams.filter != "") {
+            sorted = sorted.filter(resident => resident.full_name.toLowerCase().includes(sortParams.filter.toLowerCase()))
+        }
+
+        if (sortParams.sort == "full_name") {
+            sorted.sort((a, b) => {
+                let l = a.full_name
+                let r = b.full_name
+                if (l > r) return 1
+                if (l < r) return -1
+                return 0
+            })
+        } else if (sortParams.sort == "room") {
+            sorted.sort((a, b) => {
+                let l = a.room
+                let r = b.room
+
+                if (l > r) return 1
+                if (l < r) return -1
+                return 0
+            })
+        } else {
+            const priority = {
+                "inside": 0,
+                "isolator": 1,
+                "school": 2,
+                "outside": 3
+            }
+
+            sorted.sort((a, b) => {
+                let l = priority[a.status.status]
+                let r = priority[b.status.status]
+
+                if (l > r) return 1
+                if (l < r) return -1
+                return 0
+            })
+        }
+
+        if (sortParams.direction == "up") {
+            sorted.reverse()
+        }
+
+        return sorted
+    }, [residents, sortParams])
 
     useEffect(() => {
         setResidents({type: "LOADING"})
@@ -87,7 +137,8 @@ export default function List() {
 
         return (
             <ul>
-                <li>
+
+                <li className={`${css["list-header"]}`}>
                         <div><p><b>№</b></p></div>
                         <div><p><b>ФИО</b></p></div>
                         <div><p><b>Номер тел.</b></p></div>
@@ -96,8 +147,7 @@ export default function List() {
                         <div><p><b>Статус</b></p></div>
                         <div></div>
                 </li>
-                {residents.data.map((resident) => {
-                    console.log("RENDER", resident.id)
+                {processedResidents.map((resident) => {
                     return (
                         <ListEl key={resident["id"]} info={resident}/>
                     )

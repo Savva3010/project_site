@@ -4,7 +4,7 @@
 }
 
 .disable-bg {
-    position: fixed;
+    position: absolute;
     left: 0;
     top: 0;
     width: 100dvw;
@@ -24,7 +24,7 @@
 
 .wrapper {
     background: #FFFFFF;
-    position: fixed;
+    position: absolute;
     top: 50dvh;
     left: 50dvw;
     transform: translateY(-50%) translateX(-50%);

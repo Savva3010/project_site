@@ -47,16 +47,31 @@ export default function Residents() {
 
     useEffect(() => {
         let profile = searchParams.get("profile")
-        if (!profile || !Number(profile)) return
+        if (profile && Number(profile)) {
+            setOpenedProfileId(Number(profile))
+        }
 
-        setOpenedProfileId(Number(profile))
+        let filter = searchParams.get("q")
+        if (filter) {
+            setSortParams({type: "FILTER", payload: filter})
+        }
+
+        let direction = searchParams.get("dir")
+        if (direction) {
+            setSortParams({type: "DIRECTION", payload: direction})
+        }
+
+        let sort = searchParams.get("sort")
+        if (sort) {
+            setSortParams({type: "SORT", payload: sort})
+        }
     }, [])
     
     return (<>
         <ProfileContext.Provider value={setOpenedProfileId}>
             <Profile openedProfileId={openedProfileId} setOpenedProfileId={setOpenedProfileId} />
             <Header sortParams={sortParams} setSortParams={setSortParams} />
-            <List />
+            <List sortParams={sortParams}/>
         </ProfileContext.Provider>
     </>);
 }

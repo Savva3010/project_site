@@ -18,11 +18,24 @@ export default function Header({sortParams, setSortParams}) {
     }, [])
 
     function changeDirection() {
-        setSortParams({type: "DIRECTION", payload: sortParams.direction == "down" ? "up" : "down"})
+        let newDir = sortParams.direction == "down" ? "up" : "down"
+        let newParams = new URLSearchParams(searchParams.toString())
+        newParams.set("dir", newDir)
+        if (newDir == "down") {
+            newParams.delete("dir")
+        }
+        router.replace(`/residents/?${newParams.toString()}`, undefined, {shallow: true})
+        setSortParams({type: "DIRECTION", payload: newDir})
     }
     
     function changeSort(sortCategory) {
         return () => {
+            let newParams = new URLSearchParams(searchParams.toString())
+            newParams.set("sort", sortCategory)
+            if (sortCategory == "room") {
+                newParams.delete("sort")
+            }
+            router.replace(`/residents/?${newParams.toString()}`, undefined, {shallow: true})
             setSortParams({type: "SORT", payload: sortCategory})
         }
     }
@@ -30,6 +43,12 @@ export default function Header({sortParams, setSortParams}) {
     function changeFilter(event) {
         let val = event.target.value
         val = val.replaceAll(/[^a-zA-Zа-яА-Я0-9]/gi, "")
+        let newParams = new URLSearchParams(searchParams.toString())
+        newParams.set("q", val)
+        if (val == "") {
+            newParams.delete("q")
+        }
+        router.replace(`/residents/?${newParams.toString()}`, undefined, {shallow: true})
         setSortParams({type: "FILTER", payload: val})
     }
 

@@ -9,6 +9,15 @@
     width: 100%;
 }
 
+.list-header {
+    position: sticky;
+    top: -10px;
+    box-sizing: content-box;
+    padding-top: 10px;
+    margin-top: -10px;
+    background: #FFFFFF;
+}
+
 .list li {
     list-style: none;
     display: flex;
