@@ -98,7 +98,7 @@ export default function Cleaning() {
                 </thead>
                 <tbody>
                 {data.data.rooms.map((room, idx) => {
-                    return <Row dates={data.data.dates} room={room} isGrey={idx % 2 == 0} />
+                    return <Row key={idx} dates={data.data.dates} room={room} isGrey={idx % 2 == 0} />
                 })}
                 </tbody>
             </table>

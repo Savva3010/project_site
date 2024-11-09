@@ -5,7 +5,15 @@ import css from "@/styles/residents/profile.module.css"
 
 import { useEffect, useState, useReducer } from 'react';
 
+import Warn from './warn';
+
 export default function Warns({ warns }) {
+
+    function onDelete(idx) {
+        return () => {
+            // delete
+        }
+    }
 
     return (<>
         {warns?.length != 0 ?
@@ -13,12 +21,7 @@ export default function Warns({ warns }) {
         <p className={`${css["col3-warns-empty"]}`}>Пусто</p>
         }
         {warns.map((warn, idx) => {
-            return <div key={idx} className={`${css["col3-warn"]}`}>
-                <p>{warn?.text}</p>
-                <p>&nbsp;</p>
-                <p>От {warn?.author}</p>
-                <p>{warn?.date}</p>
-            </div>
+            return <Warn key={idx} warn={warn} onDelete={onDelete(idx)}/>
         })}
     </>);
 }
