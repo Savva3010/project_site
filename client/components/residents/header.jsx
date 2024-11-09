@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { location } from '@/enums';
 
-export default function Header({sortParams, setSortParams}) {
+export default function Header({sortParams, setSortParams, total}) {
     const router = useRouter()
     const searchParams = useSearchParams()
 
@@ -55,8 +55,8 @@ export default function Header({sortParams, setSortParams}) {
     return (<>
         <div className={`${css["header"]}`}>
             <div className={`${css["summary"]}`}>
-                <p>На территории: STATIC/STATIC</p>
-                <p>В ФТЛ: STATIC/STATIC</p>
+                <p>В ФТЛ: {total.school}/{total.total}</p>
+                <p>В интернате: {total.inside}/{total.total}</p>
             </div>
             <p><b>Список проживающих</b></p>
             <div className={`${css["sort"]}`}>

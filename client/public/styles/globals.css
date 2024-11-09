@@ -42,6 +42,7 @@ main {
     width: calc(100dvw - var(--sidebar-width));
     height: calc(100dvh - var(--header-height) - var(--footer-height));
     overflow-y: auto;
+    overflow-x: auto;
 }
 
 @media (max-width: 575px) {

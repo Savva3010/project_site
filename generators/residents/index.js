@@ -66,5 +66,5 @@ rl.question("Введите кол-во проживающих: ", (need) => {
 
     console.log(`Сгенерировано ${need} проживающих в output/residents.json`);
 
-     rl.close();
+    rl.close();
 });

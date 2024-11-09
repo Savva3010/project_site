@@ -41,8 +41,8 @@ export default function Residents() {
     const router = useRouter()
     const searchParams = useSearchParams()
 
-    const [openedProfileId, setOpenedProfileId] = useState(null)
-
+    const [ openedProfileId, setOpenedProfileId ] = useState(null)
+    const [ headerTotal, setHeaderTotal ] = useState({"total": 0, "inside": 0, "school": 0})
     const [ sortParams, setSortParams ] = useSort()
 
     useEffect(() => {
@@ -69,9 +69,9 @@ export default function Residents() {
     
     return (<>
         <ProfileContext.Provider value={setOpenedProfileId}>
-            <Profile openedProfileId={openedProfileId} setOpenedProfileId={setOpenedProfileId} />
-            <Header sortParams={sortParams} setSortParams={setSortParams} />
-            <List sortParams={sortParams}/>
+            <Profile openedProfileId={openedProfileId} setOpenedProfileId={setOpenedProfileId}/>
+            <Header sortParams={sortParams} setSortParams={setSortParams} total={headerTotal}/>
+            <List sortParams={sortParams} setTotal={setHeaderTotal}/>
         </ProfileContext.Provider>
     </>);
 }

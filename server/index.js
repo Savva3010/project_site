@@ -4,7 +4,8 @@ import methodOverride from 'method-override'
 import bodyParser from 'body-parser'
 import morgan from 'morgan'
 
-import residents from "./residents.json" assert {type: "json"}
+import residents from "./data/residents.json" assert {type: "json"}
+import journals_cleaing from "./data/journals_cleaning.json" assert {type: "json"}
 
 //heplers start
 import { errorMsg, successMsg } from './helpers/msg.js'
@@ -124,6 +125,17 @@ app.get("/residents/:id", (req, res) => {
         "data": data
     })
 
+})
+
+app.get('/journals/cleaning', (req, res) => {
+    let data = journals_cleaing
+    
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": data
+    })
 })
 
 app.use((req, res) => {

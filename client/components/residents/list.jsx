@@ -34,7 +34,7 @@ function useLoader() {
     return useReducer(reducer, INITIAL_STATE) 
 }
 
-export default function List({ sortParams }) {
+export default function List({ sortParams, setTotal }) {
 
     const [ residents, setResidents ] = useLoader()
 
@@ -101,6 +101,12 @@ export default function List({ sortParams }) {
         .then(res => res.json())
         .then(data => {
             setResidents({type: "SUCCESS", payload: data.data})
+
+            let total = data.data.length
+            let inside = data.data.filter(resident => resident?.status?.status == "inside").length
+            let school = data.data.filter(resident => resident?.status?.status == "school").length
+
+            setTotal({"total": total, "inside": inside, "school": school})
         })
         .catch(err => {
             if (err.name == "AbortError") return

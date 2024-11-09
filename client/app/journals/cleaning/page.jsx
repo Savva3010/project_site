@@ -5,104 +5,108 @@ import css from "@/styles/journals/cleaning/page.module.css"
 
 import { useEffect, useReducer } from 'react';
 
-import Row from './row';
+import Row from '@/components/journals/cleaning/row';
+
+import { SERVER_URL } from '@/globals';
+
+function useLoader() {
+    const INITIAL_STATE = {
+        status: "INITIALIZE",
+        data: null,
+        error: null
+    }
+
+    function reducer(state, { type, payload }) {
+        switch (type) {
+            case "LOADING":
+                return {...state, status: "LOADING"}
+            case "ERROR":
+                return {...state, status: "ERROR", error: payload}
+            case "SUCCESS":
+                return {...state, status: "SUCCESS", data: payload}
+            default:
+                return {...state}
+        }
+    }
+
+    return useReducer(reducer, INITIAL_STATE) 
+}
 
 export default function Cleaning() {
 
-    const data = {
-        "dates": [
-            "8 СЕН",
-            "8 СОС"
-        ],
-        "rooms": [
-            {
-                "room_number": "201",
-                "marks": [
-                    {
-                        "date": "8 СЕН",
-                        "mark": 5
-                    },
-                    {
-                        "date": "8 СОС",
-                        "mark": 5
-                    }
-                ]
+    const [ data, setData ] = useLoader()
+
+    useEffect(() => {
+        setData({type: "LOADING"})
+        let controller = new AbortController()
+        fetch(SERVER_URL + "/journals/cleaning", {
+            method: "GET",
+            header: {
+
             },
-            {
-                "room_number": "202",
-                "marks": [
-                    {
-                        "date": "8 СЕН",
-                        "mark": 2
-                    },
-                    {
-                        "date": "8 СОС",
-                        "mark": 2
-                    }
-                ]
-            },
-            {
-                "room_number": "203",
-                "marks": [
-                    {
-                        "date": "8 СЕН",
-                        "mark": 2
-                    },
-                    {
-                        "date": "8 СОС",
-                        "mark": 2
-                    }
-                ]
-            },
-            {
-                "room_number": "203",
-                "marks": [
-                    {
-                        "date": "8 СЕН",
-                        "mark": 2
-                    },
-                    {
-                        "date": "8 СОС",
-                        "mark": 2
-                    }
-                ]
-            },
-            {
-                "room_number": "203",
-                "marks": [
-                    {
-                        "date": "8 СЕН",
-                        "mark": 2
-                    },
-                    {
-                        "date": "8 СОС",
-                        "mark": 2
-                    }
-                ]
-            }
-        ]
+            signal: controller.signal
+        })
+        .then(res => res.json())
+        .then(data => {
+            setData({type: "SUCCESS", payload: data.data})
+        })
+        .catch(err => {
+            if (err.name == "AbortError") return
+            console.error(err)
+            setData({type: "ERROR", payload: err})
+        })
+
+        return () => {
+            controller.abort()
+        }
+    }, [])
+
+    function showTable() {
+        if (data.status == "INITIALIZE") return <></>
+        if (data.status == "LOADING") {
+            return <p className={`${css["loading"]}`}>Загружаем журнал . . .</p>
+        }
+        if (data.status == "ERROR") {
+            return <p style={{whiteSpace: "pre-wrap", height: "max-content"}} className={`${css["error"]}`}>Произошла ошибка (да, и такое бывает) ¯\_(ツ)_/¯ 
+                <br/>
+                Обратитесь к специалисту и попробуйте позже
+                <br/>
+                <br/>                           
+                {residents.error.name}
+                <br/>
+                {residents.error.message}
+                <br/>
+                {residents.error.stack}
+            </p>
+        }
+
+        return <>
+            <table className={`${css["table"]}`}>
+                <thead>
+                    <tr>
+                        <th><div><p>№</p></div></th>
+                        {data.data.dates.map((date, idx) => {
+                            return <th key={idx}><div><p>{date}</p></div></th>
+                        })}
+                        <th><div><p>СР</p></div></th>
+                        <th><div className={`${css["button-add"]}`}><button>&#43;</button></div></th>
+                        <th><div><p></p></div></th>
+                        <th><div><p></p></div></th>
+                        <th><div><p></p></div></th>
+                        <th><div><p></p></div></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {data.data.rooms.map((room, idx) => {
+                    return <Row dates={data.data.dates} room={room} isGrey={idx % 2 == 0} />
+                })}
+                </tbody>
+            </table>
+        </>
     }
 
     return (<>
-
-        <h1 className={`${css["head"]}`}>Journal</h1>
-        <table className={`${css["table"]}`}>
-            <thead>
-            <tr>
-                <th className={`${css["first_head_cell"]}`}>
-                    <p>№</p>
-                </th>
-                {data.dates.map((date, idx) => {
-                    return <th key={idx} className={`${css["head_cell"]}`}>{date}</th>
-                })}
-            </tr>
-            </thead>
-            <tbody>
-            {data.rooms.map((room, idx) => {
-                return <Row dates={data.dates} room={room} className={`${idx % 2 == 0 ? css["grey"] : ""}`} />
-            })}
-            </tbody>
-        </table>
-
+        <p className={`${css["header"]}`}><b>Журнал оценок за уборку</b></p>
+        {showTable()}
     </>);
   }
