@@ -5,7 +5,7 @@ import css from "@/styles/residents/note.module.css"
 
 import { useEffect, useState, useReducer } from 'react';
 
-export default function Note({ note, onDelete }) {
+export default function Note({ note, onDelete, content, setContent, placeholder }) {
 
     return (<>
         <div className={`${css["note"]}`}>
@@ -24,7 +24,10 @@ export default function Note({ note, onDelete }) {
             </button>
             }
 
-            <p>{note}</p>
+            {!setContent ?
+            <p>{note}</p> :
+            <textarea placeholder={placeholder} onChange={(evt) => setContent(evt.target.value)}>{content}</textarea>
+            }
         </div>
     </>);
 }

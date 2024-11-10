@@ -7,14 +7,14 @@ import { useEffect, useState, useReducer } from 'react';
 
 import Note from './note';
 
-export default function Notes({ notes }) {
+export default function Notes({ notes, setNoteWarnModal }) {
 
     function onDelete(idx) {
         return () => {
-            // delete
+            setNoteWarnModal({type: "DELETE_NOTE", payload: notes[idx]})
         }
     }
-
+    
     return (<>
         {notes?.length != 0 ?
         <></> :

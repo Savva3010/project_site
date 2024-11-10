@@ -5,7 +5,7 @@ import css from "@/styles/residents/warn.module.css"
 
 import { useEffect, useState, useReducer } from 'react';
 
-export default function Warn({ warn, onDelete }) {
+export default function Warn({ warn, onDelete, content, setContent, placeholder }) {
 
     return (<>
 
@@ -19,7 +19,10 @@ export default function Warn({ warn, onDelete }) {
                 </button>
             }
 
-            <p>{warn?.text}</p>
+            {!setContent ? 
+            <p>{warn?.text}</p> :
+            <textarea placeholder={placeholder} onChange={(evt) => setContent(evt.target.value)}>{content}</textarea>
+            }
             <p>&nbsp;</p>
             <p>От {warn?.author}</p>
             <p>{warn?.date}</p>

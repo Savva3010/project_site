@@ -8,7 +8,7 @@ import { useEffect, useState, useReducer } from 'react';
 import Notes from './notes';
 import Warns from './warns';
 
-export default function Column3({ info, setAddPanel }) {
+export default function Column3({ info, setNoteWarnModal }) {
 
     const [ page, setPage ] = useState("NOTES")
 
@@ -75,20 +75,20 @@ ok`,
                     <b>Заметки</b> :
                     "Заметки"
                     }
-                    <button className={`${css["col3-btn-add"]}`} onClick={() => setAddPanel("NOTES")}>&#43;</button>
+                    <button className={`${css["col3-btn-add"]}`} onClick={() => setNoteWarnModal({type: "ADD_NOTE"})}>&#43;</button>
                 </button>
                 <button className={`${css["col3-btn"]} ${page == "WARNS" ? css["col3-btn-warns-active"] : ""}`} onClick={() => setPage("WARNS")}>
                     {page == "WARNS" ? 
                     <b>Замечания</b> :
                     "Замечания"
                     }  
-                    <button className={`${css["col3-btn-add"]}`} onClick={() => setAddPanel("WARNS")}>&#43;</button>
+                    <button className={`${css["col3-btn-add"]}`} onClick={() => setNoteWarnModal({type: "ADD_WARN"})}>&#43;</button>
                 </button>
             </div>
             <div className={`${css["col3-column"]}`}>
                 {page == "NOTES" ?
-                <Notes notes={notes} /> :
-                <Warns warns={warns} />
+                <Notes notes={notes} setNoteWarnModal={setNoteWarnModal}/> :
+                <Warns warns={warns} setNoteWarnModal={setNoteWarnModal}/>
                 }
             </div>
         </div>

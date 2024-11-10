@@ -32,7 +32,7 @@
     z-index: 10;
 }
 
-.table thead tr div {
+.table thead th > div {
     height: 80px;
     background: #FFFFFF;
 }
@@ -46,10 +46,11 @@
     text-align: left;
     position: sticky;
     left: 0;
+    z-index: 2;
 }
 
-.table tr th:nth-child(1) div,
-.table tr td:nth-child(1) div {
+.table tr th:nth-child(1) > div,
+.table tr td:nth-child(1) > div {
     width: 75px;
     text-align: left;
     padding: 10px;
@@ -68,14 +69,60 @@
     font-size: .9rem;
 }
 
-.table th div,
-.table td div {
+.table th > div,
+.table td > div {
     display: flex;
     align-items: center;
     justify-content: center;
     border: 1px solid black;
     height: 40px;
     width: 40px;
+}
+
+.th-date {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    border: 1px solid black;
+    height: 80px;
+    width: 40px;
+    background: #FFFFFF;
+}
+
+.th-date div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80px;
+    width: 40px;
+}
+
+.th-date > div:nth-child(1) {
+    transform: translateY(-150%);
+}
+
+.th-date > div:nth-child(2) {
+    transform: translateY(-50%);
+}
+
+.th-date:hover > div:nth-child(1),
+.th-date:focus-within > div:nth-child(1) {
+    transform: translateY(0);
+}
+
+.th-date:hover > div:nth-child(2),
+.th-date:focus-within > div:nth-child(2) {
+    transform: translateY(0);
+}
+
+.th-date button {
+    width: 25px;
+    aspect-ratio: 1;
+    text-align: center;
+    border-radius: 5px;
+    border: 1px solid #007BFF;
+    color: #007BFF;
 }
 
 .table th div p,

@@ -12,6 +12,8 @@ import Column1 from './column1';
 import Column2 from './column2';
 import Column3 from './column3';
 
+import NoteWarnModal from './note-warn-modal';
+
 import { SERVER_URL } from '@/globals';
 
 function useLoader() {
@@ -45,7 +47,25 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
 
     const [ resident, setResident ] = useLoader()
 
-    const [ column3AddPanel, setColumn3AddPanel ] = useState(null)
+    const [ noteWarnModal, setNoteWarnModal ] = useReducer((state, {type, payload}) => {
+        switch (type) {
+            case "ADD_NOTE":
+                return {...state, category: "NOTE", info: null}
+            case "ADD_WARN":
+                return {...state, category: "WARN", info: null}
+            case "DELETE_NOTE":
+                return {...state, category: "NOTE", info: payload}
+            case "DELETE_WARN":
+                return {...state, category: "WARN", info: payload}
+            case "CLOSE":
+                return {...state, category: null, info: null}
+            default:
+                return {...state}
+        }
+    }, {
+        "category": null,
+        "info": null
+    })
 
     function closePanel() {
         setOpenedProfileId(null)
@@ -57,7 +77,7 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
     useEffect(() => {
         if (openedProfileId == null) {
             setResident({type: "INITIALIZE"})
-            setColumn3AddPanel(null)
+            setNoteWarnModal({type: "CLOSE"})
             return
         }
         setResident({type: "LOADING"})
@@ -102,7 +122,7 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
         return (<>
                 <Column1 info={resident.data} />
                 <Column2 info={resident.data} />
-                <Column3 info={resident.data} setAddPanel={setColumn3AddPanel}/>
+                <Column3 info={resident.data} setNoteWarnModal={setNoteWarnModal}/>
         </>)
     }
     return (<>
@@ -110,7 +130,7 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
             <></> :
 
             <>
-                <div className={`${css["disable-bg"]}`} onClick={closePanel}></div>
+                <div className={`${css["disable-page-bg"]}`} onClick={closePanel}></div>
                 <div className={`${css["wrapper"]}`}>
                     <button className={`${css["close"]}`} onClick={closePanel}>
                         <svg width="32" height="30" viewBox="0 0 32 30" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -121,17 +141,16 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
                     {resident.status != "LOADING" ?
                     <></> :
 
-                    <div className={`${css["disable-profile-bg"]}`}>
-                        <p>Загрузка...</p>
-                    </div>
+                    <>
+                        <div className={`${css["disable-profile-bg"]}`}></div>
+                        <p className={`${css["loading-text"]}`}><b>Загрузка...</b></p>
+                    </>
                     }
 
-                    {column3AddPanel == null ?
+                    {noteWarnModal.category == null ?
                     <></> :
 
-                    <div className={`${css["disable-profile-bg"]}`} onClick={() => setColumn3AddPanel(null)}>
-                        
-                    </div>
+                    <NoteWarnModal modalInfo={noteWarnModal} setModalInfo={setNoteWarnModal}/>
                     }
 
                     <div className={`${css["profile"]}`}>

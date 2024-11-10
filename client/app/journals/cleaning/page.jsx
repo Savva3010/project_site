@@ -9,6 +9,8 @@ import Row from '@/components/journals/cleaning/row';
 
 import { SERVER_URL } from '@/globals';
 
+import DateModal from '@/components/journals/cleaning/date-modal';
+
 function useLoader() {
     const INITIAL_STATE = {
         status: "INITIALIZE",
@@ -35,6 +37,32 @@ function useLoader() {
 export default function Cleaning() {
 
     const [ data, setData ] = useLoader()
+
+    const [ dateModal, setDateModal ] = useReducer((state, {type, payload}) => {
+        switch(type) {
+            case "ADD":
+                return {...state, show: true, date: null}
+            case "DELETE":
+                return {...state, show: true, date: payload}
+            case "CLOSE":
+                return {...state, show: false, date: null}
+            default:
+                return {...state}
+        }
+    }, {
+        "show": false,
+        "date": null
+    })
+
+    function onAdd() {
+        setDateModal({type: "ADD"})
+    }
+
+    function onDelete(date) {
+        return () => {
+            setDateModal({type: "DELETE", payload: date})
+        }
+    }
 
     useEffect(() => {
         setData({type: "LOADING"})
@@ -86,10 +114,17 @@ export default function Cleaning() {
                     <tr>
                         <th><div><p>№</p></div></th>
                         {data.data.dates.map((date, idx) => {
-                            return <th key={idx}><div><p>{date}</p></div></th>
+                            return <th key={idx}><div className={`${css["th-date"]}`}>
+                                    <div>
+                                        <button onClick={onDelete(date)}>&minus;</button>
+                                    </div>
+                                    <div>
+                                        <p>{date}</p>
+                                    </div>
+                                </div></th>
                         })}
                         <th><div><p>СР</p></div></th>
-                        <th><div className={`${css["button-add"]}`}><button>&#43;</button></div></th>
+                        <th><div className={`${css["button-add"]}`}><button onClick={onAdd}>&#43;</button></div></th>
                         <th><div><p></p></div></th>
                         <th><div><p></p></div></th>
                         <th><div><p></p></div></th>
@@ -106,6 +141,11 @@ export default function Cleaning() {
     }
 
     return (<>
+        {!dateModal.show ?
+        <></> :
+        <DateModal modalInfo={dateModal} setModalInfo={setDateModal}/>
+        }
+
         <p className={`${css["header"]}`}><b>Журнал оценок за уборку</b></p>
         {showTable()}
     </>);

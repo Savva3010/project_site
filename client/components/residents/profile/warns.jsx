@@ -7,11 +7,11 @@ import { useEffect, useState, useReducer } from 'react';
 
 import Warn from './warn';
 
-export default function Warns({ warns }) {
+export default function Warns({ warns, setNoteWarnModal }) {
 
     function onDelete(idx) {
         return () => {
-            // delete
+            setNoteWarnModal({type: "DELETE_WARN", payload: warns[idx]})
         }
     }
 
