@@ -5,11 +5,13 @@ import css from "@/styles/residents/list.module.css"
 
 import { useEffect, useState, useReducer, useMemo } from 'react';
 
+import useWebSocket from 'react-use-websocket';
+
 import { location } from '@/enums';
 
 import ListEl from './list-el';
 
-import { SERVER_URL } from '@/globals';
+import { SERVER_URL, WS_SERVER_URL } from '@/globals';
 
 function useLoader() {
     const INITIAL_STATE = {
@@ -37,6 +39,41 @@ function useLoader() {
 export default function List({ sortParams, setTotal }) {
 
     const [ residents, setResidents ] = useLoader()
+
+
+    const {sendJsonMessage, lastJsonMessage, readyState} = useWebSocket(WS_SERVER_URL + "/residents", {
+        "fromSocketIO": false,
+        "share": false,
+        "onMessage": (event) => {
+            //console.log(event)
+        },
+        "onError": (event) => {
+            console.log(event)
+        },
+        "onReconnectStop": (attempts) => {
+            window.location.reload()
+            //RODO: make error list at bottom right of screen
+        },
+        "shouldReconnect": (event) => {
+            return true
+        },
+        "reconnectInterval": 1000,
+        "reconnectAttempts": 20,
+        "retryOnError": true,
+        "heartbeat":  false
+    })
+
+    useEffect(() => {
+        let op = lastJsonMessage?.op
+        let ws_data = lastJsonMessage?.data
+        if (!op) return
+
+        if (op == "ping") {
+            sendJsonMessage({"op": "pong"})
+        } else if (op == "status_update") {
+            
+        }
+    }, [lastJsonMessage])
 
     const processedResidents = useMemo(() => {
         let sorted = residents.data
@@ -93,7 +130,7 @@ export default function List({ sortParams, setTotal }) {
         let controller = new AbortController()
         fetch(SERVER_URL + "/residents", {
             method: "GET",
-            header: {
+            headers: {
 
             },
             signal: controller.signal

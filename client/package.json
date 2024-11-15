@@ -18,7 +18,8 @@
     "react": "^18",
     "react-blurhash": "^0.3.0",
     "react-dom": "^18",
-    "react-router-dom": "^6.26.2"
+    "react-router-dom": "^6.26.2",
+    "react-use-websocket": "^4.10.1"
   },
   "devDependencies": {
     "@preact/signals-react-transform": "^0.4.0",

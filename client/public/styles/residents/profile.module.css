@@ -37,6 +37,12 @@
     overflow-y: auto;
 }
 
+.settings {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+}
+
 .close {
     position: absolute;
     top: 15px;

@@ -1,3 +1,14 @@
+.loading {
+    font-size: 2rem;
+}
+.error {
+    font-size: 1.5rem;
+    color: #CC0000;
+}
+.empty {
+    font-size: 2rem;
+}
+
 .list {
     width: 100%;
 }

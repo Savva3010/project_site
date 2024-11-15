@@ -5,9 +5,12 @@ import css from "@/styles/journals/cleaning/page.module.css"
 
 import { useEffect, useReducer } from 'react';
 
-export default function Row({ isGrey, dates, room } ) {
+import MarkModal from './mark-modal';
+
+export default function Row({ isGrey, dates, room, rowIdx, markModal, setMarkModal, setMark } ) {
     let sum = 0
     let ammount = 0
+
     return (
         <tr className={`${isGrey ? css["row-grey"] : ""}`}>
             <th><div><p>{room.room_number}</p></div></th>
@@ -17,9 +20,16 @@ export default function Row({ isGrey, dates, room } ) {
                     sum += mark.mark
                     ++ammount
                 }
-                return <td key={idx}><div><p>{mark?.mark || ""}</p></div></td>
+                return <td key={idx}><div>
+                        {rowIdx != markModal.room || idx != markModal.date ?
+                        <></> :
+                        <MarkModal setMark={setMark}/>}
+                        <button onClick={() => setMarkModal({type: "OPEN", payload: {room: rowIdx, date: idx}})}>
+                            <p>{mark?.mark || ""}</p>
+                        </button>
+                    </div></td>
             })}
-            <th className={`${css["mean"]}`}><div><p>{(sum / ammount).toFixed(1)}</p></div></th>
+            <th className={`${css["mean"]}`}><div><p>{ammount != 0 ? (sum / ammount).toFixed(1) : ""}</p></div></th>
             <th><div><p></p></div></th>
             <th><div><p></p></div></th>
             <th><div><p></p></div></th>
