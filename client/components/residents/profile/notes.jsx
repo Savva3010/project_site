@@ -9,6 +9,7 @@ import Note from './note';
 
 export default function Notes({ notes, setNoteWarnModal }) {
 
+    // Open delete_note modal
     function onDelete(idx) {
         return () => {
             setNoteWarnModal({type: "DELETE_NOTE", payload: notes[idx]})

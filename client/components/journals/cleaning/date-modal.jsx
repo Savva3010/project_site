@@ -6,12 +6,15 @@ import css from "@/styles/journals/cleaning/date-modal.module.css"
 import { useEffect, useState, useReducer, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+import { toast } from 'react-toastify';
+
 import { location } from '@/enums';
 
 import { SERVER_URL } from '@/globals';
 
 export default function DateModal({ dates, modalInfo, setModalInfo }) {
 
+    // Start sort from September instead of January
     const monthShift = 8
 
     const months = [
@@ -84,6 +87,7 @@ export default function DateModal({ dates, modalInfo, setModalInfo }) {
     
     const [ selectedDay, setSelectedDay ] = useState("NO")
 
+    // You can select only days that are not added yet
     const daysToSelect = useMemo(() => {
         let arr = []
         for (let i = 1; i <= days[selectedMonth]; ++i) {
@@ -96,48 +100,96 @@ export default function DateModal({ dates, modalInfo, setModalInfo }) {
         return arr
     }, [selectedMonth])
 
+    // Close modal
     function closeModal() {
         setModalInfo({type: "CLOSE"})
     }
 
+    // Make add_date API request
     function addDate() {
         if (selectedDay == "NO" || !selectedDay || !selectedMonth) return
         setModalInfo({type: "CLOSE"})
-        fetch(SERVER_URL + "/journals/cleaning/dates", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            mode: "cors",
-            body: JSON.stringify({
-                "csrf_token": "ABCD",
-                "month": (months.findIndex(month => month.value == selectedMonth) + monthShift) % 12 + 1,
-                "day": selectedDay
+
+        let promise = new Promise((resolve, reject) => {
+            fetch(SERVER_URL + "/journals/cleaning/dates", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                mode: "cors",
+                body: JSON.stringify({
+                    "month": (months.findIndex(month => month.value == selectedMonth) + monthShift) % 12 + 1,
+                    "day": selectedDay
+                })
+            })
+            .then(res => res.json())
+            .then((res) => {
+                if (!res.success) {
+                    reject(res.data.message)
+                } else {
+                    resolve()
+                }
+            })
+            .catch(err => {
+                reject()
+                console.log(err)
             })
         })
-        .catch(err => {
-            console.log(err)
+        toast.promise(promise, {
+            pending: "Добавление даты",
+            success: "Дата добавлена",
+            error: {
+                theme: "colored",
+                autoClose: 10000,
+                render({data}) {
+                    return "Не удалось добавить дату: " + (data || "")
+                }
+            }   
         })
     }
 
+    // Make delete_date API request
     function deleteDate() {
         setModalInfo({type: "CLOSE"})
-        fetch(SERVER_URL + "/journals/cleaning/dates", {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            mode: "cors",
-            body: JSON.stringify({
-                "csrf_token": "ABCD",
-                "date": modalInfo.date
+        let promise = new Promise((resolve, reject) => {
+            fetch(SERVER_URL + "/journals/cleaning/dates", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                mode: "cors",
+                body: JSON.stringify({
+                    "date": modalInfo.date
+                })
+            })
+            .then(res => res.json())
+            .then((res) => {
+                if (!res.success) {
+                    reject(res.data.message)
+                } else {
+                    resolve()
+                }
+            })
+            .catch(err => {
+                reject()
+                console.log(err)
             })
         })
-        .catch(err => {
-            console.log(err)
+
+        toast.promise(promise, {
+            pending: "Удаление даты",
+            success: "Дата удалена",
+            error: {
+                theme: "colored",
+                autoClose: 10000,
+                render({data}) {
+                    return "Не удалось удалить дату: " + (data || "")
+                }
+            }   
         })
     }
 
+    // Show month and day selectors
     function showSelector() {
         return <div className={`${css["selectors"]}`}>
             <div className={`${css["selector"]}`}>

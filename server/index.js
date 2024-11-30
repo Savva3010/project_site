@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 import residents from "./data/residents.json" assert {type: "json"}
 import journals_cleaing from "./data/journals_cleaning.json" assert {type: "json"}
+import rooms from "./data/rooms.json" assert {type: "json"}
 
 //heplers start
 import { errorMsg, successMsg } from './helpers/msg.js'
@@ -29,7 +30,7 @@ httpServer.listen(process.env.PORT, "127.0.0.1", (error) => {
 
 //middlewares start
 app.use(morgan(":method :url (:status) :res[content-length] - :response-time ms"))
-//app.use(express.static("public"))
+app.use(express.static("public"))
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(bodyParser.raw())
@@ -40,7 +41,6 @@ app.use((req, res, next) => {
     res.set("Access-Control-Allow-Headers", "Content-Type")
     next()
 })
-app.use(express.static("public"))
 //middlewares end
 
 app.options("/*", (req, res) => {
@@ -48,6 +48,11 @@ app.options("/*", (req, res) => {
     .status(200)
     .send()
 })
+
+
+
+
+
 
 app.get('/residents', (req, res) => {
     let data = []
@@ -83,7 +88,7 @@ app.get("/residents/:id", (req, res) => {
 
     if(!resident) {
         res
-        .status(404)
+        .status(400)
         .json({
             "success": false,
             "data": {
@@ -95,6 +100,7 @@ app.get("/residents/:id", (req, res) => {
     }
 
     let data = {
+        "id": id,
         "profile_image": {
             "src": resident.profile_image.src,
             "blur_hash": resident.profile_image.blur_hash
@@ -108,21 +114,8 @@ app.get("/residents/:id", (req, res) => {
         "mobile": resident.mobile,
         "email": resident.email,
         "telegram": resident.telegram,
-        "status": {
-            "status": resident.status.status
-        },
+        "status": resident.status,
         "parents": []
-    }
-
-    if (resident.status.status == "outside" ||
-        resident.status.status == "school" ) {
-
-        data["status"]["until"] = resident.status.until
-        data["status"]["lateness"] = resident.status.lateness
-    }
-
-    if (resident.status.status == "outside") {
-        data["status"]["place"] = resident.status.place
     }
 
     resident["parents"].forEach(parent => {
@@ -145,7 +138,208 @@ app.get("/residents/:id", (req, res) => {
 
 })
 
-app.get('/journals/cleaning', (req, res) => {
+/*
+    error ids:
+    -1 - csrf token expired
+    -2 - not enough data
+    -3 - resident is not found
+    -4 - no such status
+
+    THIS IS TEMP REQUEST TO CHECK WEBSOCKETS WORK
+*/
+app.put("/residents/:id/status", (req, res) => {
+    let { id } = req.params
+    id = Number(id)
+
+    let {status} = req.body
+
+    if (!status || !status.status) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Не хватает данных",
+                "error_id": -2
+            }
+        })
+        return
+    }
+
+    let resident = residents.findIndex(resident => resident.id == id)
+
+    if (resident == -1) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Проживающий не найден",
+                "error_id": -3
+            }
+        })
+        return
+    }
+
+    switch (status.status) {
+        case "inside":
+            residents[resident].status = {
+                "status": "inside"
+            }
+            break
+        case "isolator":
+            residents[resident].status = {
+                "status": "isolator"
+            }
+            break
+        case "outside":
+            if (!status.place || !status.until) {
+                res
+                .status(400)
+                .json({
+                    "success": false,
+                    "data": {
+                        "message": "Не хватает данных",
+                        "error_id": -2
+                    }
+                })
+                return
+            }
+            residents[resident].status = {
+                "status": "outside",
+                "until": status.until,
+                "place": status.place,
+                "lateness": 0
+            }
+            break
+        case "school":
+            if (!status.until) {
+                res
+                .status(400)
+                .json({
+                    "success": false,
+                    "data": {
+                        "message": "Не хватает данных",
+                        "error_id": -2
+                    }
+                })
+                return
+            }
+            residents[resident].status = {
+                "status": "school",
+                "until": status.until,
+                "lateness": 0
+            }
+            break
+        default:
+            res
+            .status(400)
+            .json({
+                "success": false,
+                "data": {
+                    "message": "Не существует статус",
+                    "error_id": -4
+                }
+            })
+            return
+    }
+
+    wsServerRedients.clients.forEach(client => {
+        if (client.readyState != WebSocket.OPEN) return
+        client.send(JSON.stringify({
+            "op": "status:update",
+            "data": {
+                "id": id,
+                "status": residents[resident].status
+            }
+        }))
+    })
+
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": null
+    })
+})
+
+
+
+
+
+
+app.get("/rooms", (req, res) => {
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": rooms
+    })
+})
+
+/*
+    error ids:
+    -1 - csrf token expired
+    -2 - not enough data
+    -3 - room is not found
+*/
+app.get("/rooms/:id/:subid", (req, res) => {
+    let { id, subid } = req.params
+    let roomid = id
+    if (subid != "0") roomid += `/${subid}`
+
+    let room = rooms.find(room => room.room_number == roomid)
+
+    if (!room) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Комната не найдена",
+                "error_id": -3
+            }
+        })
+        return
+    }
+
+    let data = {
+        "room_number": roomid,
+        "residents": []
+    }
+    room.residents.forEach(resident => {
+        let found = residents.find(curr => curr.id == resident.id)
+        if (!found) return
+        data.residents.push({
+            "id": found.id,
+            "profile_image": found.profile_image,
+            "full_name": found.full_name,
+            "age": found.age,
+            "room": found.room,
+            "class": found.class,
+            "class_mentor": found.class_mentor,
+            "status": found.status
+        })
+    })
+
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": data
+    })
+})
+
+app.get("/rooms/:id", (req, res) => {
+    let { id } = req.params
+    res.redirect(`/rooms/${id}/0`)
+})
+
+
+
+
+
+app.get('/journals/cleaning', (req, res) => {res
     let data = journals_cleaing
     
     res
@@ -160,41 +354,13 @@ app.get('/journals/cleaning', (req, res) => {
     error ids:
     -1 - csrf token expired
     -2 - not enough data
-    -3 - resident is not found
-
-    THIS IS TEMP REQUEST TO CHECK WEBSOCKETS WORK
-*/
-app.put("/residents/:id/status", (req, res) => {
-    let { id } = req.params
-    id = Number(id)
-
-    let {csrf_token, status} = req.body
-
-    if (!csrf_token || !status) {
-        res
-        .status(400)
-        .json({
-            "success": false,
-            "data": {
-                "message": "Не хватает данных",
-                "error_id": -2
-            }
-        })
-        return
-    }
-})
-
-/*
-    error ids:
-    -1 - csrf token expired
-    -2 - not enough data
     -3 - room is not found
     -4 - date is not found
 */
 app.put("/journals/cleaning/marks", (req, res) => {
-    let {csrf_token, date, room, mark} = req.body
+    let {date, room, mark} = req.body
 
-    if (!csrf_token || !date || !room || mark != 0 && !mark) {
+    if (!date || !room || mark != 0 && !mark) {
         res
         .status(400)
         .json({
@@ -248,7 +414,7 @@ app.put("/journals/cleaning/marks", (req, res) => {
     wsServerJournalsCleaning.clients.forEach(client => {
         if (client.readyState != WebSocket.OPEN) return
         client.send(JSON.stringify({
-            "op": "mark_update",
+            "op": "mark:update",
             "data": {
                 "room": room,
                 "date": date,
@@ -272,9 +438,9 @@ app.put("/journals/cleaning/marks", (req, res) => {
     -3 - date is alerady created
 */
 app.post("/journals/cleaning/dates", (req, res) => {
-    let {csrf_token, month, day} = req.body
+    let {month, day} = req.body
 
-    if (!csrf_token || !month || !day) {
+    if (!month || !day) {
         res
         .status(400)
         .json({
@@ -353,7 +519,7 @@ app.post("/journals/cleaning/dates", (req, res) => {
     wsServerJournalsCleaning.clients.forEach(client => {
         if (client.readyState != WebSocket.OPEN) return
         client.send(JSON.stringify({
-            "op": "date_add",
+            "op": "date:add",
             "data": {
                 "date": need_date
             }
@@ -375,9 +541,9 @@ app.post("/journals/cleaning/dates", (req, res) => {
     -3 - date does not exist
 */
 app.delete("/journals/cleaning/dates", (req, res) => {
-    let {csrf_token, date} = req.body
+    let {date} = req.body
 
-    if (!csrf_token || !date) {
+    if (!date) {
         res
         .status(400)
         .json({
@@ -416,7 +582,7 @@ app.delete("/journals/cleaning/dates", (req, res) => {
     wsServerJournalsCleaning.clients.forEach(client => {
         if (client.readyState != WebSocket.OPEN) return
         client.send(JSON.stringify({
-            "op": "date_delete",
+            "op": "date:delete",
             "data": {
                 "date": date
             }
@@ -432,6 +598,9 @@ app.delete("/journals/cleaning/dates", (req, res) => {
 })
 
 
+
+
+
 app.use((req, res) => {
     res
     .status(404)
@@ -443,7 +612,6 @@ app.use((req, res) => {
         }
     })
 })
-
 
 
 

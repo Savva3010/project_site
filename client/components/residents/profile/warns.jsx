@@ -9,6 +9,7 @@ import Warn from './warn';
 
 export default function Warns({ warns, setNoteWarnModal }) {
 
+    // Open warn_delete modal
     function onDelete(idx) {
         return () => {
             setNoteWarnModal({type: "DELETE_WARN", payload: warns[idx]})

@@ -5,7 +5,10 @@ import css from "@/styles/residents/list.module.css"
 
 import { useEffect, useState, useReducer, useMemo } from 'react';
 
-import useWebSocket from 'react-use-websocket';
+import useLoader from '@/lib/loader';
+import useDefaultWebsocket from '@/lib/websocket';
+
+import CustomServerError from '@/lib/customServerError';
 
 import { location } from '@/enums';
 
@@ -13,56 +16,22 @@ import ListEl from './list-el';
 
 import { SERVER_URL, WS_SERVER_URL } from '@/globals';
 
-function useLoader() {
-    const INITIAL_STATE = {
-        status: "INITIALIZE",
-        data: null,
-        error: null
-    }
+function recalcTotal(residents, setTotal) {
+    let total = residents.length
+    let inside = residents.filter(resident => resident?.status?.status == "inside" || resident?.status?.status == "isolator").length
+    let school = residents.filter(resident => resident?.status?.status != "outside").length
 
-    function reducer(state, { type, payload }) {
-        switch (type) {
-            case "LOADING":
-                return {...state, status: "LOADING"}
-            case "ERROR":
-                return {...state, status: "ERROR", error: payload}
-            case "SUCCESS":
-                return {...state, status: "SUCCESS", data: payload}
-            default:
-                return {...state}
-        }
-    }
-
-    return useReducer(reducer, INITIAL_STATE) 
+    setTotal({"total": total, "inside": inside, "school": school})
 }
 
 export default function List({ sortParams, setTotal }) {
 
     const [ residents, setResidents ] = useLoader()
 
+    // Connect to websocket
+    const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket("/residents")
 
-    const {sendJsonMessage, lastJsonMessage, readyState} = useWebSocket(WS_SERVER_URL + "/residents", {
-        "fromSocketIO": false,
-        "share": false,
-        "onMessage": (event) => {
-            //console.log(event)
-        },
-        "onError": (event) => {
-            console.log(event)
-        },
-        "onReconnectStop": (attempts) => {
-            window.location.reload()
-            //RODO: make error list at bottom right of screen
-        },
-        "shouldReconnect": (event) => {
-            return true
-        },
-        "reconnectInterval": 1000,
-        "reconnectAttempts": 20,
-        "retryOnError": true,
-        "heartbeat":  false
-    })
-
+    // Handle websocket messages
     useEffect(() => {
         let op = lastJsonMessage?.op
         let ws_data = lastJsonMessage?.data
@@ -70,17 +39,23 @@ export default function List({ sortParams, setTotal }) {
 
         if (op == "ping") {
             sendJsonMessage({"op": "pong"})
-        } else if (op == "status_update") {
-            
+        } else if (op == "status:update") {
+            let newResidents = [...residents.data]
+            let foundResident = newResidents.findIndex(resident => resident.id == ws_data.id)
+            if (foundResident == -1) return
+            newResidents[foundResident].status = ws_data.status
+            setResidents({type: "SUCCESS", payload: newResidents})
+            recalcTotal(newResidents, setTotal)
         }
     }, [lastJsonMessage])
 
+    // Filtered and sorted residents
     const processedResidents = useMemo(() => {
         let sorted = residents.data
         if (!sorted) return []
 
         if (sortParams.filter != "") {
-            sorted = sorted.filter(resident => resident.full_name.toLowerCase().includes(sortParams.filter.toLowerCase()))
+            sorted = sorted.filter(resident => (`${resident.room?.toLowerCase()} ${resident.full_name?.toLowerCase()} ${resident.class?.toLowerCase()} ${resident.mobile?.toLowerCase()}  ${resident.email?.toLowerCase()}  ${resident.telegram?.toLowerCase()}`).includes(sortParams.filter.toLowerCase()))
         }
 
         if (sortParams.sort == "full_name") {
@@ -125,6 +100,7 @@ export default function List({ sortParams, setTotal }) {
         return sorted
     }, [residents, sortParams])
 
+    // Fetch residents
     useEffect(() => {
         setResidents({type: "LOADING"})
         let controller = new AbortController()
@@ -135,15 +111,19 @@ export default function List({ sortParams, setTotal }) {
             },
             signal: controller.signal
         })
-        .then(res => res.json())
+        .then(res => {
+            return res.json()
+            .then(body => {
+                if (res.status != 200 || !body || !body?.success) {
+                    throw new CustomServerError(body.data.message)
+                }
+                return body
+            })
+        })
         .then(data => {
             setResidents({type: "SUCCESS", payload: data.data})
 
-            let total = data.data.length
-            let inside = data.data.filter(resident => resident?.status?.status == "inside").length
-            let school = data.data.filter(resident => resident?.status?.status == "school").length
-
-            setTotal({"total": total, "inside": inside, "school": school})
+            recalcTotal(data.data, setTotal)
         })
         .catch(err => {
             if (err.name == "AbortError") return
@@ -156,6 +136,7 @@ export default function List({ sortParams, setTotal }) {
         }
     }, [])
 
+    // Show component
     function showResidents() {
         if (residents.status == "INITIALIZE") return <></>
         if (residents.status == "LOADING") {

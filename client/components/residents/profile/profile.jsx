@@ -6,6 +6,11 @@ import css from "@/styles/residents/profile.module.css"
 import { useEffect, useState, useReducer } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+import useLoader from '@/lib/loader';
+import useDefaultWebsocket from '@/lib/websocket';
+
+import CustomServerError from '@/lib/customServerError';
+
 import { location } from '@/enums';
 
 import Column1 from './column1';
@@ -14,32 +19,7 @@ import Column3 from './column3';
 
 import NoteWarnModal from './note-warn-modal';
 
-import { SERVER_URL } from '@/globals';
-
-function useLoader() {
-    const INITIAL_STATE = {
-        status: "INITIALIZE",
-        data: null,
-        error: null
-    }
-
-    function reducer(state, { type, payload }) {
-        switch (type) {
-            case "INITIALIZE":
-                return INITIAL_STATE
-            case "LOADING":
-                return {...state, status: "LOADING"}
-            case "ERROR":
-                return {...state, status: "ERROR", error: payload}
-            case "SUCCESS":
-                return {...state, status: "SUCCESS", data: payload}
-            default:
-                return {...state}
-        }
-    }
-
-    return useReducer(reducer, INITIAL_STATE) 
-}
+import { SERVER_URL, WS_SERVER_URL } from '@/globals';
 
 export default function Profile({ openedProfileId, setOpenedProfileId }) {
     const router = useRouter()
@@ -47,6 +27,25 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
 
     const [ resident, setResident ] = useLoader()
 
+    // Connect to websocket
+    const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket("/residents")
+
+    // Handle websocket messages
+    useEffect(() => {
+        if (openedProfileId == null) return
+        let op = lastJsonMessage?.op
+        let ws_data = lastJsonMessage?.data
+        if (!op) return
+
+        if (op == "status:update") {
+            if (resident.data.id != ws_data.id) return
+            let newResident = {...resident.data}
+            newResident.status = ws_data.status
+            setResident({type: "SUCCESS", payload: newResident})
+        }
+    }, [lastJsonMessage])
+
+    // Note/warn modal info
     const [ noteWarnModal, setNoteWarnModal ] = useReducer((state, {type, payload}) => {
         switch (type) {
             case "ADD_NOTE":
@@ -67,19 +66,19 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
         "info": null
     })
 
+    // Close modal
     function closePanel() {
         setOpenedProfileId(null)
+        setResident({type: "INITIALIZE"})
+        setNoteWarnModal({type: "CLOSE"})
         let newParams = new URLSearchParams(searchParams.toString())
         newParams.delete("profile")
-        router.replace(`/residents/?${newParams.toString()}`, undefined, {shallow: true})
+        router.replace(`/residents/?${newParams.toString()}`)
     }
 
+    // Fetch resident profile
     useEffect(() => {
-        if (openedProfileId == null) {
-            setResident({type: "INITIALIZE"})
-            setNoteWarnModal({type: "CLOSE"})
-            return
-        }
+        if (openedProfileId == null) return
         setResident({type: "LOADING"})
         let controller = new AbortController()
         fetch(SERVER_URL + "/residents/" + openedProfileId, {
@@ -89,7 +88,15 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
             },
             signal: controller.signal
         })
-        .then(res => res.json())
+        .then(res => {
+            return res.json()
+            .then(body => {
+                if (res.status != 200 || !body || !body?.success) {
+                    throw new CustomServerError(body.data.message)
+                }
+                return body
+            })
+        })
         .then(data => {
             setResident({type: "SUCCESS", payload: data.data})
         })
@@ -104,6 +111,7 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
         }
     }, [openedProfileId])
 
+    // Show modal content
     function showResident() {
         if (resident.status == "ERROR") {
             return <p style={{whiteSpace: "pre-wrap", height: "100%"}} className={`${css["error"]}`}>Произошла ошибка (да, и такое бывает) ¯\_(ツ)_/¯ 

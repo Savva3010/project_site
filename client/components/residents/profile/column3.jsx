@@ -12,6 +12,7 @@ export default function Column3({ info, setNoteWarnModal }) {
 
     const [ page, setPage ] = useState("NOTES")
 
+    // TODO: This is temp. Then notes and warns will be fetched
     const notes = [
         "Ну это заметка",
         `Ну это заметка

@@ -9,7 +9,7 @@ export default function Sidebar() {
     return (
         <div className={`${css["sidebar"]}`}>
             <SidebarCatalog name="Список проживающих" href="/residents" />
-            <SidebarCatalog name="Сведения о комнатах" href="/" />
+            <SidebarCatalog name="Сведения о комнатах" href="/rooms" />
             <SidebarCatalog name="Журналы">
                 <SidebarCatalog name="Вход/выход" href="/" />
                 <SidebarCatalog name="Уборка комнат" href="/journals/cleaning" />

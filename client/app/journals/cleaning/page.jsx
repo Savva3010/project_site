@@ -6,7 +6,12 @@ import css from "@/styles/journals/cleaning/page.module.css"
 import { useEffect, useState, useReducer, useRef} from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-import useWebSocket from 'react-use-websocket';
+import useLoader from '@/lib/loader';
+import useDefaultWebsocket from '@/lib/websocket';
+
+import CustomServerError from '@/lib/customServerError';
+
+import { toast } from 'react-toastify';
 
 import Row from '@/components/journals/cleaning/row';
 
@@ -14,28 +19,6 @@ import { SERVER_URL, WS_SERVER_URL } from '@/globals';
 
 import DateModal from '@/components/journals/cleaning/date-modal';
 
-function useLoader() {
-    const INITIAL_STATE = {
-        status: "INITIALIZE",
-        data: null,
-        error: null
-    }
-
-    function reducer(state, { type, payload }) {
-        switch (type) {
-            case "LOADING":
-                return {...state, status: "LOADING"}
-            case "ERROR":
-                return {...state, status: "ERROR", error: payload}
-            case "SUCCESS":
-                return {...state, status: "SUCCESS", data: payload}
-            default:
-                return {...state}
-        }
-    }
-
-    return useReducer(reducer, INITIAL_STATE) 
-}
 
 export default function Cleaning() {
 
@@ -43,28 +26,10 @@ export default function Cleaning() {
 
     const [ data, setData ] = useLoader()
 
-    const {sendJsonMessage, lastJsonMessage, readyState} = useWebSocket(WS_SERVER_URL + "/journals/cleaning", {
-        "fromSocketIO": false,
-        "share": false,
-        "onMessage": (event) => {
-            //console.log(event)
-        },
-        "onError": (event) => {
-            console.log(event)
-        },
-        "onReconnectStop": (attempts) => {
-            window.location.reload()
-            //RODO: make error list at bottom right of screen
-        },
-        "shouldReconnect": (event) => {
-            return true
-        },
-        "reconnectInterval": 1000,
-        "reconnectAttempts": 20,
-        "retryOnError": true,
-        "heartbeat":  false
-    })
+    // Connect ot Websocket
+    const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket("/journals/cleaning")
 
+    // Handle websocket messages
     useEffect(() => {
         let op = lastJsonMessage?.op
         let ws_data = lastJsonMessage?.data
@@ -72,7 +37,7 @@ export default function Cleaning() {
 
         if (op == "ping") {
             sendJsonMessage({"op": "pong"})
-        } else if (op == "mark_update") {
+        } else if (op == "mark:update") {
             let newData = [...data.data.rooms]
             let room = newData.findIndex(el => el.room_number == ws_data.room)
             let date = newData[room].marks.findIndex(el => el.date == ws_data.date)
@@ -87,7 +52,7 @@ export default function Cleaning() {
                 }
             }
             setData({type: "SUCCESS", payload: {...data.data, rooms: newData}})
-        } else if (op == "date_add") {
+        } else if (op == "date:add") {
             let newData = [...data.data.dates]
             let foundDate = newData.findIndex(date => date == ws_data.date)
             if (foundDate != -1) return
@@ -131,7 +96,7 @@ export default function Cleaning() {
                 }
             })
             setData({type: "SUCCESS", payload: {...data.data, dates: newData, rooms: newMarks}})
-        } else if (op == "date_delete") {
+        } else if (op == "date:delete") {
             let newData = [...data.data.dates]
             let foundDate = newData.findIndex(date => date == ws_data.date)
             if (foundDate == -1) return
@@ -140,6 +105,7 @@ export default function Cleaning() {
         }
     }, [lastJsonMessage])
 
+    // Date modal info(create/delete date confirmation)
     const [ dateModal, setDateModal ] = useReducer((state, {type, payload}) => {
         switch (type) {
             case "ADD":
@@ -156,6 +122,7 @@ export default function Cleaning() {
         "date": null
     })
 
+    // Mark modal info(choose mark)
     const [ markModal, setMarkModal ] = useReducer((state, {type, payload}) => {
         switch (type) {
             case "OPEN":
@@ -168,39 +135,66 @@ export default function Cleaning() {
         "date": null
     })
 
+    // On add date
     function onAdd() {
         setDateModal({type: "ADD"})
     }
 
+    // On delete date
     function onDelete(date) {
         return () => {
             setDateModal({type: "DELETE", payload: date})
         }
     }
 
+    // Make set_mark API request
     function setMark(mark) {
         let room = markModal.room
         let date = markModal.date
         if (room == null || date == null) return
         setMarkModal({type: "CLOSE"})
-        fetch(SERVER_URL + "/journals/cleaning/marks", {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            mode: "cors",
-            body: JSON.stringify({
-                "csrf_token": "ABCD",
-                "room": data.data.rooms[markModal.room].room_number,
-                "date": data.data.dates[markModal.date],
-                "mark": mark
+
+        let promise = new Promise((resolve, reject) => {
+            fetch(SERVER_URL + "/journals/cleaning/marks", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                mode: "cors",
+                body: JSON.stringify({
+                    "room": data.data.rooms[markModal.room].room_number,
+                    "date": data.data.dates[markModal.date],
+                    "mark": mark
+                })
+            })
+            .then(res => res.json())
+            .then((res) => {
+                if (!res.success) {
+                    reject(res.data.message)
+                } else {
+                    resolve()
+                }
+            })
+            .catch(err => {
+                reject()
+                console.log(err)
             })
         })
-        .catch(err => {
-            console.log(err)
+
+        toast.promise(promise, {
+            pending: "Изменение оценки",
+            success: "Оценка изменена",
+            error: {
+                theme: "colored",
+                autoClose: 10000,
+                render({data}) {
+                    return "Не удалось изменить оценку: " + (data || "")
+                }
+            }   
         })
     }
 
+    // Fetch marks
     useEffect(() => {
         setData({type: "LOADING"})
         let controller = new AbortController()
@@ -211,7 +205,15 @@ export default function Cleaning() {
             },
             signal: controller.signal
         })
-        .then(res => res.json())
+        .then(res => {
+            return res.json()
+            .then(body => {
+                if (res.status != 200 || !body || !body?.success) {
+                    throw new CustomServerError(body.data.message)
+                }
+                return body
+            })
+        })
         .then(data => {
             setData({type: "SUCCESS", payload: data.data})
         })
@@ -226,6 +228,7 @@ export default function Cleaning() {
         }
     }, [])
 
+    // Render table
     function showTable() {
         if (data.status == "INITIALIZE") return <></>
         if (data.status == "LOADING") {
@@ -237,11 +240,11 @@ export default function Cleaning() {
                 Обратитесь к специалисту и попробуйте позже
                 <br/>
                 <br/>                           
-                {residents.error.name}
+                {data.error.name}
                 <br/>
-                {residents.error.message}
+                {data.error.message}
                 <br/>
-                {residents.error.stack}
+                {data.error.stack}
             </p>
         }
 

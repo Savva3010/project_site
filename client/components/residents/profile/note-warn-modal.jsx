@@ -17,10 +17,12 @@ export default function NoteWarnModal({ modalInfo, setModalInfo }) {
 
     const [ addContent, setAddContent ] = useState("")
 
+    // Close modal
     function closeModal() {
         setModalInfo({type: "CLOSE"})
     }
 
+    // TODO: Notes and warns are static yet. There will be add_note/add_warn and delete_note/delete_warn API request
     function addNoteWarn() {
 
     }
@@ -29,6 +31,7 @@ export default function NoteWarnModal({ modalInfo, setModalInfo }) {
 
     }
 
+    // Show hint above the note/warn
     function showHint() {
         if (modalInfo.info == null) {
             if (modalInfo.category == "NOTE") {
@@ -45,6 +48,7 @@ export default function NoteWarnModal({ modalInfo, setModalInfo }) {
         }
     }
 
+    // Show note/warn
     function showContent() {
         if (modalInfo.category == "NOTE") {
             if (modalInfo.info == null) {

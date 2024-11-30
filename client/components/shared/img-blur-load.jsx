@@ -13,6 +13,7 @@ export default function ImgBlurLoad({ src, hash, className, alt }) {
 
     const [ status, setStatus ] = useState("UNLOADED")
 
+    // Load image
     useEffect(() => {
         setStatus("UNLOADED")
         const img = new Image()
@@ -39,6 +40,7 @@ export default function ImgBlurLoad({ src, hash, className, alt }) {
         }
     }, [src])
 
+    // Show image ot blur version
     function showImg() {
         switch (status) {
             case "UNLOADED":

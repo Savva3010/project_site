@@ -9,7 +9,8 @@
       "@/images/*": ["../public/images/*"],
       "@/components/*": ["../components/*"],
       "@/enums": ["../enums.js"],
-      "@/globals": ["../globals.js"]
+      "@/globals": ["../globals.js"],
+      "@/lib/*": ["../lib/*"]
     }
   }
 }

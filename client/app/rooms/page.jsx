@@ -1,24 +1,23 @@
 "use client"
 
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import css from "@/styles/residents/page.module.css"
+import css from "@/styles/rooms/page.module.css"
 
 import { useEffect, useState, useReducer, useRef, createContext } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { location } from '@/enums';
 
-import List from "@/components/residents/list"
-import Profile from '@/components/residents/profile/profile';
-import Header from '@/components/residents/header';
+import List from "@/components/rooms/list"
+import Room from '@/components/rooms/room/room';
+import Header from '@/components/rooms/header';
 
-export const ProfileContext = createContext(null)
+export const RoomContext = createContext(null)
 
 function useSort() {
     const INITIAL_STATE = {
         filter: "",
         direction: "down",
-        sort: "room"
     }
 
     function reducer(state, { type, payload }) {
@@ -27,8 +26,6 @@ function useSort() {
                 return {...state, filter: payload}
             case "DIRECTION":
                 return {...state, direction: payload}
-            case "SORT":
-                return {...state, sort: payload}
             default:
                 return {...state}
         }
@@ -37,19 +34,19 @@ function useSort() {
     return useReducer(reducer, INITIAL_STATE)
 }
 
-export default function Residents() {
+export default function Rooms() {
     const router = useRouter()
     const searchParams = useSearchParams()
 
-    const [ openedProfileId, setOpenedProfileId ] = useState(null)
+    const [ openedRoomId, setOpenedRoomId ] = useState(null)
     const [ headerTotal, setHeaderTotal ] = useState({"total": 0, "inside": 0, "school": 0})
     const [ sortParams, setSortParams ] = useSort()
 
     // Get initial sort params
     useEffect(() => {
-        let profile = searchParams.get("profile")
-        if (profile && Number(profile)) {
-            setOpenedProfileId(Number(profile))
+        let room = searchParams.get("room")
+        if (room) {
+            setOpenedRoomId(room)
         }
 
         let filter = searchParams.get("q")
@@ -69,10 +66,10 @@ export default function Residents() {
     }, [])
     
     return (<>
-        <ProfileContext.Provider value={setOpenedProfileId}>
-            <Profile openedProfileId={openedProfileId} setOpenedProfileId={setOpenedProfileId}/>
+        <RoomContext.Provider value={setOpenedRoomId}>
+            <Room openedRoomId={openedRoomId} setOpenedRoomId={setOpenedRoomId}/>
             <Header sortParams={sortParams} setSortParams={setSortParams} total={headerTotal}/>
             <List sortParams={sortParams} setTotal={setHeaderTotal}/>
-        </ProfileContext.Provider>
+        </RoomContext.Provider>
     </>);
 }

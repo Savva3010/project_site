@@ -11,6 +11,7 @@ export default function SidebarCatalog({name, href, children = []}) {
     const [ expanded, setExpanded ] = useState(false)
     const router = useRouter()
 
+    // If is catalog, then toggle open/close
     function showExpanded() {
         if (!expanded) return (<></>)
 
@@ -21,6 +22,7 @@ export default function SidebarCatalog({name, href, children = []}) {
         </>)
     }
 
+    // Handle click based on catalog/link
     function handleClick() {
         if (Children.count(children) != 0) {
             setExpanded(prev => prev = !prev)

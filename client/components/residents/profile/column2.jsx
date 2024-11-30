@@ -4,10 +4,12 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import css from "@/styles/residents/profile.module.css"
 
 import { useEffect, useState, useReducer } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import Status from './status';
 
 export default function Column2({ info }) {
+    const router = useRouter()
 
     return (<>
         <div className={`${css["col"]} ${css["col2"]}`}>
@@ -23,7 +25,10 @@ export default function Column2({ info }) {
                     <p><b>Почта: </b>{                info?.email         ? info["email"]         : <b>&minus;</b>}</p>
                     <p><b>Telegram: </b>{             info?.telegram      ? info["telegram"]      : <b>&minus;</b>}</p>
                     <p>&nbsp;</p>
-                    <button className={`${css["col2-link"]}`}>Комната</button>
+                    <button className={`${css["col2-link"]}`} onClick={() => {
+                        let newParams = new URLSearchParams(`room=${info?.room}`)
+                        router.push(`/rooms/?${newParams.toString()}`)
+                    }}>Комната</button>
                     <button className={`${css["col2-link"]}`}>Заявления</button>
                     <button className={`${css["col2-link"]}`}>Журнал входов/выходов</button>
                 </div>
@@ -45,7 +50,7 @@ export default function Column2({ info }) {
                     })}
                 </div>
             </div>
-            <Status info={info} />
+            <Status info={info?.status} />
         </div>
     </>);
 }

@@ -16,11 +16,12 @@ export default function ListEl({ info }) {
 
     const setOpenedProfileId = useContext(ProfileContext)
 
+    // Open profile modal
     function openProfile() {
         setOpenedProfileId(info.id)
         let newParams = new URLSearchParams(searchParams.toString())
         newParams.set("profile", info.id)
-        router.replace(`/residents/?${newParams.toString()}`, undefined, {shallow: true})
+        router.replace(`/residents/?${newParams.toString()}`)
     }
 
     return (<>

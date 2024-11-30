@@ -9,9 +9,6 @@ let data = {
     "rooms": []
 }
 
-function Generate() {
-}
-
 const rl = readline.createInterface({ input, output });
 
 rl.question(`Введите кол-во дат(макс ${30 * randoms.months.length}): `, (need_dates) => {

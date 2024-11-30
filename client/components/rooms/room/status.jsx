@@ -1,7 +1,7 @@
 "use client"
 
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import css from "@/styles/residents/profile.module.css"
+import css from "@/styles/rooms/resident.module.css"
 
 import { useEffect, useState, useReducer, useRef } from 'react';
 
@@ -10,12 +10,12 @@ import { location } from '@/enums';
 // Css class color based on lateness
 function statusLatenessClass(lateness, status) {
     if (lateness >= 30) {
-        return css["col2-status-status-late-30"]
+        return css["status-status-late-30"]
     }
     if (lateness) {
-        return css["col2-status-status-late"]
+        return css["status-status-late"]
     }
-    return css[`col2-status-status-${status[1]}`]
+    return css[`status-status-${status[1]}`]
 }
 
 // Correct form of "minute" based on lateness
@@ -35,10 +35,10 @@ function minuteTextForm(lateness) {
 // Css wrapper class color based on lateness
 function wrapperLatenessClass(lateness) {
     if (lateness >= 30) {
-        return css["col2-status-wrapper-late-30"]
+        return css["status-wrapper-late-30"]
     }
     if (lateness) {
-        return css["col2-status-wrapper-late"]
+        return css["status-wrapper-late"]
     }
     return ""
 }
@@ -59,14 +59,14 @@ export default function Status({ info }) {
     // Show component
     function showStatus() {
         if (!info?.status) {
-            return <div className={`${css["col2-status-wrapper"]}`}>
-                <div className={`${css["col2-status-status"]}`}>
-                    <p className={`${css["col2-no-status"]}`}>Нет данных</p>
+            return <div className={`${css["status-wrapper"]}`}>
+                <div className={`${css["status-status"]}`}>
+                    <p className={`${css["no-status"]}`}>Нет данных</p>
                 </div>
             </div>
         }
-        return <div className={`${css["col2-status-wrapper"]} ${wrapperLatenessClass(lateness)}`}>
-            <div className={`${css["col2-status-status"]} ${statusLatenessClass(lateness, status)}`}>
+        return <div className={`${css["status-wrapper"]} ${wrapperLatenessClass(lateness)}`}>
+            <div className={`${css["status-status"]} ${statusLatenessClass(lateness, status)}`}>
                 <p>{statusText(lateness, status)}</p>
             </div>
             {status[1] == "inside" || status[1] == "isolator" ?
