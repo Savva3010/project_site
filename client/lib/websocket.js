@@ -14,7 +14,7 @@ export default function useDefaultWebsocket(path) {
             console.log(event)
         },
         "onReconnectStop": (attempts) => {
-            toast.error("Не удалось подключиться к серверу. Перезагрузите страницу", {
+            toast.error("Не удалось подключиться к серверу. Обновите страницу", {
                 theme: "colored",
                 autoClose: false,
                 closeOnClick: false,

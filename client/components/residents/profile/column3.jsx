@@ -71,15 +71,15 @@ ok`,
     return (<>
         <div className={`${css["col3"]}`}>
             <div className={`${css["col3-btns"]}`}>
-                <button className={`${css["col3-btn"]} ${page == "NOTES" ? css["col3-btn-notes-active"] : ""}`} onClick={() => setPage("NOTES")}>
-                    {page == "NOTES" ? 
+                <button className={`${css["col3-btn"]} ${page === "NOTES" ? css["col3-btn-notes-active"] : ""}`} onClick={() => setPage("NOTES")}>
+                    {page === "NOTES" ? 
                     <b>Заметки</b> :
                     "Заметки"
                     }
                     <button className={`${css["col3-btn-add"]}`} onClick={() => setNoteWarnModal({type: "ADD_NOTE"})}>&#43;</button>
                 </button>
-                <button className={`${css["col3-btn"]} ${page == "WARNS" ? css["col3-btn-warns-active"] : ""}`} onClick={() => setPage("WARNS")}>
-                    {page == "WARNS" ? 
+                <button className={`${css["col3-btn"]} ${page === "WARNS" ? css["col3-btn-warns-active"] : ""}`} onClick={() => setPage("WARNS")}>
+                    {page === "WARNS" ? 
                     <b>Замечания</b> :
                     "Замечания"
                     }  
@@ -87,7 +87,7 @@ ok`,
                 </button>
             </div>
             <div className={`${css["col3-column"]}`}>
-                {page == "NOTES" ?
+                {page === "NOTES" ?
                 <Notes notes={notes} setNoteWarnModal={setNoteWarnModal}/> :
                 <Warns warns={warns} setNoteWarnModal={setNoteWarnModal}/>
                 }

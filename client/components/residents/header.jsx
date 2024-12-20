@@ -16,13 +16,13 @@ export default function Header({sortParams, setSortParams, total}) {
 
     // Change direction of sort
     function changeDirection() {
-        let newDir = sortParams.direction == "down" ? "up" : "down"
+        let newDir = sortParams.direction === "down" ? "up" : "down"
         let newParams = new URLSearchParams(searchParams.toString())
         newParams.set("dir", newDir)
-        if (newDir == "down") {
+        if (newDir === "down") {
             newParams.delete("dir")
         }
-        router.replace(`/residents/?${newParams.toString()}`)
+        router.replace(`/residents/?${newParams.toString()}`, { scroll: false })
         setSortParams({type: "DIRECTION", payload: newDir})
     }
     
@@ -31,10 +31,10 @@ export default function Header({sortParams, setSortParams, total}) {
         return () => {
             let newParams = new URLSearchParams(searchParams.toString())
             newParams.set("sort", sortCategory)
-            if (sortCategory == "room") {
+            if (sortCategory === "room") {
                 newParams.delete("sort")
             }
-            router.replace(`/residents/?${newParams.toString()}`)
+            router.replace(`/residents/?${newParams.toString()}`, { scroll: false })
             setSortParams({type: "SORT", payload: sortCategory})
         }
     }
@@ -46,10 +46,10 @@ export default function Header({sortParams, setSortParams, total}) {
         val = val.replaceAll(/[^@_/+.\-a-zA-Zа-яА-Я0-9 ]/g, "")
         let newParams = new URLSearchParams(searchParams.toString())
         newParams.set("q", val)
-        if (val == "") {
+        if (val === "") {
             newParams.delete("q")
         }
-        router.replace(`/residents/?${newParams.toString()}`)
+        router.replace(`/residents/?${newParams.toString()}`, { scroll: false })
         setSortParams({type: "FILTER", payload: val})
     }
 
@@ -69,9 +69,9 @@ export default function Header({sortParams, setSortParams, total}) {
                 </div>
                 <div className={`${css["sort-sort"]}`}>
                     <p>Сортировать по:</p>
-                    <button className={`${sortParams.sort == "room"      ? css["sort-sort-selected"] : ""}`} onClick={changeSort("room")}>комната</button>
-                    <button className={`${sortParams.sort == "full_name" ? css["sort-sort-selected"] : ""}`} onClick={changeSort("full_name")}>ФИО</button>
-                    <button className={`${sortParams.sort == "status"    ? css["sort-sort-selected"] : ""}`} onClick={changeSort("status")}>статус</button>
+                    <button className={`${sortParams.sort === "room"      ? css["sort-sort-selected"] : ""}`} onClick={changeSort("room")}>комната</button>
+                    <button className={`${sortParams.sort === "full_name" ? css["sort-sort-selected"] : ""}`} onClick={changeSort("full_name")}>ФИО</button>
+                    <button className={`${sortParams.sort === "status"    ? css["sort-sort-selected"] : ""}`} onClick={changeSort("status")}>статус</button>
                 </div>
             </div>
         </div>

@@ -16,13 +16,13 @@ export default function Header({sortParams, setSortParams, total}) {
 
     // Change sort direction
     function changeDirection() {
-        let newDir = sortParams.direction == "down" ? "up" : "down"
+        let newDir = sortParams.direction === "down" ? "up" : "down"
         let newParams = new URLSearchParams(searchParams.toString())
         newParams.set("dir", newDir)
-        if (newDir == "down") {
+        if (newDir === "down") {
             newParams.delete("dir")
         }
-        router.replace(`/rooms/?${newParams.toString()}`)
+        router.replace(`/rooms/?${newParams.toString()}`, { scroll: false })
         setSortParams({type: "DIRECTION", payload: newDir})
     }
 
@@ -33,10 +33,10 @@ export default function Header({sortParams, setSortParams, total}) {
         val = val.replaceAll(/[^/a-zA-Zа-яА-Я0-9 ]/g, "")
         let newParams = new URLSearchParams(searchParams.toString())
         newParams.set("q", val)
-        if (val == "") {
+        if (val === "") {
             newParams.delete("q")
         }
-        router.replace(`/rooms/?${newParams.toString()}`)
+        router.replace(`/rooms/?${newParams.toString()}`, { scroll: false })
         setSortParams({type: "FILTER", payload: val})
     }
 

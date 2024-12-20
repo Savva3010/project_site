@@ -14,7 +14,7 @@ export default function Sidebar() {
                 <SidebarCatalog name="Вход/выход" href="/" />
                 <SidebarCatalog name="Уборка комнат" href="/journals/cleaning" />
             </SidebarCatalog>
-            <SidebarCatalog name="Заявления на выход" href="/" />
+            <SidebarCatalog name="Заявления на выход" href="/applications/leave" />
         </div>
     )
 }

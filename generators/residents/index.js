@@ -7,8 +7,17 @@ const randoms = require("./randoms.json")
 let residents = []
 let rooms = []
 
+let currDate = Date.now()
+
 function Random(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+// dist_before and dist_after in minutes
+function RandomDate(dist_before, dist_after) {
+    let min = currDate - dist_before * 60 * 1000
+    let max = currDate + dist_after * 60 * 1000
+    return new Date(Random(min, max))
 }
 
 function GenerateResident(id) {
@@ -33,11 +42,10 @@ function GenerateResident(id) {
         "parents": []
     }
 
-    if (push.status.status == "school" || push.status.status == "outside") {
-        push.status.lateness = randoms.latenesses[Random(0, randoms.latenesses.length - 1)]
-        push.status.until = randoms.dates[Random(0, randoms.dates.length - 1)] + " " + randoms.times[Random(0, randoms.times.length - 1)]
+    if (push.status.status === "school" || push.status.status === "outside") {
+        push.status.until = RandomDate(60 * 5, 60 * 24).getTime()
     }
-    if (push.status.status == "outside") {
+    if (push.status.status === "outside") {
         push.status.place = randoms.places[Random(0, randoms.places.at.length - 1)]
     }
 
@@ -83,7 +91,7 @@ rl.question(`Введите кол-во проживающих(макс ${availa
 
     for (let i = 0; i < need; ++i) {
         residents[i].room = availabeRooms[i]
-        rooms.find(room => room.room_number == availabeRooms[i]).residents.push({
+        rooms.find(room => room.room_number === availabeRooms[i]).residents.push({
             "id": i + 1,
             "full_name": residents[i].full_name,
             "class": residents[i].class

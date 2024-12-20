@@ -32,9 +32,9 @@ export default function Room({ openedRoomId, setOpenedRoomId }) {
         let ws_data = lastJsonMessage?.data
         if (!op) return
 
-        if (op == "status:update") {
-            let found = room.data.residents.findIndex(resident => resident.id == ws_data.id)
-            if (found == -1) return
+        if (op === "status:update") {
+            let found = room.data.residents.findIndex(resident => resident.id === ws_data.id)
+            if (found === -1) return
             let newResidents = [...room.data.residents]
             newResidents[found].status = ws_data.status
             setRoom({type: "SUCCESS", payload: {...room.data, residents: newResidents}})
@@ -47,12 +47,12 @@ export default function Room({ openedRoomId, setOpenedRoomId }) {
         setRoom({type: "INITIALIZE"})
         let newParams = new URLSearchParams(searchParams.toString())
         newParams.delete("room")
-        router.replace(`/rooms/?${newParams.toString()}`)
+        router.replace(`/rooms/?${newParams.toString()}`, { scroll: false })
     }
 
     // Fetch room
     useEffect(() => {
-        if (openedRoomId == null) return
+        if (openedRoomId === null) return
         setRoom({type: "LOADING"})
         let controller = new AbortController()
         fetch(SERVER_URL + "/rooms/" + openedRoomId, {
@@ -75,7 +75,7 @@ export default function Room({ openedRoomId, setOpenedRoomId }) {
             setRoom({type: "SUCCESS", payload: data.data})
         })
         .catch(err => {
-            if (err.name == "AbortError") return
+            if (err.name === "AbortError") return
             console.error(err)
             setRoom({type: "ERROR", payload: err})
         })
@@ -87,7 +87,7 @@ export default function Room({ openedRoomId, setOpenedRoomId }) {
 
     // Show modal content
     function showRoom() {
-        if (room.status == "ERROR") {
+        if (room.status === "ERROR") {
             return <p style={{whiteSpace: "pre-wrap", height: "100%"}} className={`${css["error"]}`}>Произошла ошибка (да, и такое бывает) ¯\_(ツ)_/¯ 
                 <br/>
                 Обратитесь к специалисту и попробуйте позже
@@ -105,7 +105,7 @@ export default function Room({ openedRoomId, setOpenedRoomId }) {
             return (<></>)
         }
 
-        if (room.data.residents.length == 0) {
+        if (room.data.residents.length === 0) {
             return (<>
                 <p className={`${css["no-residents"]}`}>Пусто. Здесь никто не живёт</p>
             </>)
@@ -118,7 +118,7 @@ export default function Room({ openedRoomId, setOpenedRoomId }) {
         </>)
     }
     return (<>
-        {openedRoomId == null ?
+        {openedRoomId === null ?
             <></> :
 
             <>

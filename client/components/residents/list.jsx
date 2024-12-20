@@ -18,7 +18,7 @@ import { SERVER_URL, WS_SERVER_URL } from '@/globals';
 
 function recalcTotal(residents, setTotal) {
     let total = residents.length
-    let inside = residents.filter(resident => resident?.status?.status == "inside" || resident?.status?.status == "isolator").length
+    let inside = residents.filter(resident => resident?.status?.status === "inside" || resident?.status?.status === "isolator").length
     let school = residents.filter(resident => resident?.status?.status != "outside").length
 
     setTotal({"total": total, "inside": inside, "school": school})
@@ -37,12 +37,12 @@ export default function List({ sortParams, setTotal }) {
         let ws_data = lastJsonMessage?.data
         if (!op) return
 
-        if (op == "ping") {
+        if (op === "ping") {
             sendJsonMessage({"op": "pong"})
-        } else if (op == "status:update") {
+        } else if (op === "status:update") {
             let newResidents = [...residents.data]
-            let foundResident = newResidents.findIndex(resident => resident.id == ws_data.id)
-            if (foundResident == -1) return
+            let foundResident = newResidents.findIndex(resident => resident.id === ws_data.id)
+            if (foundResident === -1) return
             newResidents[foundResident].status = ws_data.status
             setResidents({type: "SUCCESS", payload: newResidents})
             recalcTotal(newResidents, setTotal)
@@ -58,7 +58,7 @@ export default function List({ sortParams, setTotal }) {
             sorted = sorted.filter(resident => (`${resident.room?.toLowerCase()} ${resident.full_name?.toLowerCase()} ${resident.class?.toLowerCase()} ${resident.mobile?.toLowerCase()}  ${resident.email?.toLowerCase()}  ${resident.telegram?.toLowerCase()}`).includes(sortParams.filter.toLowerCase()))
         }
 
-        if (sortParams.sort == "full_name") {
+        if (sortParams.sort === "full_name") {
             sorted.sort((a, b) => {
                 let l = a.full_name
                 let r = b.full_name
@@ -66,7 +66,7 @@ export default function List({ sortParams, setTotal }) {
                 if (l < r) return -1
                 return 0
             })
-        } else if (sortParams.sort == "room") {
+        } else if (sortParams.sort === "room") {
             sorted.sort((a, b) => {
                 let l = a.room
                 let r = b.room
@@ -93,7 +93,7 @@ export default function List({ sortParams, setTotal }) {
             })
         }
 
-        if (sortParams.direction == "up") {
+        if (sortParams.direction === "up") {
             sorted.reverse()
         }
 
@@ -126,7 +126,7 @@ export default function List({ sortParams, setTotal }) {
             recalcTotal(data.data, setTotal)
         })
         .catch(err => {
-            if (err.name == "AbortError") return
+            if (err.name === "AbortError") return
             console.error(err)
             setResidents({type: "ERROR", payload: err})
         })
@@ -138,11 +138,11 @@ export default function List({ sortParams, setTotal }) {
 
     // Show component
     function showResidents() {
-        if (residents.status == "INITIALIZE") return <></>
-        if (residents.status == "LOADING") {
+        if (residents.status === "INITIALIZE") return <></>
+        if (residents.status === "LOADING") {
             return <p className={`${css["loading"]}`}>Загружаем список . . .</p>
         }
-        if (residents.status == "ERROR") {
+        if (residents.status === "ERROR") {
             return <p style={{whiteSpace: "pre-wrap", height: "max-content"}} className={`${css["error"]}`}>Произошла ошибка (да, и такое бывает) ¯\_(ツ)_/¯ 
                 <br/>
                 Обратитесь к специалисту и попробуйте позже
@@ -155,7 +155,7 @@ export default function List({ sortParams, setTotal }) {
                 {residents.error.stack}
             </p>
         }
-        if (residents.data.length == 0) {
+        if (residents.data.length === 0) {
             return <p className={`${css["empty"]}`}>Проживающих нет, меньше работы ^_^</p>
         }
 

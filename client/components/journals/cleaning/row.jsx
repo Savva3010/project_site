@@ -15,7 +15,7 @@ export default function Row({ isGrey, dates, room, rowIdx, markModal, setMarkMod
         <tr className={`${isGrey ? css["row-grey"] : ""}`}>
             <th><div><p>{room.room_number}</p></div></th>
             {dates.map((date, idx) => {
-                let mark = room.marks.find(mark => mark.date == date)
+                let mark = room.marks.find(mark => mark.date === date)
                 if (mark?. mark) {
                     sum += mark.mark
                     ++ammount

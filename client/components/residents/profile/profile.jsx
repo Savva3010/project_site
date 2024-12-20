@@ -32,12 +32,12 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
 
     // Handle websocket messages
     useEffect(() => {
-        if (openedProfileId == null) return
+        if (openedProfileId === null) return
         let op = lastJsonMessage?.op
         let ws_data = lastJsonMessage?.data
         if (!op) return
 
-        if (op == "status:update") {
+        if (op === "status:update") {
             if (resident.data.id != ws_data.id) return
             let newResident = {...resident.data}
             newResident.status = ws_data.status
@@ -73,12 +73,12 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
         setNoteWarnModal({type: "CLOSE"})
         let newParams = new URLSearchParams(searchParams.toString())
         newParams.delete("profile")
-        router.replace(`/residents/?${newParams.toString()}`)
+        router.replace(`/residents/?${newParams.toString()}`, { scroll: false })
     }
 
     // Fetch resident profile
     useEffect(() => {
-        if (openedProfileId == null) return
+        if (openedProfileId === null) return
         setResident({type: "LOADING"})
         let controller = new AbortController()
         fetch(SERVER_URL + "/residents/" + openedProfileId, {
@@ -101,7 +101,7 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
             setResident({type: "SUCCESS", payload: data.data})
         })
         .catch(err => {
-            if (err.name == "AbortError") return
+            if (err.name === "AbortError") return
             console.error(err)
             setResident({type: "ERROR", payload: err})
         })
@@ -113,7 +113,7 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
 
     // Show modal content
     function showResident() {
-        if (resident.status == "ERROR") {
+        if (resident.status === "ERROR") {
             return <p style={{whiteSpace: "pre-wrap", height: "100%"}} className={`${css["error"]}`}>Произошла ошибка (да, и такое бывает) ¯\_(ツ)_/¯ 
                 <br/>
                 Обратитесь к специалисту и попробуйте позже
@@ -134,7 +134,7 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
         </>)
     }
     return (<>
-        {openedProfileId == null ?
+        {openedProfileId === null ?
             <></> :
 
             <>
@@ -161,7 +161,7 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
                     </>
                     }
 
-                    {noteWarnModal.category == null ?
+                    {noteWarnModal.category === null ?
                     <></> :
 
                     <NoteWarnModal modalInfo={noteWarnModal} setModalInfo={setNoteWarnModal}/>

@@ -21,7 +21,7 @@ export default function ListEl({ info }) {
         setOpenedProfileId(info.id)
         let newParams = new URLSearchParams(searchParams.toString())
         newParams.set("profile", info.id)
-        router.replace(`/residents/?${newParams.toString()}`)
+        router.replace(`/residents/?${newParams.toString()}`, { scroll: false })
     }
 
     return (<>

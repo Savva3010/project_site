@@ -4,7 +4,7 @@
 }
 
 .disable-page-bg {
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;
     width: 100dvw;
@@ -16,7 +16,7 @@
 
 .wrapper {
     background: #FFFFFF;
-    position: absolute;
+    position: fixed;
     top: 50dvh;
     left: 50dvw;
     transform: translateY(-50%) translateX(-50%);

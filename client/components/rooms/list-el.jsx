@@ -21,7 +21,7 @@ export default function ListEl({ info }) {
         setOpenedRoomId(info.room_number)
         let newParams = new URLSearchParams(searchParams.toString())
         newParams.set("room", info.room_number)
-        router.replace(`/rooms/?${newParams.toString()}`)
+        router.replace(`/rooms/?${newParams.toString()}`, { scroll: false })
     }
 
     return (<>

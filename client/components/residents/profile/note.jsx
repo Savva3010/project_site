@@ -26,7 +26,7 @@ export default function Note({ note, onDelete, content, setContent, placeholder 
 
             {!setContent ?
             <p>{note}</p> :
-            <textarea placeholder={placeholder} onChange={(evt) => setContent(evt.target.value)}>{content}</textarea>
+            <textarea placeholder={placeholder} value={content} onChange={(evt) => setContent(evt.target.value)}></textarea>
             }
         </div>
     </>);

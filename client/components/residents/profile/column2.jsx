@@ -27,7 +27,7 @@ export default function Column2({ info }) {
                     <p>&nbsp;</p>
                     <button className={`${css["col2-link"]}`} onClick={() => {
                         let newParams = new URLSearchParams(`room=${info?.room}`)
-                        router.push(`/rooms/?${newParams.toString()}`)
+                        router.push(`/rooms/?${newParams.toString()}`, { scroll: false })
                     }}>Комната</button>
                     <button className={`${css["col2-link"]}`}>Заявления</button>
                     <button className={`${css["col2-link"]}`}>Журнал входов/выходов</button>

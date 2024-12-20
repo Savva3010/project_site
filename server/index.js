@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 import residents from "./data/residents.json" assert {type: "json"}
 import journals_cleaing from "./data/journals_cleaning.json" assert {type: "json"}
+import applications_leave from "./data/applications_leave.json" assert {type: "json"}
 import rooms from "./data/rooms.json" assert {type: "json"}
 
 //heplers start
@@ -84,7 +85,7 @@ app.get("/residents/:id", (req, res) => {
     let { id } = req.params
     id = Number(id)
 
-    let resident = residents.find(resident => resident.id == id)
+    let resident = residents.find(resident => resident.id === id)
 
     if(!resident) {
         res
@@ -166,9 +167,9 @@ app.put("/residents/:id/status", (req, res) => {
         return
     }
 
-    let resident = residents.findIndex(resident => resident.id == id)
+    let resident = residents.findIndex(resident => resident.id === id)
 
-    if (resident == -1) {
+    if (resident === -1) {
         res
         .status(400)
         .json({
@@ -288,7 +289,7 @@ app.get("/rooms/:id/:subid", (req, res) => {
     let roomid = id
     if (subid != "0") roomid += `/${subid}`
 
-    let room = rooms.find(room => room.room_number == roomid)
+    let room = rooms.find(room => room.room_number === roomid)
 
     if (!room) {
         res
@@ -308,7 +309,7 @@ app.get("/rooms/:id/:subid", (req, res) => {
         "residents": []
     }
     room.residents.forEach(resident => {
-        let found = residents.find(curr => curr.id == resident.id)
+        let found = residents.find(curr => curr.id === resident.id)
         if (!found) return
         data.residents.push({
             "id": found.id,
@@ -335,6 +336,172 @@ app.get("/rooms/:id", (req, res) => {
     res.redirect(`/rooms/${id}/0`)
 })
 
+
+
+
+
+app.get("/applications/leave", (req, res) => {
+    let data = []
+    applications_leave.forEach(application => {
+        let resident = residents.find(resident => resident.id === application.resident_id)
+        let push = {
+            "id": application.id,
+            "resident_id": application.resident_id,
+            "full_name": resident.full_name,
+            "class": resident.class,
+            "room": resident.room,
+            "leave": application.leave,
+            "return": application.return,
+            "address": application.address,
+            "accompany": application.accompany,
+            "status": application.status
+        }
+        data.push(push)
+    })
+    
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": data
+    })
+})
+
+/*
+    error ids:
+    -1 - csrf token expired
+    -2 - not enough data
+    -3 - application is not found
+*/
+app.get("/applications/leave/:id", (req, res) => {
+    let { id } = req.params
+    id = Number(id)
+
+    let application = applications_leave.find(application => application.id === id)
+
+    if (!application) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Заявление не найдено",
+                "error_id": -3
+            }
+        })
+        return
+    }
+
+    let resident = residents.find(resident => resident.id === application.resident_id)
+
+    let data = {
+        "id": application.id,
+        "resident": {
+            "id": resident.id,
+            "profile_image": {
+                "src": resident.profile_image.src,
+                "blur_hash": resident.profile_image.blur_hash
+            },
+            "full_name": resident.full_name,
+            "age": resident.age,
+            "room": resident.room,
+            "class": resident.class,
+            "class_teacher": resident.class_teacher,
+            "class_mentor": resident.class_mentor,
+            "mobile": resident.mobile,
+            "status": resident.status,
+            "parents": []
+
+        },
+        "leave": application.leave,
+        "return": application.return,
+        "address": application.address,
+        "accompany": application.accompany,
+        "status": application.status,
+        "comment": application.comment,
+        "created_at": application.created_at
+    }
+
+    resident["parents"].forEach(parent => {
+        let push = {
+            "full_name": parent.full_name,
+            "mobile": parent.mobile,
+            "email": parent.email,
+            "telegram": parent.telegram
+        }
+
+        data["resident"]["parents"].push(push)
+    })
+
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": data
+    })
+})
+
+/*
+    error ids:
+    -1 - csrf token expired
+    -2 - not enough data
+    -3 - application is not found
+*/
+app.put("/applications/leave/:id/comment", (req, res) => {   
+    let { id } = req.params
+    id = Number(id)
+    let {content} = req.body
+    
+    let application = applications_leave.findIndex(application => application.id === id)
+
+    if (application === -1) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Заявление не найдено",
+                "error_id": -3
+            }
+        })
+        return
+    }
+
+    if (content === null) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Не хватает данных",
+                "error_id": -2
+            }
+        })
+        return
+    }
+
+    applications_leave[application].comment = content
+
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": null
+    })
+})
+
+app.put("/applications/leave/:id/status", (req, res) => {
+    res
+    .status(500)
+    .json({
+        "success": false,
+        "data": {
+            "message": "В работе",
+            "error_id": -10010
+        }
+    })
+    return
+})
 
 
 
@@ -373,8 +540,8 @@ app.put("/journals/cleaning/marks", (req, res) => {
         return
     }
 
-    let found_room = journals_cleaing.rooms.findIndex(find_room => find_room.room_number == room)
-    if (found_room == -1) {
+    let found_room = journals_cleaing.rooms.findIndex(find_room => find_room.room_number === room)
+    if (found_room === -1) {
         res
         .status(400)
         .json({
@@ -386,7 +553,7 @@ app.put("/journals/cleaning/marks", (req, res) => {
         })
         return
     }
-    if (!journals_cleaing.dates.find(find_date => find_date == date)) {
+    if (!journals_cleaing.dates.find(find_date => find_date === date)) {
         res
         .status(400)
         .json({
@@ -398,8 +565,8 @@ app.put("/journals/cleaning/marks", (req, res) => {
         })
         return
     }
-    let found_date = journals_cleaing.rooms[found_room].marks.findIndex(find_date => find_date.date == date)
-    if (mark == 0) {
+    let found_date = journals_cleaing.rooms[found_room].marks.findIndex(find_date => find_date.date === date)
+    if (mark === 0) {
         if (found_date != -1) {
             journals_cleaing.rooms[found_room].marks.splice(found_date, 1)
         }
@@ -486,7 +653,7 @@ app.post("/journals/cleaning/dates", (req, res) => {
 
     let need_date = `${day} ${parseMonth[month]}`
 
-    let found_date = journals_cleaing.dates.findIndex(date => date == need_date)
+    let found_date = journals_cleaing.dates.findIndex(date => date === need_date)
     if (found_date != -1) {
         res
         .status(400)
@@ -556,8 +723,8 @@ app.delete("/journals/cleaning/dates", (req, res) => {
         return
     }
 
-    let found_date = journals_cleaing.dates.findIndex(find_date => find_date == date)
-    if (found_date == -1) {
+    let found_date = journals_cleaing.dates.findIndex(find_date => find_date === date)
+    if (found_date === -1) {
         res
         .status(400)
         .json({
@@ -572,10 +739,10 @@ app.delete("/journals/cleaning/dates", (req, res) => {
 
     journals_cleaing.dates.splice(found_date, 1)
     journals_cleaing.rooms.forEach((room, idx) => {
-        let found = journals_cleaing.rooms[idx].marks.findIndex(mark => mark.date == date)
+        let found = journals_cleaing.rooms[idx].marks.findIndex(mark => mark.date === date)
         while (found != -1) {
             journals_cleaing.rooms[idx].marks.splice(found, 1)
-            found = journals_cleaing.rooms[idx].marks.findIndex(mark => mark.date == date)
+            found = journals_cleaing.rooms[idx].marks.findIndex(mark => mark.date === date)
         }
     })
 
@@ -612,7 +779,6 @@ app.use((req, res) => {
         }
     })
 })
-
 
 
 
@@ -726,18 +892,25 @@ wsServerRedients.on("connection", ws => {
     })
 })
 
-httpServer.on('upgrade', function upgrade(request, socket, head) {
+httpServer.on('upgrade', (request, socket, head) => {
+    const headers = request.headers
+
+    if (headers['upgrade'] != 'websocket') {
+        socket.destroy()
+        return
+    }
+    
     const { pathname } = new URL(request.url, 'ws://127.0.0.1')
   
     if (pathname === '/residents') {
         wsServerRedients.handleUpgrade(request, socket, head, ws => {
-            wsServerRedients.emit('connection', ws, request);
+            wsServerRedients.emit('connection', ws, request)
         })
     } else if (pathname === '/journals/cleaning') {
         wsServerJournalsCleaning.handleUpgrade(request, socket, head, ws => {
-            wsServerJournalsCleaning.emit('connection', ws, request);
+            wsServerJournalsCleaning.emit('connection', ws, request)
         })
     } else {
-      socket.destroy()
+        socket.destroy()
     }
-});
+})

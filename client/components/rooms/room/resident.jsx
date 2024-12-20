@@ -29,7 +29,7 @@ export default function Resident({ info }) {
             
             <button className={`${css["link"]}`} onClick={() => {
                 let newParams = new URLSearchParams(`profile=${info?.id}`)
-                router.push(`/residents/?${newParams.toString()}`)
+                router.push(`/residents/?${newParams.toString()}`, { scroll: false })
             }}>Подробнее</button>
             <button className={`${css["link"]}`}>Заявления</button>
             <button className={`${css["link"]}`}>Журнал входов/выходов</button>

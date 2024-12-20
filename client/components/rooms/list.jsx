@@ -37,7 +37,7 @@ export default function List({ sortParams, setTotal }) {
             return 0
         })
 
-        if (sortParams.direction == "up") {
+        if (sortParams.direction === "up") {
             sorted.reverse()
         }
 
@@ -68,13 +68,13 @@ export default function List({ sortParams, setTotal }) {
             setRooms({type: "SUCCESS", payload: data.data})
 
             let total = data.data.length
-            let inside = data.data.filter(resident => resident?.status?.status == "inside").length
-            let school = data.data.filter(resident => resident?.status?.status == "school").length
+            let inside = data.data.filter(resident => resident?.status?.status === "inside").length
+            let school = data.data.filter(resident => resident?.status?.status === "school").length
 
             setTotal({"total": total, "inside": inside, "school": school})
         })
         .catch(err => {
-            if (err.name == "AbortError") return
+            if (err.name === "AbortError") return
             console.error(err)
             setRooms({type: "ERROR", payload: err})
         })
@@ -86,11 +86,11 @@ export default function List({ sortParams, setTotal }) {
 
     // Show component
     function showRooms() {
-        if (rooms.status == "INITIALIZE") return <></>
-        if (rooms.status == "LOADING") {
+        if (rooms.status === "INITIALIZE") return <></>
+        if (rooms.status === "LOADING") {
             return <p className={`${css["loading"]}`}>Загружаем список . . .</p>
         }
-        if (rooms.status == "ERROR") {
+        if (rooms.status === "ERROR") {
             return <p style={{whiteSpace: "pre-wrap", height: "max-content"}} className={`${css["error"]}`}>Произошла ошибка (да, и такое бывает) ¯\_(ツ)_/¯ 
                 <br/>
                 Обратитесь к специалисту и попробуйте позже
@@ -103,7 +103,7 @@ export default function List({ sortParams, setTotal }) {
                 {rooms.error.stack}
             </p>
         }
-        if (rooms.data.length == 0) {
+        if (rooms.data.length === 0) {
             return <p className={`${css["empty"]}`}>Комнат нет. А куда пропало здание то? (⊙﹏⊙)</p>
         }
 

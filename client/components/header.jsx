@@ -12,7 +12,7 @@ export default function Header() {
     return (
         <header className={`${css["header"]}`}>
         <div className={`${css["title"]}`}>
-            <button className={`${css["title-txt"]}`} onClick={() => router.push("/")}>Кабинет</button>
+            <button className={`${css["title-txt"]}`} onClick={() => router.push("/", { scroll: false })}>Кабинет</button>
             <button>
             <span className={`bi bi-layout-text-sidebar`}></span>
             </button>

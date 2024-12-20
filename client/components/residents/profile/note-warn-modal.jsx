@@ -33,14 +33,14 @@ export default function NoteWarnModal({ modalInfo, setModalInfo }) {
 
     // Show hint above the note/warn
     function showHint() {
-        if (modalInfo.info == null) {
-            if (modalInfo.category == "NOTE") {
+        if (modalInfo.info === null) {
+            if (modalInfo.category === "NOTE") {
                 return "Введите текст заметки"
             } else {
                 return "Введите текст замечания"
             }
         } else {
-            if (modalInfo.category == "NOTE") {
+            if (modalInfo.category === "NOTE") {
                 return "Вы уверены, что хотите удалить заметку?"
             } else {
                 return "Вы уверены, что хотите удалить замечание?"
@@ -50,14 +50,14 @@ export default function NoteWarnModal({ modalInfo, setModalInfo }) {
 
     // Show note/warn
     function showContent() {
-        if (modalInfo.category == "NOTE") {
-            if (modalInfo.info == null) {
+        if (modalInfo.category === "NOTE") {
+            if (modalInfo.info === null) {
                 return <Note content={addContent} setContent={setAddContent} placeholder={"Заметка"}/>
             } else {
                 return <Note note={modalInfo.info}/>
             }
         } else {
-            if (modalInfo.info == null) {
+            if (modalInfo.info === null) {
                 return <Warn warn={{"author": "Серебренников Савва Андреевич", "date": "19.09.2024"}} content={addContent} setContent={setAddContent} placeholder={"Замечание"}/>
             } else {
                 return <Warn warn={modalInfo.info}/>
@@ -66,7 +66,8 @@ export default function NoteWarnModal({ modalInfo, setModalInfo }) {
     }
 
     return (<>
-        <div className={`${css["disable-profile-bg"]}`} onClick={closeModal}></div>
+        <div className={`${css["disable-profile-trigger"]}`} onClick={closeModal}></div>
+        <div className={`${css["disable-profile-bg"]}`}></div>
         <div className={`${css["wrapper"]}`}>
             <button className={`${css["close"]}`} onClick={closeModal}>
                 <svg width="32" height="30" viewBox="0 0 32 30" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -74,13 +75,13 @@ export default function NoteWarnModal({ modalInfo, setModalInfo }) {
                 </svg>
             </button>
 
-            <p className={`${css["title"]}`}><b>{modalInfo.info == null ? "Добавление" : "Удаление"}</b></p>
+            <p className={`${css["title"]}`}><b>{modalInfo.info === null ? "Добавление" : "Удаление"}</b></p>
 
             <div className={`${css["modal"]}`}>
                 <p className={`${css["hint"]}`}>{showHint()}</p>
                 {showContent()}
                 <div className={`${css["buttons"]}`}>
-                    {modalInfo.info == null ?
+                    {modalInfo.info === null ?
                     <button onClick={deleteNoteWarn} className={`${css["button-add"]}`}>Добавить</button> :
 
                     <>

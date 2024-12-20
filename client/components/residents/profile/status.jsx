@@ -5,6 +5,8 @@ import css from "@/styles/residents/profile.module.css"
 
 import { useEffect, useState, useReducer, useRef } from 'react';
 
+import unixToString from '@/lib/unixToString';
+
 import { location } from '@/enums';
 
 // Css class color based on lateness
@@ -23,10 +25,10 @@ function minuteTextForm(lateness) {
     if (10 <= lateness && lateness <= 20) {
         return "минут"
     }
-    if (lateness % 10 == 0 || 5 <= lateness % 10 && lateness % 10 <= 9) {
+    if (lateness % 10 === 0 || 5 <= lateness % 10 && lateness % 10 <= 9) {
         return "минут"
     }
-    if (lateness % 10 == 1) {
+    if (lateness % 10 === 1) {
         return "минута"
     }
     return "минуты"
@@ -34,6 +36,7 @@ function minuteTextForm(lateness) {
 
 // Css wrapper class color based on lateness
 function wrapperLatenessClass(lateness) {
+
     if (lateness >= 30) {
         return css["col2-status-wrapper-late-30"]
     }
@@ -53,8 +56,10 @@ function statusText(lateness, status) {
 
 export default function Status({ info }) {
     
-    const status = location.getInfo(info?.status)
-    const lateness = info?.lateness || 0
+    let untilDate = new Date(info?.until || 0)
+    let status = location.getInfo(info?.status)
+    let lateness = Math.max(0, Math.floor((Date.now() - untilDate.getTime()) / 1000 / 60))
+    if (status[1] === "inside" || status[1] === "isolator") lateness = 0
 
     // Show component
     function showStatus() {
@@ -69,9 +74,9 @@ export default function Status({ info }) {
             <div className={`${css["col2-status-status"]} ${statusLatenessClass(lateness, status)}`}>
                 <p>{statusText(lateness, status)}</p>
             </div>
-            {status[1] == "inside" || status[1] == "isolator" ?
+            {status[1] === "inside" || status[1] === "isolator" ?
             <></> :
-            <p>В {status[1] == "school" ? "ФТЛ" : info?.place} до {info?.until}</p>}
+            <p>В {status[1] === "school" ? "ФТЛ" : info?.place} до {unixToString(untilDate)}</p>}
         </div>
     }
 

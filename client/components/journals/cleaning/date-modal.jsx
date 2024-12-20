@@ -91,7 +91,7 @@ export default function DateModal({ dates, modalInfo, setModalInfo }) {
     const daysToSelect = useMemo(() => {
         let arr = []
         for (let i = 1; i <= days[selectedMonth]; ++i) {
-            if (!dates.find(date => date == `${i} ${selectedMonth}`)) {
+            if (!dates.find(date => date === `${i} ${selectedMonth}`)) {
                 arr.push({"value": i, "text": i})
             }
         }
@@ -107,7 +107,7 @@ export default function DateModal({ dates, modalInfo, setModalInfo }) {
 
     // Make add_date API request
     function addDate() {
-        if (selectedDay == "NO" || !selectedDay || !selectedMonth) return
+        if (selectedDay === "NO" || !selectedDay || !selectedMonth) return
         setModalInfo({type: "CLOSE"})
 
         let promise = new Promise((resolve, reject) => {
@@ -118,7 +118,7 @@ export default function DateModal({ dates, modalInfo, setModalInfo }) {
                 },
                 mode: "cors",
                 body: JSON.stringify({
-                    "month": (months.findIndex(month => month.value == selectedMonth) + monthShift) % 12 + 1,
+                    "month": (months.findIndex(month => month.value === selectedMonth) + monthShift) % 12 + 1,
                     "day": selectedDay
                 })
             })
@@ -220,15 +220,15 @@ export default function DateModal({ dates, modalInfo, setModalInfo }) {
                 </svg>
             </button>
 
-            <p className={`${css["title"]}`}><b>{modalInfo.date == null ? "Добавление" : "Удаление"}</b></p>
+            <p className={`${css["title"]}`}><b>{modalInfo.date === null ? "Добавление" : "Удаление"}</b></p>
 
             <div className={`${css["modal"]}`}>
-                <p className={`${css["hint"]}`}>{modalInfo.date == null ? "Выберите дату для добавления": `Вы уверены, что хотите удалить дату ${modalInfo.date}?`}</p>
+                <p className={`${css["hint"]}`}>{modalInfo.date === null ? "Выберите дату для добавления": `Вы уверены, что хотите удалить дату ${modalInfo.date}?`}</p>
                 {modalInfo.date != null ?
                 <></> :
                 showSelector()}
                 <div className={`${css["buttons"]}`}>
-                    {modalInfo.date == null ?
+                    {modalInfo.date === null ?
                     <button onClick={addDate} className={`${css["button-add"]}`}>Добавить</button> :
 
                     <>

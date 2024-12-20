@@ -1,0 +1,224 @@
+.error {
+    font-size: 1.5rem;
+    color: #CC0000;
+}
+
+.disable-page-bg {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100dvw;
+    height: 100dvh;
+    background: #000000;
+    opacity: 0.5;
+    z-index: 50;
+}
+
+.wrapper {
+    background: #FFFFFF;
+    position: fixed;
+    top: 50dvh;
+    left: 50dvw;
+    transform: translateY(-50%) translateX(-50%);
+    width: 1410px;
+    height: 682px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 15px 10px rgba(0, 0, 0, 0.5);
+    padding: 100px 20px 20px 20px;
+    z-index: 55;
+}
+
+.application {
+    display: flex;
+    justify-content: flex-start;
+    gap: 20px;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+}
+
+.settings {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.disable-profile-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000000;
+    opacity: 0.5;
+    z-index: 50;
+}
+
+.loading-text {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2.5rem;
+    z-index: 51;
+}
+
+.info {
+    width: 100%;
+    display: flex;
+    gap: 20px;
+}
+
+.col1 {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.col1 img, .col1-blur-img {
+    width: 100%;
+    width: 300px;
+    aspect-ratio: 1;
+    border: 1px solid #000000;
+    border-radius: 10px;
+}
+
+.col1-blur-img canvas {
+    border-radius: 10px;
+}
+
+.col2 {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.col2-info {
+    display: flex;
+    gap: 20px;
+}
+
+.col2-resident {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    width: 300px;
+}
+
+.col2-link {
+    color: #007BFF;
+}
+
+.col2-parents {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    width: 300px;
+}
+
+.col2-parents > p {
+    margin-bottom: -30px;
+}
+
+.col2-parent {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+}
+
+.col2-no-parents {
+    color: #C0C0C0;
+    font-size: 2rem;
+}
+
+.col3 {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end;
+    width: 410px;
+}
+
+.col3-status-status {
+    width: 225px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #000000;
+}
+
+.col3-no-status {
+    color: #C0C0C0;
+    font-size: 2rem;
+}
+
+.col3-status-review {
+    background: #FFFF80;
+}
+.col3-status-denied {
+    background: #FF8080;
+}
+.col3-status-cancelled {
+    background: #FF8080;
+}
+.col3-status-accepted {
+    background: #FFBB80;
+}
+.col3-status-active {
+    background: #80FF80;
+}
+.col3-status-expired {
+    background: #EEEEEE;
+}
+
+.col3 > button {
+    padding: 5px 15px;
+    border: 1px solid #337AB7;
+    border-radius: 2px;
+    color: #337AB7;
+}
+
+.col3-comment {
+    width: 100%;
+    max-width: 285px;
+    border-radius: 10px;
+    background: #FFEEAA;
+    padding: 10px;
+    position: relative;
+    height: max-content;
+}
+
+.col3-comment-corner {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    top: -15px;
+    left: -15px;
+}
+
+.col3-comment textarea {
+    max-width: 100%;
+    min-width: 100%;
+    max-height: 250px;
+    min-height: 20px;
+    height: max-content;
+    background: none;
+    border: none;
+    font-size: 1rem;
+}
+
+.col3-comment textarea::placeholder {
+    font-size: 1rem;
+}

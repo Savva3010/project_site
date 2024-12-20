@@ -35,14 +35,14 @@ export default function Cleaning() {
         let ws_data = lastJsonMessage?.data
         if (!op) return
 
-        if (op == "ping") {
+        if (op === "ping") {
             sendJsonMessage({"op": "pong"})
-        } else if (op == "mark:update") {
+        } else if (op === "mark:update") {
             let newData = [...data.data.rooms]
-            let room = newData.findIndex(el => el.room_number == ws_data.room)
-            let date = newData[room].marks.findIndex(el => el.date == ws_data.date)
-            if (ws_data == 0) {
-                if (date == -1) return;
+            let room = newData.findIndex(el => el.room_number === ws_data.room)
+            let date = newData[room].marks.findIndex(el => el.date === ws_data.date)
+            if (ws_data === 0) {
+                if (date === -1) return;
                 newData[room].marks.splice(date, 1)
             } else {
                 if (date != -1) {
@@ -52,9 +52,9 @@ export default function Cleaning() {
                 }
             }
             setData({type: "SUCCESS", payload: {...data.data, rooms: newData}})
-        } else if (op == "date:add") {
+        } else if (op === "date:add") {
             let newData = [...data.data.dates]
-            let foundDate = newData.findIndex(date => date == ws_data.date)
+            let foundDate = newData.findIndex(date => date === ws_data.date)
             if (foundDate != -1) return
             newData.push(ws_data.date)
             const monthToIdxSorted = {
@@ -89,17 +89,17 @@ export default function Cleaning() {
             
             let newMarks = [...data.data.rooms]
             newMarks.forEach((room, idx) => {
-                let found = newMarks[idx].marks.findIndex(mark => mark.date == ws_data.date)
+                let found = newMarks[idx].marks.findIndex(mark => mark.date === ws_data.date)
                 while (found != -1) {
                     newMarks[idx].marks.splice(found, 1)
-                    found = newMarks[idx].marks.findIndex(mark => mark.date == ws_data.date)
+                    found = newMarks[idx].marks.findIndex(mark => mark.date === ws_data.date)
                 }
             })
             setData({type: "SUCCESS", payload: {...data.data, dates: newData, rooms: newMarks}})
-        } else if (op == "date:delete") {
+        } else if (op === "date:delete") {
             let newData = [...data.data.dates]
-            let foundDate = newData.findIndex(date => date == ws_data.date)
-            if (foundDate == -1) return
+            let foundDate = newData.findIndex(date => date === ws_data.date)
+            if (foundDate === -1) return
             newData.splice(foundDate, 1)
             setData({type: "SUCCESS", payload: {...data.data, dates: newData}})
         }
@@ -151,7 +151,7 @@ export default function Cleaning() {
     function setMark(mark) {
         let room = markModal.room
         let date = markModal.date
-        if (room == null || date == null) return
+        if (room === null || date === null) return
         setMarkModal({type: "CLOSE"})
 
         let promise = new Promise((resolve, reject) => {
@@ -218,7 +218,7 @@ export default function Cleaning() {
             setData({type: "SUCCESS", payload: data.data})
         })
         .catch(err => {
-            if (err.name == "AbortError") return
+            if (err.name === "AbortError") return
             console.error(err)
             setData({type: "ERROR", payload: err})
         })
@@ -230,11 +230,11 @@ export default function Cleaning() {
 
     // Render table
     function showTable() {
-        if (data.status == "INITIALIZE") return <></>
-        if (data.status == "LOADING") {
+        if (data.status === "INITIALIZE") return <></>
+        if (data.status === "LOADING") {
             return <p className={`${css["loading"]}`}>Загружаем журнал . . .</p>
         }
-        if (data.status == "ERROR") {
+        if (data.status === "ERROR") {
             return <p style={{whiteSpace: "pre-wrap", height: "max-content"}} className={`${css["error"]}`}>Произошла ошибка (да, и такое бывает) ¯\_(ツ)_/¯ 
                 <br/>
                 Обратитесь к специалисту и попробуйте позже
@@ -273,7 +273,7 @@ export default function Cleaning() {
                 </thead>
                 <tbody>
                 {data.data.rooms.map((room, idx) => {
-                    return <Row key={idx} rowIdx={idx} dates={data.data.dates} room={room} isGrey={idx % 2 == 0}
+                    return <Row key={idx} rowIdx={idx} dates={data.data.dates} room={room} isGrey={idx % 2 === 0}
                         markModal={markModal} setMarkModal={setMarkModal} setMark={setMark}/>
                 })}
                 </tbody>
@@ -287,7 +287,7 @@ export default function Cleaning() {
         <DateModal dates={data.data.dates} modalInfo={dateModal} setModalInfo={setDateModal}/>
         }
 
-        {markModal.date == null || markModal.room == null ?
+        {markModal.date === null || markModal.room === null ?
         <></> :
         <div onClick={() => setMarkModal({type: "CLOSE"})} className={`${css["mark-modal-disable-page-bg"]}`}></div>
         }

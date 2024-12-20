@@ -1,3 +1,14 @@
+.disable-profile-trigger {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100dvw;
+    height: 100dvh;
+    background: transparent;
+    opacity: 0.5;
+    z-index: 51;
+}
+
 .disable-profile-bg {
     position: absolute;
     top: 0;
