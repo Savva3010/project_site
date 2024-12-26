@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { location } from '@/enums';
 
 import List from "@/components/applications/leave/list"
+import AddApplication from '@/components/applications/leave/add-application';
 import Application from '@/components/applications/leave/application/application';
 import Header from '@/components/applications/leave/header';
 
@@ -18,7 +19,7 @@ function useSort() {
     const INITIAL_STATE = {
         filter: "",
         direction: "down",
-        sort: "room"
+        sort: "leave"
     }
 
     function reducer(state, { type, payload }) {
@@ -42,6 +43,7 @@ export default function Applications() {
     const searchParams = useSearchParams()
 
     const [ openedApplicationId, setOpenedApplicationId ] = useState(null)
+    const [ addApplicaitonOpened, setAddAddplicationOpened ] = useState(false)
     const [ headerTotal, setHeaderTotal ] = useState({"total": 0, "inside": 0, "school": 0})
     const [ sortParams, setSortParams ] = useSort()
 
@@ -70,8 +72,14 @@ export default function Applications() {
     
     return (<>
         <ApplicationContext.Provider value={setOpenedApplicationId}>
+            {!addApplicaitonOpened ?
+            <></> :
+
+            <AddApplication modalInfo={addApplicaitonOpened} setModalInfo={setAddAddplicationOpened}/>
+            }
+
             <Application openedApplicationId={openedApplicationId} setOpenedApplicationId={setOpenedApplicationId}/>
-            <Header sortParams={sortParams} setSortParams={setSortParams} total={headerTotal}/>
+            <Header sortParams={sortParams} setSortParams={setSortParams} total={headerTotal} addApplication={() => setAddAddplicationOpened(true)}/>
             <List sortParams={sortParams} setTotal={setHeaderTotal}/>
         </ApplicationContext.Provider>
     </>);

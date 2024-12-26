@@ -22,7 +22,7 @@ function statusLatenessClass(lateness, status) {
 
 // Correct form of "minute" based on lateness
 function minuteTextForm(lateness) {
-    if (10 <= lateness && lateness <= 20) {
+    if (10 <= lateness % 100 && lateness % 100 <= 20) {
         return "минут"
     }
     if (lateness % 10 === 0 || 5 <= lateness % 10 && lateness % 10 <= 9) {

@@ -21,6 +21,18 @@ export default function ListEl({ info }) {
     const leave_date = info?.leave && unixToString(new Date(info["leave"])).split(" ") || []
     const return_date = info?.return && unixToString(new Date(info["return"])).split(" ") || []
 
+    let status = info?.status
+
+    const currTime = Date.now()
+
+    if (status === "accepted") {
+        if (info?.return < currTime) {
+            status = "expired"
+        } else if (info?.leave < currTime) {
+            status = "active"
+        }
+    }
+
     // Open application modal
     function openApplication() {
         setOpenedApplicationId(info.id)
@@ -30,7 +42,7 @@ export default function ListEl({ info }) {
     }
 
     return (<>
-        <li className={`${application_leave_status.getInfo(info.status)[1] === "expired" ? css[`list-el-expired`] : ""}`}>
+        <li className={`${application_leave_status.getInfo(status)[1] === "expired" ? css[`list-el-expired`] : ""}`}>
             <div><p>{info?.room ? info["room"] : <b>&minus;</b>}</p></div>
             <div><p>{info?.full_name ? `${info["full_name"]} ${info?.class}` : <b>&minus;</b>}</p></div>
             <div>{info?.leave ? <>
@@ -49,8 +61,8 @@ export default function ListEl({ info }) {
             </> : <p><b>&minus;</b></p>}</div>
             <div><p>{info?.address ? info["address"] : <b>&minus;</b>}</p></div>
             <div><p>{info?.accompany ? info["accompany"] : <b>&minus;</b>}</p></div>
-            <div className={`${css[`status-${application_leave_status.getInfo(info.status)[1]}`]}`}>
-                <p>{application_leave_status.getInfo(info.status)[0]}</p>
+            <div className={`${css[`status-${application_leave_status.getInfo(status)[1]}`]}`}>
+                <p>{application_leave_status.getInfo(status)[0]}</p>
             </div>
             <div><button onClick={openApplication}>Подробнее</button></div>
         </li>

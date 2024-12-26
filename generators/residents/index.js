@@ -15,7 +15,7 @@ function Random(min, max) {
 
 // dist_before and dist_after in minutes
 function RandomDate(dist_before, dist_after) {
-    let min = currDate - dist_before * 60 * 1000
+    let min = currDate + dist_before * 60 * 1000
     let max = currDate + dist_after * 60 * 1000
     return new Date(Random(min, max))
 }
@@ -43,7 +43,7 @@ function GenerateResident(id) {
     }
 
     if (push.status.status === "school" || push.status.status === "outside") {
-        push.status.until = RandomDate(60 * 5, 60 * 24).getTime()
+        push.status.until = RandomDate(-60 * 4, 60 * 8).getTime()
     }
     if (push.status.status === "outside") {
         push.status.place = randoms.places[Random(0, randoms.places.at.length - 1)]

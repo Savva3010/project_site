@@ -29,23 +29,23 @@ export default function List({ sortParams, setTotal }) {
     const [ residents, setResidents ] = useLoader()
 
     // Connect to websocket
-    const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket("/residents")
+    const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket()
 
     // Handle websocket messages
     useEffect(() => {
         let op = lastJsonMessage?.op
         let ws_data = lastJsonMessage?.data
-        if (!op) return
+        if (!op || !lastJsonMessage.path) return
 
-        if (op === "ping") {
-            sendJsonMessage({"op": "pong"})
-        } else if (op === "status:update") {
-            let newResidents = [...residents.data]
-            let foundResident = newResidents.findIndex(resident => resident.id === ws_data.id)
-            if (foundResident === -1) return
-            newResidents[foundResident].status = ws_data.status
-            setResidents({type: "SUCCESS", payload: newResidents})
-            recalcTotal(newResidents, setTotal)
+        if (lastJsonMessage.path == "/residents") {
+            if (op === "status:update") {
+                let newResidents = [...residents.data]
+                let foundResident = newResidents.findIndex(resident => resident.id === ws_data.id)
+                if (foundResident === -1) return
+                newResidents[foundResident].status = ws_data.status
+                setResidents({type: "SUCCESS", payload: newResidents})
+                recalcTotal(newResidents, setTotal)
+            }
         }
     }, [lastJsonMessage])
 

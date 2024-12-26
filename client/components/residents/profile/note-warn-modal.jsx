@@ -82,10 +82,10 @@ export default function NoteWarnModal({ modalInfo, setModalInfo }) {
                 {showContent()}
                 <div className={`${css["buttons"]}`}>
                     {modalInfo.info === null ?
-                    <button onClick={deleteNoteWarn} className={`${css["button-add"]}`}>Добавить</button> :
+                    <button onClick={addNoteWarn} className={`${css["button-add"]}`}>Добавить</button> :
 
                     <>
-                    <button onClick={addNoteWarn} className={`${css["button-delete"]}`}>Да</button>
+                    <button onClick={deleteNoteWarn} className={`${css["button-delete"]}`}>Да</button>
                     <button onClick={closeModal} className={`${css["button-delete"]}`}>Нет</button>
                     </>
                 }

@@ -1,5 +1,9 @@
 "use client"
 
+import { useEffect, useState, useReducer } from 'react';
+
+import useDefaultWebsocket from '@/lib/websocket';
+
 import localFont from "next/font/local";
 import "@/styles/globals.css";
 import Header from "@/components/header";
@@ -26,6 +30,21 @@ import { Bounce, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function RootLayout({ children }) {
+
+    const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket()
+
+    useEffect(() => {
+        let op = lastJsonMessage?.op
+        let ws_data = lastJsonMessage?.data
+        if (!op || !lastJsonMessage.path) return
+
+        if (op === "ping") {
+            sendJsonMessage({
+                "op": "pong"
+            })
+        }
+    }, [lastJsonMessage])
+
     return (
         <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable}`}>

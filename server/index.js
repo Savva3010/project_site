@@ -22,8 +22,7 @@ const app = express();
 
 const httpServer = http.createServer(app)
 
-const wsServerJournalsCleaning = new WebSocketServer({ noServer: true })
-const wsServerRedients = new WebSocketServer({ noServer: true })
+const wsServer = new WebSocketServer({ server: httpServer })
 
 httpServer.listen(process.env.PORT, "127.0.0.1", (error) => {
     error? console.log(errorMsg(error)) : console.log(successMsg(`listening port ${process.env.PORT}`))
@@ -31,7 +30,6 @@ httpServer.listen(process.env.PORT, "127.0.0.1", (error) => {
 
 //middlewares start
 app.use(morgan(":method :url (:status) :res[content-length] - :response-time ms"))
-app.use(express.static("public"))
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(bodyParser.raw())
@@ -42,6 +40,7 @@ app.use((req, res, next) => {
     res.set("Access-Control-Allow-Headers", "Content-Type")
     next()
 })
+app.use(express.static("public"))
 //middlewares end
 
 app.options("/*", (req, res) => {
@@ -245,10 +244,11 @@ app.put("/residents/:id/status", (req, res) => {
             return
     }
 
-    wsServerRedients.clients.forEach(client => {
+    wsServer.clients.forEach(client => {
         if (client.readyState != WebSocket.OPEN) return
         client.send(JSON.stringify({
             "op": "status:update",
+            "path": "/residents",
             "data": {
                 "id": id,
                 "status": residents[resident].status
@@ -419,7 +419,8 @@ app.get("/applications/leave/:id", (req, res) => {
         "accompany": application.accompany,
         "status": application.status,
         "comment": application.comment,
-        "created_at": application.created_at
+        "created_at": application.created_at,
+        "files": application.files
     }
 
     resident["parents"].forEach(parent => {
@@ -578,10 +579,11 @@ app.put("/journals/cleaning/marks", (req, res) => {
         }
     }
     
-    wsServerJournalsCleaning.clients.forEach(client => {
+    wsServer.clients.forEach(client => {
         if (client.readyState != WebSocket.OPEN) return
         client.send(JSON.stringify({
             "op": "mark:update",
+            "path": "/journals/cleaning",
             "data": {
                 "room": room,
                 "date": date,
@@ -683,10 +685,11 @@ app.post("/journals/cleaning/dates", (req, res) => {
         return 0;
     })
     
-    wsServerJournalsCleaning.clients.forEach(client => {
+    wsServer.clients.forEach(client => {
         if (client.readyState != WebSocket.OPEN) return
         client.send(JSON.stringify({
             "op": "date:add",
+            "path": "/journals/cleaning",
             "data": {
                 "date": need_date
             }
@@ -746,10 +749,11 @@ app.delete("/journals/cleaning/dates", (req, res) => {
         }
     })
 
-    wsServerJournalsCleaning.clients.forEach(client => {
+    wsServer.clients.forEach(client => {
         if (client.readyState != WebSocket.OPEN) return
         client.send(JSON.stringify({
             "op": "date:delete",
+            "path": "/journals/cleaning",
             "data": {
                 "date": date
             }
@@ -784,7 +788,7 @@ app.use((req, res) => {
 
 
 
-wsServerJournalsCleaning.on("connection", ws => {
+wsServer.on("connection", ws => {
     ws.id = uuidv4()
 
     //TODO: make anti CSRF (check initiator is localhost:3000)
@@ -836,81 +840,4 @@ wsServerJournalsCleaning.on("connection", ws => {
             clearTimeout(heartbeatCloseTimeout)
         }
     })
-})
-
-wsServerRedients.on("connection", ws => {
-    ws.id = uuidv4()
-
-    //TODO: make anti CSRF (check initiator is localhost:3000)
-
-    let heartbeatCloseTimeout
-    let heartbeatInterval = setInterval(() => {
-        //ws.ping()
-        ws.send(JSON.stringify({"op": "ping"}))
-        heartbeatCloseTimeout = setTimeout(() => {
-            ws.terminate()
-        }, 5000)
-    }, 10000)
-
-    // DONT FORGET TO REMOVE LINE BELOW
-    clearInterval(heartbeatInterval)
-
-    ws.on("message", m => {
-        if (!m) return
-        m = JSON.parse(m)
-        if (!m || !m.op) return
-        switch (m.op) {
-            case "ping":
-                ws.send(JSON.stringify({"op": "pong"}))
-                return
-            case "pong":
-                if (heartbeatCloseTimeout) {
-                    clearTimeout(heartbeatCloseTimeout)
-                }
-                return
-            default:
-                return
-        }
-    })
-
-    ws.on("error", err => {
-        console.log(err)
-    })
-
-    ws.on("close", () => {
-        clearInterval(heartbeatInterval)
-    })
-
-    ws.on("ping", () => {
-        ws.pong("pong")
-    })
-
-    ws.on("pong", () => {
-        if (heartbeatCloseTimeout) {
-            clearTimeout(heartbeatCloseTimeout)
-        }
-    })
-})
-
-httpServer.on('upgrade', (request, socket, head) => {
-    const headers = request.headers
-
-    if (headers['upgrade'] != 'websocket') {
-        socket.destroy()
-        return
-    }
-    
-    const { pathname } = new URL(request.url, 'ws://127.0.0.1')
-  
-    if (pathname === '/residents') {
-        wsServerRedients.handleUpgrade(request, socket, head, ws => {
-            wsServerRedients.emit('connection', ws, request)
-        })
-    } else if (pathname === '/journals/cleaning') {
-        wsServerJournalsCleaning.handleUpgrade(request, socket, head, ws => {
-            wsServerJournalsCleaning.emit('connection', ws, request)
-        })
-    } else {
-        socket.destroy()
-    }
 })

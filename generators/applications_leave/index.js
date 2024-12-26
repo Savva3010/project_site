@@ -14,22 +14,35 @@ function Random(min, max) {
 
 // dist_before and dist_after in minutes
 function RandomDate(dist_before, dist_after) {
-    let min = currDate - dist_before * 60 * 1000
+    let min = currDate + dist_before * 60 * 1000
     let max = currDate + dist_after * 60 * 1000
     return new Date(Random(min, max))
 }
 
 function GenerateApp(id, max_id) {
+    let leaveDate = RandomDate(-60 * 24 * 3, 60 * 24 * 2).getTime()
+    let returnDateStart = Math.floor((leaveDate - currDate) / 60 / 1000)
+
     let push = {
         "id": id,
         "resident_id": Random(1, max_id),
-        "leave": RandomDate(-60 * 24 * 3, 60 * 24).getTime(),
-        "return": RandomDate(60 * 24 * 5, -60 * 24 * 3).getTime(),
+        "leave": leaveDate,
+        "return": RandomDate(returnDateStart, returnDateStart + 60 * 24 * 6).getTime(),
         "address": randoms.places[Random(0, randoms.places.length - 1)],
         "accompany": randoms.accompany[Random(0, randoms.accompany.length - 1)],
         "status": randoms.statuses[Random(0, randoms.statuses.length - 1)],
+        "comment": randoms.comments[Random(0, randoms.comments.length - 1)],
         "created_at": RandomDate(-60 * 24 * 5, -60 * 24 * 2).getTime(),
-        "comment": randoms.comments[Random(0, randoms.comments.length - 1)]
+        "files": []
+    }
+
+    let files = Random(0, 4);
+    for (let i = 0; i < files; ++i) {
+        push["files"].push({
+            "filename": randoms.file_names[Random(0, randoms.file_names.length - 1)],
+            "src": "/no_img.png",
+        	"blur_hash": "|RRMb$of_3ay-;j[WBt7M{xuayRjofj[ayoffQay~qWBIUofIUj[j[Rjt7IUof%MRjayofRjayj[%Mj[M{WBj[j[ofoft7-;WBM{t7j[Rjt7j[ay9Fay%Moft7WBWBj[RjWBofofRjj[t7WBayj[ofj[ayWBj[ofWBWBj["
+        })
     }
 
     apps.push(push)

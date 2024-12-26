@@ -24,20 +24,22 @@ export default function Room({ openedRoomId, setOpenedRoomId }) {
     const [ room, setRoom ] = useLoader()
 
     // Connect to websocket
-    const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket("/residents")
+    const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket()
 
     // Handle websocket messages
     useEffect(() => {
         let op = lastJsonMessage?.op
         let ws_data = lastJsonMessage?.data
-        if (!op) return
+        if (!op || !lastJsonMessage) return
 
-        if (op === "status:update") {
-            let found = room.data.residents.findIndex(resident => resident.id === ws_data.id)
-            if (found === -1) return
-            let newResidents = [...room.data.residents]
-            newResidents[found].status = ws_data.status
-            setRoom({type: "SUCCESS", payload: {...room.data, residents: newResidents}})
+        if (lastJsonMessage.path === "/residents") {
+            if (op === "status:update") {
+                let found = room.data.residents.findIndex(resident => resident.id === ws_data.id)
+                if (found === -1) return
+                let newResidents = [...room.data.residents]
+                newResidents[found].status = ws_data.status
+                setRoom({type: "SUCCESS", payload: {...room.data, residents: newResidents}})
+            }
         }
     }, [lastJsonMessage])
 

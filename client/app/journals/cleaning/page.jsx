@@ -27,81 +27,81 @@ export default function Cleaning() {
     const [ data, setData ] = useLoader()
 
     // Connect ot Websocket
-    const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket("/journals/cleaning")
+    const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket()
 
     // Handle websocket messages
     useEffect(() => {
         let op = lastJsonMessage?.op
         let ws_data = lastJsonMessage?.data
-        if (!op) return
+        if (!op || !lastJsonMessage.path) return
 
-        if (op === "ping") {
-            sendJsonMessage({"op": "pong"})
-        } else if (op === "mark:update") {
-            let newData = [...data.data.rooms]
-            let room = newData.findIndex(el => el.room_number === ws_data.room)
-            let date = newData[room].marks.findIndex(el => el.date === ws_data.date)
-            if (ws_data === 0) {
-                if (date === -1) return;
-                newData[room].marks.splice(date, 1)
-            } else {
-                if (date != -1) {
-                    newData[room].marks[date].mark = ws_data.mark
+        if (lastJsonMessage.path === "/journals/cleaning") {
+            if (op === "mark:update") {
+                let newData = [...data.data.rooms]
+                let room = newData.findIndex(el => el.room_number === ws_data.room)
+                let date = newData[room].marks.findIndex(el => el.date === ws_data.date)
+                if (ws_data === 0) {
+                    if (date === -1) return;
+                    newData[room].marks.splice(date, 1)
                 } else {
-                    newData[room].marks.push({"date": ws_data.date, "mark": ws_data.mark})
+                    if (date != -1) {
+                        newData[room].marks[date].mark = ws_data.mark
+                    } else {
+                        newData[room].marks.push({"date": ws_data.date, "mark": ws_data.mark})
+                    }
                 }
-            }
-            setData({type: "SUCCESS", payload: {...data.data, rooms: newData}})
-        } else if (op === "date:add") {
-            let newData = [...data.data.dates]
-            let foundDate = newData.findIndex(date => date === ws_data.date)
-            if (foundDate != -1) return
-            newData.push(ws_data.date)
-            const monthToIdxSorted = {
-                "ЯНВ": 5,
-                "ФЕВ": 6,
-                "МАР": 7,
-                "АПР": 8,
-                "МАЯ": 9,
-                "ИЮН": 10,
-                "ИЮЛ": 11,
-                "АВГ": 12,
-                "СЕН": 1,
-                "ОКТ": 2,
-                "НОЯ": 3,
-                "ДЕК": 4
-            }
-            newData.sort((a, b) => {
-                let [l_d, l_m] = a.split(" ")
-                let [r_d, r_m] = b.split(" ")
-
-                l_d = parseInt(l_d)
-                l_m = monthToIdxSorted[l_m]
-                r_d = parseInt(r_d)
-                r_m = monthToIdxSorted[r_m]
-
-                if (l_m > r_m) return 1
-                if (l_m < r_m) return -1
-                if (l_d > r_d) return 1
-                if (l_d < r_d) return -1
-                return 0;
-            })
-            
-            let newMarks = [...data.data.rooms]
-            newMarks.forEach((room, idx) => {
-                let found = newMarks[idx].marks.findIndex(mark => mark.date === ws_data.date)
-                while (found != -1) {
-                    newMarks[idx].marks.splice(found, 1)
-                    found = newMarks[idx].marks.findIndex(mark => mark.date === ws_data.date)
+                setData({type: "SUCCESS", payload: {...data.data, rooms: newData}})
+            } else if (op === "date:add") {
+                let newData = [...data.data.dates]
+                let foundDate = newData.findIndex(date => date === ws_data.date)
+                if (foundDate != -1) return
+                newData.push(ws_data.date)
+                const monthToIdxSorted = {
+                    "ЯНВ": 5,
+                    "ФЕВ": 6,
+                    "МАР": 7,
+                    "АПР": 8,
+                    "МАЯ": 9,
+                    "ИЮН": 10,
+                    "ИЮЛ": 11,
+                    "АВГ": 12,
+                    "СЕН": 1,
+                    "ОКТ": 2,
+                    "НОЯ": 3,
+                    "ДЕК": 4
                 }
-            })
-            setData({type: "SUCCESS", payload: {...data.data, dates: newData, rooms: newMarks}})
-        } else if (op === "date:delete") {
-            let newData = [...data.data.dates]
-            let foundDate = newData.findIndex(date => date === ws_data.date)
-            if (foundDate === -1) return
-            newData.splice(foundDate, 1)
-            setData({type: "SUCCESS", payload: {...data.data, dates: newData}})
+                newData.sort((a, b) => {
+                    let [l_d, l_m] = a.split(" ")
+                    let [r_d, r_m] = b.split(" ")
+    
+                    l_d = parseInt(l_d)
+                    l_m = monthToIdxSorted[l_m]
+                    r_d = parseInt(r_d)
+                    r_m = monthToIdxSorted[r_m]
+    
+                    if (l_m > r_m) return 1
+                    if (l_m < r_m) return -1
+                    if (l_d > r_d) return 1
+                    if (l_d < r_d) return -1
+                    return 0;
+                })
+                
+                let newMarks = [...data.data.rooms]
+                newMarks.forEach((room, idx) => {
+                    let found = newMarks[idx].marks.findIndex(mark => mark.date === ws_data.date)
+                    while (found != -1) {
+                        newMarks[idx].marks.splice(found, 1)
+                        found = newMarks[idx].marks.findIndex(mark => mark.date === ws_data.date)
+                    }
+                })
+                setData({type: "SUCCESS", payload: {...data.data, dates: newData, rooms: newMarks}})
+            } else if (op === "date:delete") {
+                let newData = [...data.data.dates]
+                let foundDate = newData.findIndex(date => date === ws_data.date)
+                if (foundDate === -1) return
+                newData.splice(foundDate, 1)
+                setData({type: "SUCCESS", payload: {...data.data, dates: newData}})
+            }
         }
     }, [lastJsonMessage])
 

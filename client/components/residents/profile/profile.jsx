@@ -28,20 +28,22 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
     const [ resident, setResident ] = useLoader()
 
     // Connect to websocket
-    const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket("/residents")
+    const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket()
 
     // Handle websocket messages
     useEffect(() => {
         if (openedProfileId === null) return
         let op = lastJsonMessage?.op
         let ws_data = lastJsonMessage?.data
-        if (!op) return
+        if (!op || !lastJsonMessage.path) return
 
-        if (op === "status:update") {
-            if (resident.data.id != ws_data.id) return
-            let newResident = {...resident.data}
-            newResident.status = ws_data.status
-            setResident({type: "SUCCESS", payload: newResident})
+        if (lastJsonMessage.path === "/residents") {
+            if (op === "status:update") {
+                if (resident.data.id != ws_data.id) return
+                let newResident = {...resident.data}
+                newResident.status = ws_data.status
+                setResident({type: "SUCCESS", payload: newResident})
+            }
         }
     }, [lastJsonMessage])
 

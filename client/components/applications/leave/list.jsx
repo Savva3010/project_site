@@ -14,6 +14,8 @@ import { location } from '@/enums';
 
 import ListEl from './list-el';
 
+import unixToString from '@/lib/unixToString';
+
 import { SERVER_URL, WS_SERVER_URL } from '@/globals';
 
 function recalcTotal(applications, setTotal) {
@@ -29,33 +31,28 @@ export default function List({ sortParams, setTotal }) {
     const [ applications, setApplications ] = useLoader()
 
     // Connect to websocket
-    const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket("/applications/leave")
+    const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket()
 
     // Handle websocket messages
     useEffect(() => {
         let op = lastJsonMessage?.op
         let ws_data = lastJsonMessage?.data
-        if (!op) return
+        if (!op || !lastJsonMessage.path) return
 
-        if (op === "ping") {
-            sendJsonMessage({"op": "pong"})
-        } else if (op === "status:update") {
-            let newApplications = [...applications.data]
-            let foundResident = newApplications.findIndex(resident => resident.id === ws_data.id)
-            if (foundResident === -1) return
-            newApplications[foundResident].status = ws_data.status
-            setApplications({type: "SUCCESS", payload: newApplications})
-            recalcTotal(newApplications, setTotal)
+        if (lastJsonMessage.path === "/applications/leave") {
+
         }
     }, [lastJsonMessage])
 
     // Filtered and sorted applications
     const processedApplications = useMemo(() => {
+        let currTime = Date.now()
+        
         let sorted = applications.data
         if (!sorted) return []
 
         if (sortParams.filter != "") {
-            sorted = sorted.filter(resident => (`${resident.room?.toLowerCase()} ${resident.full_name?.toLowerCase()} ${resident.class?.toLowerCase()} ${resident.mobile?.toLowerCase()}  ${resident.email?.toLowerCase()}  ${resident.telegram?.toLowerCase()}`).includes(sortParams.filter.toLowerCase()))
+            sorted = sorted.filter(application => (`${application.room?.toLowerCase()} ${application.full_name?.toLowerCase()} ${application.class?.toLowerCase()} ${unixToString(application.leave)} ${unixToString(application.return)} ${application.address?.toLowerCase()} ${application.accompany?.toLowerCase()}`).includes(sortParams.filter.toLowerCase()))
         }
 
         if (sortParams.sort === "full_name") {
@@ -75,17 +72,51 @@ export default function List({ sortParams, setTotal }) {
                 if (l < r) return -1
                 return 0
             })
-        } else {
-            const priority = {
-                "inside": 0,
-                "isolator": 1,
-                "school": 2,
-                "outside": 3
-            }
-
+        } else if (sortParams.sort === "leave") {
             sorted.sort((a, b) => {
-                let l = priority[a.status.status]
-                let r = priority[b.status.status]
+                let l = a.leave
+                let r = b.leave
+                if (l > r) return 1
+                if (l < r) return -1
+                return 0
+            })
+        } else if (sortParams.sort === "return") {
+            sorted.sort((a, b) => {
+                let l = a.return
+                let r = b.return
+                if (l > r) return 1
+                if (l < r) return -1
+                return 0
+            })
+        } else {
+            // TODO: make status sort
+            const priority = {
+                "review": 0,
+                "accepted": 1,
+                "active": 2,
+                "denied": 3,
+                "cancelled": 4,
+                "expired": 5
+            }
+            
+            sorted.sort((a, b) => {
+                let l = priority[a.status]
+                if (a.status === "accepted") {
+                    if (a.return < currTime) {
+                        l = priority["expired"]
+                    } else if (a.leave < currTime) {
+                        l = priority["active"]
+                    }
+                }
+
+                let r = priority[b.status]
+                if (b.status === "accepted") {
+                    if (b.return < currTime) {
+                        r = priority["expired"]
+                    } else if (b.leave < currTime) {
+                        r = priority["active"]
+                    }
+                }
 
                 if (l > r) return 1
                 if (l < r) return -1

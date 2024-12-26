@@ -193,16 +193,16 @@ export default function DateModal({ dates, modalInfo, setModalInfo }) {
     function showSelector() {
         return <div className={`${css["selectors"]}`}>
             <div className={`${css["selector"]}`}>
-                <label htmlFor="add-date-modal-slect-month">Месяц</label>
-                <select value={selectedMonth} onChange={(evt) => setSelectedMonth(evt.target.value)} name="" id="add-date-modal-slect-month">
+                <label htmlFor="add-date-modal-select-month">Месяц</label>
+                <select value={selectedMonth} onChange={(evt) => setSelectedMonth(evt.target.value)} name="" id="add-date-modal-select-month">
                     {months.map((month, idx) => {
                         return <option key={idx} value={month.value}>{month.text}</option>
                     })}
                 </select>
             </div>
             <div className={`${css["selector"]}`}>
-                <label htmlFor="add-date-modal-slect-day">Число</label>
-                <select onChange={(evt) => setSelectedDay(evt.target.value)} name="" id="add-date-modal-slect-day">
+                <label htmlFor="add-date-modal-select-day">Число</label>
+                <select onChange={(evt) => setSelectedDay(evt.target.value)} name="" id="add-date-modal-select-day">
                     {daysToSelect.map((day, idx) => {
                         return <option key={idx} value={day.value}>{day.text}</option>
                     })}

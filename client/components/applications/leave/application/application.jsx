@@ -13,6 +13,7 @@ import CustomServerError from '@/lib/customServerError';
 
 import { location } from '@/enums';
 
+import FileActionModal from './file-action-modal';
 import Info from './info';
 import Files from './files';
 
@@ -25,20 +26,46 @@ export default function Application({ openedApplicationId, setOpenedApplicationI
     const [ application, setApplication ] = useLoader()
 
     // Connect to websocket
-    const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket("/residents")
+    const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket()
 
     // Handle websocket messages
     useEffect(() => {
         if (openedApplicationId === null) return
         let op = lastJsonMessage?.op
         let ws_data = lastJsonMessage?.data
-        if (!op) return
+        if (!op || !lastJsonMessage.path) return
+
+        if (lastJsonMessage.path === "/residents") {
+            if (op === "status:update") {
+                if (application.data.resident.id != ws_data.id) return
+                let newResident = {...application.data.resident}
+                newResident.status = ws_data.status
+                setApplication({type: "SUCCESS", payload: {...application.data, resident: newResident}})
+            }
+        }
     }, [lastJsonMessage])
+
+    const [ fileActionModal, setFileActionModal ] = useReducer((state, {type, payload}) => {
+        switch (type) {
+            case "ADD":
+                return {...state, category: "ADD", info: null}
+            case "DELETE":
+                return {...state, category: "DELETE", info: payload}
+            case "CLOSE":
+                return {...state, category: null, info: null}
+            default:
+                return {...state}
+        }
+    }, {
+        "category": null,
+        "info": null
+    })
 
     // Close modal
     function closePanel() {
         setOpenedApplicationId(null)
         setApplication({type: "INITIALIZE"})
+        setFileActionModal({type: "CLOSE"})
         let newParams = new URLSearchParams(searchParams.toString())
         newParams.delete("app")
         router.replace(`/applications/leave/?${newParams.toString()}`, { scroll: false })
@@ -97,7 +124,7 @@ export default function Application({ openedApplicationId, setOpenedApplicationI
 
         return (<>
             <Info info={application.data} />
-            <Files info={application.data} />
+            <Files info={application.data} setFileActionModal={setFileActionModal} />
         </>)
     }
     return (<>
@@ -126,6 +153,12 @@ export default function Application({ openedApplicationId, setOpenedApplicationI
                         <div className={`${css["disable-profile-bg"]}`}></div>
                         <p className={`${css["loading-text"]}`}><b>Загрузка...</b></p>
                     </>
+                    }
+
+                    {fileActionModal.category === null ?
+                    <></> :
+                    
+                    <FileActionModal modalInfo={fileActionModal} setModalInfo={setFileActionModal} />
                     }
 
                     <div className={`${css["application"]}`}>

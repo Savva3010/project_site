@@ -4,8 +4,8 @@ import { toast } from 'react-toastify';
 
 import { WS_SERVER_URL } from '@/globals';
 
-export default function useDefaultWebsocket(path) {
-    return useWebSocket(WS_SERVER_URL + path, {
+export default function useDefaultWebsocket() {
+    return useWebSocket(WS_SERVER_URL, {
         "fromSocketIO": false,
         "share": true,
         "onMessage": (event) => {
