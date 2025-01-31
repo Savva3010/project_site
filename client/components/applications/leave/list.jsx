@@ -40,7 +40,13 @@ export default function List({ sortParams, setTotal }) {
         if (!op || !lastJsonMessage.path) return
 
         if (lastJsonMessage.path === "/applications/leave") {
-
+            if (op === "status:update") {
+                let newApplications = [...applications.data]
+                let foundApplication = newApplications.findIndex(app => app.id === ws_data.id)
+                if (foundApplication === -1) return
+                newApplications[foundApplication].status = ws_data.status
+                setApplications({type: "SUCCESS", payload: newApplications})
+            }
         }
     }, [lastJsonMessage])
 
@@ -89,7 +95,6 @@ export default function List({ sortParams, setTotal }) {
                 return 0
             })
         } else {
-            // TODO: make status sort
             const priority = {
                 "review": 0,
                 "accepted": 1,

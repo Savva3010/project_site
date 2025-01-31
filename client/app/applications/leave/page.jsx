@@ -69,7 +69,7 @@ export default function Applications() {
             setSortParams({type: "SORT", payload: sort})
         }
     }, [])
-    
+
     return (<>
         <ApplicationContext.Provider value={setOpenedApplicationId}>
             {!addApplicaitonOpened ?
@@ -78,7 +78,7 @@ export default function Applications() {
             <AddApplication modalInfo={addApplicaitonOpened} setModalInfo={setAddAddplicationOpened}/>
             }
 
-            <Application openedApplicationId={openedApplicationId} setOpenedApplicationId={setOpenedApplicationId}/>
+            <Application openedApplicationId={openedApplicationId} setOpenedApplicationId={setOpenedApplicationId} setSortParams={setSortParams}/>
             <Header sortParams={sortParams} setSortParams={setSortParams} total={headerTotal} addApplication={() => setAddAddplicationOpened(true)}/>
             <List sortParams={sortParams} setTotal={setHeaderTotal}/>
         </ApplicationContext.Provider>

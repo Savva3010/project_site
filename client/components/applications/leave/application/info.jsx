@@ -16,7 +16,7 @@ import ApplicationStatus from './application-status';
 
 import { SERVER_URL, WS_SERVER_URL } from '@/globals';
 
-export default function Info({ info }) {
+export default function Info({ info, closePanel, setSortParams }) {
     const router = useRouter()
 
     const [ comment, setComment ] = useState("")
@@ -67,6 +67,48 @@ export default function Info({ info }) {
                 })
     }
 
+    function setStatus(status) {
+        
+        let promise = new Promise((resolve, reject) => {
+            fetch(SERVER_URL + `/applications/leave/${info?.id}/status`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                mode: "cors",
+                body: JSON.stringify({
+                    "status": status
+                })
+            })
+            .then(res => res.json())
+            .then((res) => {
+                if (!res.success) {
+                    reject(res.data.message)
+                } else {
+                    resolve()
+                }
+            })
+            .catch(err => {
+                reject()
+                console.log(err)
+            })
+        })
+        
+        toast.promise(promise, {
+                    pending: "Изменение статуса",
+                    success: "Статус изменён",
+                    error: {
+                        theme: "colored",
+                        autoClose: 10000,
+                        render({data}) {
+                            return "Не удалось изменить статус: " + (data || "")
+                        }
+                    }   
+                })
+    }
+
+    // TODO: add "applications" link from /residdents and /rooms
+
     return (<>
         <div className={`${css["info"]}`}>
             <div className={`${css["col1"]}`}> 
@@ -97,7 +139,14 @@ export default function Info({ info }) {
                             let newParams = new URLSearchParams(`room=${info?.resident?.room}`)
                             router.push(`/rooms/?${newParams.toString()}`, { scroll: false })
                         }}>Комната</button>
-                        <button className={`${css["col2-link"]}`}>Заявления</button>
+                        <button className={`${css["col2-link"]}`} onClick={() => {
+                            let newParams = new URLSearchParams()
+                            let newFilter = `${info?.resident?.room} ${info?.resident?.full_name} ${info?.resident?.class}`
+                            newParams.set("q", newFilter)
+                            router.push(`/applications/leave/?${newParams.toString()}`, { scroll: false })
+                            setSortParams({type: "FILTER", payload: newFilter})
+                            closePanel()
+                        }}>Заявления</button>
                         <button className={`${css["col2-link"]}`}>Журнал входов/выходов</button>
                     </div>
                     <div className={`${css["col2-parents"]}`}>
@@ -126,17 +175,17 @@ export default function Info({ info }) {
 
                 {["review", "cancelled", "accepted", "active", "expired"].findIndex(status => status === info?. status) === -1 ?
                 <></> :
-                <button>Отклонить</button>
+                <button onClick={() => setStatus("denied")}>Отклонить</button>
                 }
 
                 {["review", "cancelled", "denied"].findIndex(status => status === info?. status) === -1 ?
                 <></> :
-                <button>Одобрить</button>
+                <button onClick={() => setStatus("accepted")}>Одобрить</button>
                 }
 
                 {["cancelled"].findIndex(status => status === info?. status) != -1 ?
                 <></> :
-                <button>Аннулировать</button>
+                <button onClick={() => setStatus("cancelled")}>Аннулировать</button>
                 }
 
                 <div className={`${css["col3-comment"]}`}>

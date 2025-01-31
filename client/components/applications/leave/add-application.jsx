@@ -19,6 +19,8 @@ export default function AddApplication({ modalInfo, setModalInfo }) {
         setModalInfo(false)
     }
 
+    // TODO: Make add application logic
+
     return (<>
         <div className={`${css["disable-page-bg"]}`} onClick={closeModal}></div>
         <div className={`${css["wrapper"]}`}>
@@ -35,7 +37,7 @@ export default function AddApplication({ modalInfo, setModalInfo }) {
                     <p><b>Проживающий</b></p>
                     <div className={`${css["selector"]}`}>
                         <label htmlFor="add-app-modal-select-room">Комната</label>
-                        <select name="" id="add-app-modal-select-romm">
+                        <select name="" id="add-app-modal-select-room">
                         </select>
                     </div>
                     <div className={`${css["selector"]}`}>

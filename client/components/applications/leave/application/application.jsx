@@ -19,11 +19,22 @@ import Files from './files';
 
 import { SERVER_URL, WS_SERVER_URL } from '@/globals';
 
-export default function Application({ openedApplicationId, setOpenedApplicationId }) {
+export default function Application({ openedApplicationId, setOpenedApplicationId, setSortParams }) {
     const router = useRouter()
     const searchParams = useSearchParams()
 
     const [ application, setApplication ] = useLoader()
+
+    let status = application.data?.status
+    const currTime = Date.now()
+
+    if (status === "accepted") {
+        if (application.data?.return < currTime) {
+            setApplication({type: "SUCCESS", payload: {...application.data, status: "expired"}})
+        } else if (application.data?.leave < currTime) {
+            setApplication({type: "SUCCESS", payload: {...application.data, status: "active"}})
+        }
+    }
 
     // Connect to websocket
     const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket()
@@ -41,6 +52,11 @@ export default function Application({ openedApplicationId, setOpenedApplicationI
                 let newResident = {...application.data.resident}
                 newResident.status = ws_data.status
                 setApplication({type: "SUCCESS", payload: {...application.data, resident: newResident}})
+            }
+        } else if (lastJsonMessage.path === "/applications/leave") {
+            if (op === "status:update") {
+                if (application.data.id != ws_data.id) return
+                setApplication({type: "SUCCESS", payload: {...application.data, status: ws_data.status}})
             }
         }
     }, [lastJsonMessage])
@@ -123,7 +139,7 @@ export default function Application({ openedApplicationId, setOpenedApplicationI
         }
 
         return (<>
-            <Info info={application.data} />
+            <Info info={application.data} closePanel={closePanel} setSortParams={setSortParams}/>
             <Files info={application.data} setFileActionModal={setFileActionModal} />
         </>)
     }

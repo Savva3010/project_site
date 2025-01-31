@@ -491,17 +491,65 @@ app.put("/applications/leave/:id/comment", (req, res) => {
     })
 })
 
+/*
+    error ids:
+    -1 - csrf token expired
+    -2 - not enough data
+    -3 - application is not found
+*/
 app.put("/applications/leave/:id/status", (req, res) => {
-    res
-    .status(500)
-    .json({
-        "success": false,
-        "data": {
-            "message": "В работе",
-            "error_id": -10010
-        }
+    let { id } = req.params
+    id = Number(id)
+    let {status} = req.body
+    
+    let application = applications_leave.findIndex(application => application.id === id)
+
+    if (application === -1) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Заявление не найдено",
+                "error_id": -3
+            }
+        })
+        return
+    }
+
+    if (status === null) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Не хватает данных",
+                "error_id": -2
+            }
+        })
+        return
+    }
+
+    applications_leave[application].status = status
+
+    wsServer.clients.forEach(client => {
+        if (client.readyState != WebSocket.OPEN) return
+        client.send(JSON.stringify({
+            "op": "status:update",
+            "path": "/applications/leave",
+            "data": {
+                "id": id,
+                "status": applications_leave[application].status
+            }
+        }))
     })
-    return
+
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": null
+    })
 })
 
 

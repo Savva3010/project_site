@@ -55,9 +55,7 @@ export default function Header({sortParams, setSortParams, total, addApplication
 
     return (<>
         <div className={`${css["header"]}`}>
-            <div className={`${css["summary"]}`}>
-                <p>В ФТЛ: {total.school}/{total.total}</p>
-                <p>В интернате: {total.inside}/{total.total}</p>
+            <div>
             </div>
             <p><b>Список заявлений на выбытие</b></p>
             <div className={`${css["sort"]}`}>
