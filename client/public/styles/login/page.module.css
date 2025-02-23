@@ -1,0 +1,74 @@
+.wrapper {
+    background: #FFFFFF;
+    position: fixed;
+    top: 50dvh;
+    left: 50dvw;
+    transform: translateY(-50%) translateX(-50%);
+    width: 400px;
+    height: max-content;
+    border-radius: 5px;
+    box-shadow: 0px 0px 15px 10px rgba(0, 0, 0, 0.5);
+    padding: 25px;
+    z-index: 55;
+}
+
+.error {
+    background-color: rgba(255, 0, 0, 0.25);
+    border: 2px solid rgb(255, 0, 0);
+    border-radius: 5px;
+    padding: 15px;
+    width: 100%;
+}
+
+.wrapper h2 {
+    width: 100%;
+    text-align: center;
+}
+
+.wrapper form {
+    width: 100%;
+    height: max-content;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+
+    gap: 40px;
+}
+
+.wrapper div:not(.error) {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 5px;
+}
+
+.wrapper form input {
+    height: 40px;
+    border-radius: 5px;
+    padding: 6px;
+}
+
+.wrapper button {
+    background-color: #007BFF;
+    width: 100%;
+    height: 40px;
+    font-size: 1rem;
+    color: #FFFFFF;
+    border-radius: 8px;
+    transition: background-color 0.1s ease-in-out;
+}
+
+.wrapper form:invalid button {
+    background-color: #c0dada;
+    border: 2px solid #7fa6cf;
+    color: #7fa6cf;
+}
+
+.wrapper form:valid button:hover {
+    background-color: #30ABFF;
+}
+
+.wrapper form:valid button:active {
+    background-color: #006BEF;
+}
