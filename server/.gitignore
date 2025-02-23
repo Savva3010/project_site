@@ -1,0 +1,39 @@
+# Virtual Python environments
+.venv/
+venv/
+env/
+
+# Python bytecode cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local development files
+.env
+.env.local
+.env.development
+
+# Editor/IDE files
+.vscode/
+.idea/
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+
+# Local uploads directory
+/uploads/
+
+# Testing coverage
+.coverage
+htmlcov/
+
+# Distribution packages
+*.egg-info/
+dist/
+build/
+
+# Python packaging
+*.egg
+*.wheel
