@@ -1,6 +1,6 @@
-from fastapi import FastAPI, WebSocket, HTTPException, status, Depends, UploadFile, File, Form
+from fastapi import FastAPI, WebSocket, Depends, UploadFile, File, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import List, Optional, Union
@@ -10,7 +10,6 @@ import os
 import uuid
 import jwt
 import secrets
-import string
 import json
 from passlib.context import CryptContext
 
@@ -220,16 +219,16 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("sub")
         if not username:
-            return error_response("Invalid token", "401", 401)
+            return error_response("Неправильный токен", "BAD_TOKEN", 401)
     except jwt.PyJWTError:
-        return error_response("Invalid token", "401", 401)
+        return error_response("Неправильный токен", "BAD_TOKEN", 401)
     
     db = get_db()
     user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
     db.close()
     
     if not user:
-        return error_response("User not found", "401", 401)
+        return error_response("Пользователь не найден", "ACCOUNT_NOT_FOUND", 401)
     return user
 
 @app.post("/register", response_model=BaseResponse)
@@ -238,6 +237,7 @@ async def register(user: UserCreate):
     pepper = os.getenv("PEPPER", "default_pepper")
     hashed = pwd_context.hash(user.password + salt + pepper)
     
+    conn = None
     try:
         conn = get_db()
         conn.execute(
@@ -255,18 +255,10 @@ async def register(user: UserCreate):
         }
         
     except sqlite3.IntegrityError:
-        return error_response(
-            message="Username already registered",
-            error_id="400",
-            status_code=400
-        )
+        return error_response("На данное имя уже зарегистрирован пользователь", "DOUBLE_REGISTRATION", 400)
         
-    except Exception as e:
-        return error_response(
-            message="Internal server error",
-            error_id="500",
-            status_code=500
-        )
+    except Exception:
+        return error_response("Ошибка сервера", "SERVER_ERROR", 500)
         
     finally:
         if conn:
@@ -276,11 +268,7 @@ async def register(user: UserCreate):
 async def login(user: UserLogin):
     authenticated_user = authenticate_user(user.username, user.password)
     if not authenticated_user:
-        return error_response(
-            message="Invalid credentials",
-            error_id="401",
-            status_code=401
-        )
+        return error_response("Неправильный логин или пароль", "AUTH_ERROR", 401)
     
     return {
         "success": True,
@@ -342,7 +330,7 @@ async def get_resident(
     conn.close()
 
     if not resident:
-        return error_response("Resident not found", "404", 404);
+        return error_response("Интернатовец не найден", "RESIDENT_NOT_FOUND", 404);
 
     resident_dict = dict(resident)
     
@@ -420,9 +408,9 @@ async def create_resident(
         conn.commit()
         return {"success": True, "data": {"id": resident_id}}
         
-    except sqlite3.Error as e:
+    except sqlite3.Error:
         conn.rollback()
-        return error_response(str(e), "400", 400)
+        return error_response("Ошибка сервера", "DB_ERROR", 400)
     finally:
         conn.close()
 
@@ -448,8 +436,8 @@ async def update_resident(
                 resident_id
             ))
         db.commit()
-    except sqlite3.Error as e:
-        return error_response(str(e), 500, 500)
+    except sqlite3.Error:
+        return error_response("Ошибка сервера", "DB_ERROR", 500)
     finally:
         db.close()
     
@@ -575,7 +563,7 @@ async def get_leave_application(
     
     if not app_data:
         conn.close()
-        return error_response("Application not found", "APPLICATION_NOT_FOUND", 404)
+        return error_response("Заявление не найдено", "APPLICATION_NOT_FOUND", 404)
     
     resident = conn.execute('''
         SELECT * FROM residents WHERE id = ?
@@ -634,7 +622,7 @@ async def create_leave_application_json(
     db = get_db()
     resident = db.execute("SELECT 1 FROM residents WHERE id = ?", (application.resident_id,)).fetchone()
     if not resident:
-        return error_response("Resident not found", "RESIDENT_NOT_FOUND", 404)
+        return error_response("Интернатовец не найден", "RESIDENT_NOT_FOUND", 404)
     
     try:
         with db:
@@ -664,8 +652,8 @@ async def create_leave_application_json(
                 }
             }
             
-    except sqlite3.Error as e:
-        return error_response(str(e), "DB_ERROR", 500)
+    except sqlite3.Error:
+        return error_response("Ошибка сервера", "DB_ERROR", 500)
     finally:
         db.close()
 
@@ -682,7 +670,7 @@ async def upload_application_file(
     
     if not app_exists:
         conn.close()
-        return error_response("Application not found", "APPLICATION_NOT_FOUND", 404)
+        return error_response("Заявление не найдено", "APPLICATION_NOT_FOUND", 404)
     
     file_uuid = str(uuid.uuid4())
     filename = f"{file_uuid}_{file.filename}"
@@ -691,8 +679,8 @@ async def upload_application_file(
     try:
         with open(file_path, "wb") as buffer:
             buffer.write(await file.read())
-    except Exception as e:
-        return error_response(str(e), "FILE_SAVE_ERROR", 500)
+    except Exception:
+        return error_response("Ошибка сервера", "FILE_SAVE_ERROR", 500)
     
     try:
         conn.execute('''
@@ -702,8 +690,8 @@ async def upload_application_file(
         ''', (application_id, file.filename, file_path))
         conn.commit()
         return {"success": True, "data": {}}
-    except sqlite3.Error as e:
-        return error_response(str(e), "DB_ERROR", 500)
+    except sqlite3.Error:
+        return error_response("Ошибка сервера", "DB_ERROR", 500)
     finally:
         conn.close()
 
@@ -721,7 +709,7 @@ async def delete_application_file(
         ''', (application_id, path)).fetchone()
         
         if not file_info:
-            return error_response("File not found", "FILE_NOT_FOUND", 404)
+            return error_response("Файл не найден", "FILE_NOT_FOUND", 404)
         
         try:
             os.remove(file_info['filepath'])
@@ -735,8 +723,8 @@ async def delete_application_file(
         conn.commit()
         
         return {"success": True, "data": {}}
-    except Exception as e:
-        return error_response(str(e), "SERVER_ERROR", 500)
+    except Exception:
+        return error_response("Ошибка сервера", "SERVER_ERROR", 500)
     finally:
         conn.close()
 
@@ -755,12 +743,12 @@ async def update_application_comment(
         ''', (comment.content, application_id))
         
         if result.rowcount == 0:
-            return error_response("Application not found", "APPLICATION_NOT_FOUND", 404)
+            return error_response("Заявление не найдено", "APPLICATION_NOT_FOUND", 404)
             
         conn.commit()
         return {"success": True, "data": {}}
-    except sqlite3.Error as e:
-        return error_response(str(e), "DB_ERROR", 500)
+    except sqlite3.Error:
+        return error_response("Ошибка сервера", "DB_ERROR", 500)
     finally:
         conn.close()
 
@@ -772,11 +760,7 @@ async def update_application_status(
 ):
     valid_statuses = {'review', 'denied', 'cancelled', 'accepted'}
     if status_data.status not in valid_statuses:
-        return error_response(
-            "Invalid status value", 
-            "INVALID_STATUS",
-            status_code=400
-        )
+        return error_response("Неправильный статус рассмотрения заявления", "INVALID_REVIEW_STATUS", 400)
     
     conn = get_db()
     try:
@@ -787,12 +771,12 @@ async def update_application_status(
         ''', (status_data.status, application_id))
         
         if result.rowcount == 0:
-            return error_response("Application not found", "APPLICATION_NOT_FOUND", 404)
+            return error_response("Заявление не найдено", "APPLICATION_NOT_FOUND", 404)
             
         conn.commit()
         return {"success": True, "data": {}}
-    except sqlite3.Error as e:
-        return error_response(str(e), "DB_ERROR", 500)
+    except sqlite3.Error:
+        return error_response("Ошибка сервера", "DB_ERROR", 500)
     finally:
         conn.close()
 
@@ -839,7 +823,7 @@ async def add_cleaning_date(
     try:
         date_str = f"{date_req.day} {month_names[date_req.month - 1][:3].upper()}"
     except IndexError:
-        return error_response("Invalid month number", "400", 400)
+        return error_response("Неправильный месяц", "INVALID_MONTH", 400)
 
     conn = get_db()
     try:
@@ -847,7 +831,7 @@ async def add_cleaning_date(
         conn.commit()
         return {"success": True, "data": {}}
     except sqlite3.IntegrityError:
-        return error_response("Date already exists", "400", 400);
+        return error_response("Дата уже существует", "DATE_ALREADY_EXIST", 400);
     finally:
         conn.close()
 
