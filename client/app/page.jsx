@@ -3,16 +3,22 @@
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import css from "@/styles/page.module.css"
 
+import { useContext } from 'react';
+
 import { useRouter } from 'next/navigation';
 
+import { CurrentUser } from '@/layout';
+
 export default function Home() {
+
+    const currentUser = useContext(CurrentUser)
 
     const router = useRouter()
 
     return (<>
         <div className={`${css["wrapper"]}`}>
             <p><b>Главная страница</b></p>
-            <p>Добро пожаловать в личный кабинет, <b>Иванов Иван Иванович</b></p>
+            <p>Добро пожаловать в личный кабинет, <b>{`${currentUser.surname || ""} ${currentUser.name || ""} ${currentUser.lastname || ""}`}</b></p>
 
             &nbsp;
 

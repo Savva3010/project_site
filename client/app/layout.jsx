@@ -1,7 +1,10 @@
 "use client"
 
-import { useEffect, useState, useReducer } from 'react';
+import { useEffect, useState, useReducer, createContext } from 'react';
 
+import { useRouter, usePathname } from 'next/navigation';
+
+import useLoader from '@/lib/loader';
 import useDefaultWebsocket from '@/lib/websocket';
 
 import localFont from "next/font/local";
@@ -29,10 +32,63 @@ const geistMono = localFont({
 import { Bounce, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import { CLIENT_URL, SERVER_URL } from '@/globals';
+
+
+
+export const CurrentUser = createContext(null)
+
 export default function RootLayout({ children }) {
+
+    const router = useRouter()
+    const pathname = usePathname()
 
     const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket()
 
+    const [ currentUser, setCurrentUser ] = useLoader()
+
+    // Login 
+    useEffect(() => {
+        setCurrentUser({type: "LOADING"})
+        let currDate = Date.now()
+
+        let expire_date = JSON.parse(localStorage.getItem("AUTH_TOKEN_EXPIRE")) || 0
+
+        if (expire_date < currDate && pathname != "/login") {
+            localStorage.removeItem("AUTH_TOKEN")
+            localStorage.removeItem("AUTH_TOKEN_EXPIRE")
+            router.push("/login", { scroll: false })
+            return
+        }
+
+        fetch(SERVER_URL + "/profile", {
+            method: "GET",
+            headers: {
+                "Key": "Authorization",
+                "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
+            },
+            mode: "cors",
+        })
+        .then(res => res.json())
+        .then((res) => {
+            if (!res.success) {
+                if (pathname != "/login") {
+                    router.push("/login", { scroll: false })
+                }
+                setCurrentUser({type: "SUCCESS", payload: null})
+            } else {
+                if (pathname === "/login") {
+                    router.push("/", { scroll: false })
+                }
+                setCurrentUser({type: "SUCCESS", payload: res.data})
+            }
+        })
+        .catch(err => {
+            console.log(err)
+        })
+    }, [pathname])
+
+    // handle websocket
     useEffect(() => {
         let op = lastJsonMessage?.op
         let ws_data = lastJsonMessage?.data
@@ -47,29 +103,33 @@ export default function RootLayout({ children }) {
 
     return (
         <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable}`}>
-            <Header />
-            <div>
-            <Sidebar />
-            <main>
-                {children}
-            </main>
-            </div>
-            <ToastContainer   
-                position="bottom-right"
-                autoClose={2000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss={false}
-                draggable={false}
-                pauseOnHover
-                theme="light"
-                transition={Bounce}
-            />
-            <Footer />
-        </body>
+            <CurrentUser.Provider value={currentUser.data}>
+                <body className={`${geistSans.variable} ${geistMono.variable}`}>
+                    <Header />
+                    <div>
+                    <Sidebar />
+                    <main>
+                        {currentUser.status === "SUCCESS" ?
+                        children :
+                        <></>}
+                    </main>
+                    </div>
+                    <ToastContainer   
+                        position="bottom-right"
+                        autoClose={2000}
+                        hideProgressBar={false}
+                        newestOnTop={false}
+                        closeOnClick
+                        rtl={false}
+                        pauseOnFocusLoss={false}
+                        draggable={false}
+                        pauseOnHover
+                        theme="light"
+                        transition={Bounce}
+                    />
+                    <Footer />
+                </body> 
+            </CurrentUser.Provider>
         </html>
     );
 }

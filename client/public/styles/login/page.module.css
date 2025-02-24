@@ -13,7 +13,7 @@
 }
 
 .error {
-    background-color: rgba(255, 0, 0, 0.25);
+    background-color: rgba(255, 230, 230);
     border: 2px solid rgb(255, 0, 0);
     border-radius: 5px;
     padding: 15px;

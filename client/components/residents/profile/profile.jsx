@@ -85,8 +85,9 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
         let controller = new AbortController()
         fetch(SERVER_URL + "/residents/" + openedProfileId, {
             method: "GET",
-            header: {
-
+            headers: {
+                "Key": "Authorization",
+                "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
             },
             signal: controller.signal
         })

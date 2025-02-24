@@ -94,8 +94,9 @@ export default function Application({ openedApplicationId, setOpenedApplicationI
         let controller = new AbortController()
         fetch(SERVER_URL + "/applications/leave/" + openedApplicationId, {
             method: "GET",
-            header: {
-
+            headers: {
+                "Key": "Authorization",
+                "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
             },
             signal: controller.signal
         })

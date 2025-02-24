@@ -7,7 +7,9 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { SERVER_URL } from '@/globals';
+import { useCookies } from 'react-cookie';
+
+import { CLIENT_URL, SERVER_URL } from '@/globals';
 
 function Submit() {
     const { pending } = useFormStatus();
@@ -20,16 +22,21 @@ export default function Login() {
 
     const router = useRouter()
 
-    const [ errorId, setErrorId ] = useState(200);
+    const [ errorId, setErrorId ] = useState("200");
+    const [ cookies, setCookie, removeCookie ] = useCookies();
 
     function submit(formData) {
         const login = formData.get("login")
         const password = formData.get("password")
 
+        let currDate = Date.now()
+
         fetch(SERVER_URL + "/token", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "Key": "Authorization",
+                "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
             },
             mode: "cors",
             body: JSON.stringify({
@@ -42,7 +49,10 @@ export default function Login() {
             if (!res.success) {
                 setErrorId(res.data.error_id)
             } else {
-                // TODO: make save token
+                setErrorId(200)
+                localStorage.setItem("AUTH_TOKEN", JSON.stringify(res.data.access_token))
+                localStorage.setItem("AUTH_TOKEN_EXPIRE", JSON.stringify(new Date(currDate + 24 * 60 * 60 * 1000).getTime()))
+                router.push("/", { scroll: false })
             }
         })
         .catch(err => {
@@ -54,8 +64,8 @@ export default function Login() {
         return <div className={`${css["error"]}`}>
             <p>Что-то пошло не так.</p>
             <p>&nbsp;</p>
-            {errorId == 401 ?
-                <p>Неверное имя пользоаиеля или пароль</p> :
+            {errorId == "401" ?
+                <p>Неверное имя пользователя или пароль</p> :
                 <p>Повторите попытку позднее</p>
             }
         </div>
@@ -65,7 +75,7 @@ export default function Login() {
         <div className={`${css["wrapper"]}`}>
             <form action={submit}>
                 <h2>Вход в систему</h2>
-                {errorId != 200 ? showError() : <></>}
+                {errorId != "200" ? showError() : <></>}
                 <div>
                     <label htmlFor="login">Имя пользователя</label>
                     <input type="text" name="login" id="login" required/>

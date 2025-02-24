@@ -34,6 +34,8 @@ export default function FileActionModal({ applicationId, modalInfo, setModalInfo
             fetch(SERVER_URL + `/applications/leave/${applicationId}/file?${name.toString()}`, {
                 method: "POST",
                 headers: {
+                    "Key": "Authorization",
+                    "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
                 },
                 mode: "cors",
                 body: data
@@ -73,6 +75,8 @@ export default function FileActionModal({ applicationId, modalInfo, setModalInfo
             fetch(SERVER_URL + `/applications/leave/${applicationId}/file?${path.toString()}`, {
                 method: "DELETE",
                 headers: {
+                    "Key": "Authorization",
+                    "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
                 },
                 mode: "cors"
             })

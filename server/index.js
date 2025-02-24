@@ -39,7 +39,7 @@ app.use(methodOverride("_method"))
 app.use((req, res, next) => {
     res.set('Access-Control-Allow-Origin', ['http://localhost:3000'])
     res.set("Access-Control-Allow-Methods", "*")
-    res.set("Access-Control-Allow-Headers", "Content-Type")
+    res.set("Access-Control-Allow-Headers", ["Content-Type", "Key", "Value"])
     next()
 })
 app.use(express.static("public"))
@@ -51,6 +51,71 @@ app.options("/*", (req, res) => {
     .send()
 })
 
+
+
+
+
+
+app.get('/profile', (req, res) => {
+    let token = req.get("Value")
+
+    if (!token || token.split(' ')[1].length < 7) {
+        res
+        .status(401)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Пользователь не авторизован",
+                "error_id": "NO_AUTH"
+            }
+        })
+        return
+    }
+
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": {
+            "id": 222,
+            "name": "Иван",
+            "surname": "Иванов",
+            "lastname": "Иванович",
+            "image": "/no_img.png"
+        }
+    })
+})
+
+
+
+
+
+app.post('/token', (req, res) => {
+    let {username, password} = req.body
+
+    if (username != "admin" || password != "12345") {
+        res
+        .status(401)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Неверные данные",
+                "error_id": "401"
+            }
+        })
+        return
+    }
+
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": {
+            "access_token": "asdoiasdjansdjknakjsdnakd",
+            "token_type": "bearer"
+        }
+    })
+})
 
 
 

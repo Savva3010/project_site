@@ -59,8 +59,9 @@ export default function Room({ openedRoomId, setOpenedRoomId }) {
         let controller = new AbortController()
         fetch(SERVER_URL + "/rooms/" + openedRoomId, {
             method: "GET",
-            header: {
-
+            headers: {
+                "Key": "Authorization",
+                "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
             },
             signal: controller.signal
         })

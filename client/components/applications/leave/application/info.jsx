@@ -34,6 +34,8 @@ export default function Info({ info, closePanel, setSortParams }) {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
+                    "Key": "Authorization",
+                    "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
                 },
                 mode: "cors",
                 body: JSON.stringify({
@@ -74,6 +76,8 @@ export default function Info({ info, closePanel, setSortParams }) {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
+                    "Key": "Authorization",
+                    "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
                 },
                 mode: "cors",
                 body: JSON.stringify({

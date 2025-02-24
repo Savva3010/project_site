@@ -143,7 +143,8 @@ export default function List({ sortParams, setTotal }) {
         fetch(SERVER_URL + "/applications/leave", {
             method: "GET",
             headers: {
-
+                "Key": "Authorization",
+                "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
             },
             signal: controller.signal
         })

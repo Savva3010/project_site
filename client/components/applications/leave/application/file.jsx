@@ -42,6 +42,8 @@ export default function File({ info, setFileActionModal }) {
     function download() {
         fetch(`${SERVER_URL}${info?.src}`, {
             headers: {
+                "Key": "Authorization",
+                "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
             },
             mode: "cors"
         })
