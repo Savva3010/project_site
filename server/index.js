@@ -1,5 +1,6 @@
 import 'dotenv/config'
 import express from 'express'
+import fileUpload from 'express-fileupload'
 import methodOverride from 'method-override'
 import bodyParser from 'body-parser'
 import morgan from 'morgan'
@@ -9,10 +10,10 @@ import http from 'http'
 import WebSocket, { WebSocketServer } from 'ws'
 import { v4 as uuidv4 } from 'uuid'
 
-import residents from "./data/residents.json" assert {type: "json"}
-import journals_cleaing from "./data/journals_cleaning.json" assert {type: "json"}
-import applications_leave from "./data/applications_leave.json" assert {type: "json"}
-import rooms from "./data/rooms.json" assert {type: "json"}
+import residents from "./data/residents.json" with {type: "json"}
+import journals_cleaing from "./data/journals_cleaning.json" with {type: "json"}
+import applications_leave from "./data/applications_leave.json" with {type: "json"}
+import rooms from "./data/rooms.json" with {type: "json"}
 
 //heplers start
 import { errorMsg, successMsg } from './helpers/msg.js'
@@ -24,7 +25,7 @@ const httpServer = http.createServer(app)
 
 const wsServer = new WebSocketServer({ server: httpServer })
 
-httpServer.listen(process.env.PORT, "127.0.0.1", (error) => {
+httpServer.listen(process.env.PORT, "0.0.0.0", (error) => {
     error? console.log(errorMsg(error)) : console.log(successMsg(`listening port ${process.env.PORT}`))
 })
 
@@ -33,6 +34,7 @@ app.use(morgan(":method :url (:status) :res[content-length] - :response-time ms"
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(bodyParser.raw())
+app.use(fileUpload())
 app.use(methodOverride("_method"))
 app.use((req, res, next) => {
     res.set('Access-Control-Allow-Origin', ['http://localhost:3000'])
@@ -145,7 +147,7 @@ app.get("/residents/:id", (req, res) => {
     -3 - resident is not found
     -4 - no such status
 
-    THIS IS TEMP REQUEST TO CHECK WEBSOCKETS WORK
+    XXX: THIS IS TEMP REQUEST TO CHECK WEBSOCKETS WORK
 */
 app.put("/residents/:id/status", (req, res) => {
     let { id } = req.params
@@ -439,6 +441,128 @@ app.get("/applications/leave/:id", (req, res) => {
     .json({
         "success": true,
         "data": data
+    })
+})
+
+/*
+    error ids:
+    -1 - csrf token expired
+    -2 - not enough data
+    -3 - application is not found
+    -4 - file is not found
+*/
+app.delete("/applications/leave/:id/file", (req, res) => {
+    let { id } = req.params
+    let { path } = req.query
+    
+    id = Number(id)
+
+    let application = applications_leave.findIndex(application => application.id === id)
+
+    if (application === -1) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Заявление не найдено",
+                "error_id": -3
+            }
+        })
+        return
+    }
+
+    if (path === null) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Не хватает данных",
+                "error_id": -2
+            }
+        })
+        return
+    }
+
+    let file = applications_leave[application].files.findIndex(file => file.src === path)
+
+    if (file === -1) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Скан не найден",
+                "error_id": -4
+            }
+        })
+        return
+    }
+
+    applications_leave[application].files.splice(file, 1)
+
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": null
+    })
+})
+
+/*
+    error ids:
+    -1 - csrf token expired
+    -2 - not enough data
+    -3 - application is not found
+*/
+app.post("/applications/leave/:id/file", (req, res) => {
+    let { id } = req.params
+    let { name } = req.query
+
+    id = Number(id)
+
+    if (!name || !req.files || Object.keys(req.files).length === 0 || !req.files.main) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Не хватает данных",
+                "error_id": -2
+            }
+        })
+        return
+    }
+
+    let application = applications_leave.findIndex(application => application.id === id)
+
+    if (application === -1) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Заявление не найдено",
+                "error_id": -3
+            }
+        })
+        return
+    }
+
+    const file = req.files.main
+
+    applications_leave[application].files.push({
+        "filename": name,
+        "src": "/no_img.png",
+        "blur_hash": "|RRMb$of_3ay-;j[WBt7M{xuayRjofj[ayoffQay~qWBIUofIUj[j[Rjt7IUof%MRjayofRjayj[%Mj[M{WBj[j[ofoft7-;WBM{t7j[Rjt7j[ay9Fay%Moft7WBWBj[RjWBofofRjj[t7WBayj[ofj[ayWBj[ofWBWBj["
+    })
+
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": null
     })
 })
 

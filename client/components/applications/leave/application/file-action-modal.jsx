@@ -8,12 +8,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { location } from '@/enums';
 
+import { toast } from 'react-toastify';
+
 import { SERVER_URL } from '@/globals';
 
-export default function FileActionModal({ modalInfo, setModalInfo }) {
-
-    const [ addContent, setAddContent ] = useState("")
-
+export default function FileActionModal({ applicationId, modalInfo, setModalInfo }) {
+    const router = useRouter()
+    
+    const [ file, setFile ] = useState()
 
     // Close modal
     function closeModal() {
@@ -22,14 +24,87 @@ export default function FileActionModal({ modalInfo, setModalInfo }) {
 
     // TODO: make delete and addfile
     function addFile() {
+        if (!file) return
+        let promise = new Promise((resolve, reject) => {      
+            let data = new FormData()
+            data.set("main", file)
 
+            let name = new URLSearchParams
+            name.set("name", file.name)
+            fetch(SERVER_URL + `/applications/leave/${applicationId}/file?${name.toString()}`, {
+                method: "POST",
+                headers: {
+                },
+                mode: "cors",
+                body: data
+            })
+            .then(res => res.json())
+            .then((res) => {
+                if (!res.success) {
+                    reject(res.data.message)
+                } else {
+                    resolve()
+                    closeModal()
+                }
+            })
+            .catch(err => {
+                reject()
+                console.log(err)
+            })
+        })
+        
+        toast.promise(promise, {
+            pending: "Добавление файла",
+            success: "файл добавлен",
+            error: {
+                theme: "colored",
+                autoClose: 10000,
+                render({data}) {
+                    return "Не удалось добавить файл: " + (data || "")
+                }
+            }   
+        })
     }
 
     function deleteFile() {
-
+        let promise = new Promise((resolve, reject) => {
+            let path = new URLSearchParams
+            path.set("path", modalInfo.info?.src)
+            fetch(SERVER_URL + `/applications/leave/${applicationId}/file?${path.toString()}`, {
+                method: "DELETE",
+                headers: {
+                },
+                mode: "cors"
+            })
+            .then(res => res.json())
+            .then((res) => {
+                if (!res.success) {
+                    reject(res.data.message)
+                } else {
+                    resolve()
+                    closeModal()
+                }
+            })
+            .catch(err => {
+                reject()
+                console.log(err)
+            })
+        })
+        
+        toast.promise(promise, {
+            pending: "Удаление файла",
+            success: "файл удалён",
+            error: {
+                theme: "colored",
+                autoClose: 10000,
+                render({data}) {
+                    return "Не удалось удалить файл: " + (data || "")
+                }
+            }   
+        })
     }
 
-    // Show hint above the note/warn
+    // Show hint above the add/delete
     function showHint() {
         if (modalInfo.category === "ADD") {
             return "Выберите файл"
@@ -38,10 +113,12 @@ export default function FileActionModal({ modalInfo, setModalInfo }) {
         }
     }
 
-    // Show note/warn
+    // Show add/delete
     function showContent() {
         if (modalInfo.category === "ADD") {
-            return <input type='file'/>
+            return <input type='file'
+                accept='.png,.jpg,.jpeg,.svg'
+                onChange={(event) => setFile(event.target.files?.[0])}/>
         } else {
             return <a
                 href={`${SERVER_URL}${modalInfo.info?.src}`}

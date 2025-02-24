@@ -174,7 +174,7 @@ export default function Application({ openedApplicationId, setOpenedApplicationI
                     {fileActionModal.category === null ?
                     <></> :
                     
-                    <FileActionModal modalInfo={fileActionModal} setModalInfo={setFileActionModal} />
+                    <FileActionModal applicationId={openedApplicationId} modalInfo={fileActionModal} setModalInfo={setFileActionModal} />
                     }
 
                     <div className={`${css["application"]}`}>
