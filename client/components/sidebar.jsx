@@ -5,9 +5,9 @@ import css from "@/styles/sidebar.module.css"
 
 import SidebarCatalog from './sidebar-catalog';
 
-export default function Sidebar() {
+export default function Sidebar({ collapsed }) {
     return (
-        <div className={`${css["sidebar"]}`}>
+        <div className={`${css["sidebar"]} ${!collapsed ? css["mob-show"] : ""}`}>
             <SidebarCatalog name="Список проживающих" href="/residents" />
             <SidebarCatalog name="Сведения о комнатах" href="/rooms" />
             <SidebarCatalog name="Журналы">

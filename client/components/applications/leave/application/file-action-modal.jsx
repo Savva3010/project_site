@@ -15,15 +15,14 @@ import { SERVER_URL } from '@/globals';
 export default function FileActionModal({ applicationId, modalInfo, setModalInfo }) {
     const router = useRouter()
     
-    const [ file, setFile ] = useState()
-
     // Close modal
     function closeModal() {
         setModalInfo({type: "CLOSE"})
     }
 
-    // TODO: make delete and addfile
-    function addFile() {
+    function addFile(formData) {
+        let file = formData.get("file")
+
         if (!file) return
         let promise = new Promise((resolve, reject) => {      
             let data = new FormData()
@@ -68,7 +67,7 @@ export default function FileActionModal({ applicationId, modalInfo, setModalInfo
         })
     }
 
-    function deleteFile() {
+    function deleteFile(formData) {
         let promise = new Promise((resolve, reject) => {
             let path = new URLSearchParams
             path.set("path", modalInfo.info?.src)
@@ -120,9 +119,7 @@ export default function FileActionModal({ applicationId, modalInfo, setModalInfo
     // Show add/delete
     function showContent() {
         if (modalInfo.category === "ADD") {
-            return <input type='file'
-                accept='.png,.jpg,.jpeg,.svg'
-                onChange={(event) => setFile(event.target.files?.[0])}/>
+            return <input type='file' name="file" accept='.png,.jpg,.jpeg,.svg' required/>
         } else {
             return <a
                 href={`${SERVER_URL}${modalInfo.info?.src}`}
@@ -144,20 +141,20 @@ export default function FileActionModal({ applicationId, modalInfo, setModalInfo
 
             <p className={`${css["title"]}`}><b>{modalInfo.category === "ADD" ? "Добавление" : "Удаление"}</b></p>
 
-            <div className={`${css["modal"]}`}>
+            <form action={modalInfo.category === "ADD" ? addFile : deleteFile} className={`${css["modal"]}`}>
                 <p className={`${css["hint"]}`}>{showHint()}</p>
                 {showContent()}
                 <div className={`${css["buttons"]}`}>
                     {modalInfo.category === "ADD" ?
-                    <button onClick={addFile} className={`${css["button-add"]}`}>Добавить</button> :
+                    <button type="submit" className={`${css["button-add"]}`}>Добавить</button> :
 
                     <>
-                    <button onClick={deleteFile} className={`${css["button-delete"]}`}>Да</button>
-                    <button onClick={closeModal} className={`${css["button-delete"]}`}>Нет</button>
+                    <button type="submit" className={`${css["button-delete"]}`}>Да</button>
+                    <button type="button" onClick={closeModal} className={`${css["button-delete"]}`}>Нет</button>
                     </>
                 }
                 </div>
-            </div>
+            </form>
         </div>
     </>);
 }

@@ -47,6 +47,8 @@ export default function RootLayout({ children }) {
 
     const [ currentUser, setCurrentUser ] = useLoader()
 
+    const [ sidebarCollapsed, setSidebarCollapsed ] = useState(true)
+
     // Login 
     useEffect(() => {
         setCurrentUser({type: "LOADING"})
@@ -75,7 +77,7 @@ export default function RootLayout({ children }) {
                 if (pathname != "/login") {
                     router.push("/login", { scroll: false })
                 }
-                setCurrentUser({type: "SUCCESS", payload: null})
+                setCurrentUser({type: "ERROR", payload: null})
             } else {
                 if (pathname === "/login") {
                     router.push("/", { scroll: false })
@@ -105,11 +107,12 @@ export default function RootLayout({ children }) {
         <html lang="en">
             <CurrentUser.Provider value={currentUser.data}>
                 <body className={`${geistSans.variable} ${geistMono.variable}`}>
-                    <Header />
+                    <Header sidebarCollapsed={sidebarCollapsed} setSidebarCollapsed={setSidebarCollapsed} />
                     <div>
-                    <Sidebar />
+                    <Sidebar collapsed={sidebarCollapsed} />
                     <main>
-                        {currentUser.status === "SUCCESS" ?
+                        {currentUser.status === "SUCCESS" && pathname != "/login" ||
+                        currentUser.status === "ERROR" && pathname === "/login" ?
                         children :
                         <></>}
                     </main>
@@ -133,3 +136,6 @@ export default function RootLayout({ children }) {
         </html>
     );
 }
+
+
+// TODO: Make journals/leave page

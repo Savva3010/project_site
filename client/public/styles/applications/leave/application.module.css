@@ -185,9 +185,19 @@
 
 .col3 > button {
     padding: 5px 15px;
-    border: 1px solid #337AB7;
     border-radius: 2px;
     color: #337AB7;
+    border: 1px solid #337AB7;
+    transition: background-color 0.1s ease-in-out;
+}
+
+.col3 > button:hover {
+    background-color: #F8F8F8;
+}
+
+.col3 > button:active {
+    color: #fff;
+    background-color: #007bff;
 }
 
 .col3-comment {
@@ -309,4 +319,14 @@
     border-radius: 5px;
     border: 1px solid #007BFF;
     color: #007BFF;
+    transition: background-color 0.1s ease-in-out;
+}
+
+.files-add:hover {
+    background-color: #F8F8F8;
+}
+
+.files-add:active {
+    color: #fff;
+    background-color: #007bff;
 }

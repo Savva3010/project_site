@@ -130,4 +130,14 @@
     border: 1px solid #007BFF;
     border-radius: 5px;
     padding: 5px 15px;
+    transition: background-color 0.1s ease-in-out;
+}
+
+.header2 button:hover {
+    background-color: #F8F8F8;
+}
+
+.header2 button:active {
+    color: #fff;
+    background-color: #007bff;
 }

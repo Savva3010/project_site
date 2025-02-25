@@ -83,9 +83,8 @@ export default function DateModal({ dates, modalInfo, setModalInfo }) {
         "АВГ": 31
     }
 
-    const [ selectedMonth, setSelectedMonth ] = useState(months[0].value)
-    
-    const [ selectedDay, setSelectedDay ] = useState("NO")
+    const [ selectedMonth, setSelectedMonth ] = useState("СЕН")
+    const [ selectedDay, setSelectedDay ] = useState(1)
 
     // You can select only days that are not added yet
     const daysToSelect = useMemo(() => {
@@ -106,7 +105,10 @@ export default function DateModal({ dates, modalInfo, setModalInfo }) {
     }
 
     // Make add_date API request
-    function addDate() {
+    function addDate(formData) {
+        let selectedMonth = formData.get("month")
+        let selectedDay = formData.get("day")
+
         if (selectedDay === "NO" || !selectedDay || !selectedMonth) return
         setModalInfo({type: "CLOSE"})
 
@@ -151,7 +153,7 @@ export default function DateModal({ dates, modalInfo, setModalInfo }) {
     }
 
     // Make delete_date API request
-    function deleteDate() {
+    function deleteDate(formData) {
         setModalInfo({type: "CLOSE"})
         let promise = new Promise((resolve, reject) => {
             fetch(SERVER_URL + "/journals/cleaning/dates", {
@@ -197,16 +199,16 @@ export default function DateModal({ dates, modalInfo, setModalInfo }) {
     function showSelector() {
         return <div className={`${css["selectors"]}`}>
             <div className={`${css["selector"]}`}>
-                <label htmlFor="add-date-modal-select-month">Месяц</label>
-                <select value={selectedMonth} onChange={(evt) => setSelectedMonth(evt.target.value)} name="" id="add-date-modal-select-month">
+                <label htmlFor="month">Месяц</label>
+                <select value={selectedMonth} onChange={(evt) => setSelectedMonth(evt.target.value)} name="month" id="month" required>
                     {months.map((month, idx) => {
                         return <option key={idx} value={month.value}>{month.text}</option>
                     })}
                 </select>
             </div>
             <div className={`${css["selector"]}`}>
-                <label htmlFor="add-date-modal-select-day">Число</label>
-                <select onChange={(evt) => setSelectedDay(evt.target.value)} name="" id="add-date-modal-select-day">
+                <label htmlFor="day">Число</label>
+                <select onChange={(evt) => setSelectedDay(evt.target.value)} name="day" id="day" required>
                     {daysToSelect.map((day, idx) => {
                         return <option key={idx} value={day.value}>{day.text}</option>
                     })}
@@ -226,22 +228,23 @@ export default function DateModal({ dates, modalInfo, setModalInfo }) {
 
             <p className={`${css["title"]}`}><b>{modalInfo.date === null ? "Добавление" : "Удаление"}</b></p>
 
-            <div className={`${css["modal"]}`}>
+            <form action={modalInfo.date === null ? addDate : deleteDate} className={`${css["modal"]}`}>
                 <p className={`${css["hint"]}`}>{modalInfo.date === null ? "Выберите дату для добавления": `Вы уверены, что хотите удалить дату ${modalInfo.date}?`}</p>
                 {modalInfo.date != null ?
                 <></> :
-                showSelector()}
+                showSelector()
+                }
                 <div className={`${css["buttons"]}`}>
                     {modalInfo.date === null ?
-                    <button onClick={addDate} className={`${css["button-add"]}`}>Добавить</button> :
+                    <button type="submit" className={`${css["button-add"]}`}>Добавить</button> :
 
                     <>
-                    <button onClick={deleteDate} className={`${css["button-delete"]}`}>Да</button>
-                    <button onClick={closeModal} className={`${css["button-delete"]}`}>Нет</button>
+                    <button type="submit" className={`${css["button-delete"]}`}>Да</button>
+                    <button type="button" onClick={closeModal} className={`${css["button-delete"]}`}>Нет</button>
                     </>
                 }
                 </div>
-            </div>
+            </form>
         </div>
     </>);
 }

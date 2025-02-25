@@ -17,6 +17,7 @@
 
 .title span {
     font-size: 1.25rem;
+    display: none;
 }
 
 .title-txt {
@@ -46,6 +47,7 @@
     align-items: center;
     gap: 10px;
     color: #337AB7;
+    position: relative;
 }
 
 .profile span {
@@ -61,4 +63,74 @@
     border-right: .3em solid transparent;
     border-bottom: 0;
     border-left: .3em solid transparent;
+}
+
+
+.profile > div {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    z-index: 1000;
+    margin-top: 0.125rem;
+    padding: 0.5rem 0;
+    min-width: 10rem;
+    border-radius: 0.25rem;
+    box-shadow: 0px 0px 15px 10px rgba(0, 0, 0, 0.5);
+    background: #FFFFFF;
+    font-size: 1rem;   
+}
+
+.profile div p {
+    white-space: nowrap;
+    display: block;
+    width: 100%;
+    padding: 0.25rem 1.5rem;
+    color: #337AB7;
+    display: none;
+}
+
+.profile-line {
+    display: none;
+    height: 1px;
+    width: 100%;
+    background-color: #000000;
+}
+
+.profile button {
+    white-space: nowrap;
+    display: block;
+    width: 100%;
+    padding: 0.25rem 1.5rem;
+}
+
+.profile button:hover {
+    background-color: #F8F8F8;
+}
+
+.profile button:active {
+    color: #fff;
+    background-color: #007bff;
+}
+
+.profile button span {
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+}
+
+@media (max-width: 575px) {
+    .title span {
+        display: block;
+    }
+
+    .profile-line {
+        display: block;
+    }
+
+    .profile > p {
+        display: none;
+    }
+
+    .profile div p {
+        display: block;
+    }
 }

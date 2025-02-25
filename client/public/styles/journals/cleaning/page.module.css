@@ -142,6 +142,16 @@
     border-radius: 5px;
     border: 1px solid #007BFF;
     color: #007BFF;
+    transition: background-color 0.1s ease-in-out;
+}
+
+.th-date button:hover {
+    background-color: #F8F8F8;
+}
+
+.th-date button:active {
+    color: #fff;
+    background-color: #007bff;
 }
 
 .table th div p,
@@ -172,4 +182,14 @@
     border-radius: 5px;
     border: 1px solid #007BFF;
     color: #007BFF;
+    transition: background-color 0.1s ease-in-out;
+}
+
+.button-add button:hover {
+    background-color: #F8F8F8;
+}
+
+.button-add button:active {
+    color: #fff;
+    background-color: #007bff;
 }

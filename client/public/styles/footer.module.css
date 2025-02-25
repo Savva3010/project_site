@@ -20,3 +20,19 @@
 .footer a {
     color: #007BFF;
 }
+
+
+
+.mob-shown {
+    display: none;
+}
+
+@media (max-width: 575px) {
+    .mob-shown {
+        display: block;
+    }
+
+    .pc-shown {
+        display: none;
+    }
+}

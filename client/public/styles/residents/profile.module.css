@@ -226,12 +226,29 @@
     gap: 5px;
 }
 
-.col3-btn-notes-active {
-    background: #FFEEAA;
+
+.col3-btn:hover {
+    background-color: #F8F8F8;
 }
 
+.col3-btn:active {
+    color: #fff;
+    background-color: #007bff;
+}
+
+.col3-btn:active button {
+    border-color: #fff;
+    color: #fff;
+}
+
+.col3-btn-notes-active {
+    background-color: #FFEEAA;
+}
+
+
+
 .col3-btn-warns-active {
-    background: #F0F0F0;
+    background-color: #F0F0F0;
 }
 
 .col3-btn-add {
@@ -244,6 +261,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.col3-btn-add:hover {
+    background-color: #E8E8E8;
+}
+
+.col3-btn-add:active {
+    color: #fff;
+    background-color: #007bff;
 }
 
 .col3-column {

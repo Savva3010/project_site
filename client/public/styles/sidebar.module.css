@@ -5,6 +5,7 @@
     overflow-y: auto;
     padding: 5px 10px;
     font-size: 1.2rem;
+    z-index: 1000;
 }
 
 .sidebar-catalog-name {
@@ -26,5 +27,10 @@
 @media (max-width: 575px) {
     .sidebar {
         display: none;
+    }
+
+    .mob-show {
+        display: block;
+        position: absolute;
     }
 }

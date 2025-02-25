@@ -32,17 +32,17 @@ export default function AddApplication({ modalInfo, setModalInfo }) {
 
             <p className={`${css["title"]}`}><b>Добавить заявление</b></p>
 
-            <div className={`${css["modal"]}`}>
+            <form action={() => {}} className={`${css["modal"]}`}>
                 <div className={`${css["category"]}`}>
                     <p><b>Проживающий</b></p>
                     <div className={`${css["selector"]}`}>
                         <label htmlFor="add-app-modal-select-room">Комната</label>
-                        <select name="" id="add-app-modal-select-room">
+                        <select name="" id="add-app-modal-select-room" required>
                         </select>
                     </div>
                     <div className={`${css["selector"]}`}>
                         <label htmlFor="add-app-modal-select-resident">Проживающий</label>
-                        <select name="" id="add-app-modal-select-resident">
+                        <select name="" id="add-app-modal-select-resident" required>
                         </select>
                     </div>
                 </div>
@@ -50,29 +50,29 @@ export default function AddApplication({ modalInfo, setModalInfo }) {
                     <p><b>Дополнительно</b></p>
                     <div className={`${css["selector"]}`}>
                         <label htmlFor="add-app-modal-select-leave">Время выхода</label>
-                        <select name="" id="add-app-modal-select-leave">
+                        <select name="" id="add-app-modal-select-leave" required>
                         </select>
                     </div>
                     <div className={`${css["selector"]}`}>
                         <label htmlFor="add-app-modal-select-address">Адрес</label>
-                        <select name="" id="add-app-modal-select-address">
+                        <select name="" id="add-app-modal-select-address" required>
                         </select>
                     </div>
                     <div className={`${css["selector"]}`}>
                         <label htmlFor="add-app-modal-select-return">Время входа</label>
-                        <select name="" id="add-app-modal-select-return">
+                        <select name="" id="add-app-modal-select-return" required>
                         </select>
                     </div>
                     <div className={`${css["selector"]}`}>
                         <label htmlFor="add-app-modal-select-accompany">Сопровождающие</label>
-                        <select name="" id="add-app-modal-select-accompany">
+                        <select name="" id="add-app-modal-select-accompany" required>
                         </select>
                     </div>
                 </div>
                 <div className={`${css["buttons"]}`}>
-                    <button onClick={() => {}} className={`${css["button-add"]}`}>Добавить</button>
+                    <button className={`${css["button-add"]}`}>Добавить</button>
                 </div>
-            </div>
+            </form>
         </div>
     </>);
 }

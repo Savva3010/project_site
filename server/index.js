@@ -134,7 +134,7 @@ app.get('/residents', (req, res) => {
             "telegram": resident.telegram,
             "status": {
                 "status": resident.status.status
-            }
+            },
         }
         data.push(push)
     })
@@ -182,7 +182,9 @@ app.get("/residents/:id", (req, res) => {
         "email": resident.email,
         "telegram": resident.telegram,
         "status": resident.status,
-        "parents": []
+        "parents": [],
+        "notes": resident.notes,
+        "warns": resident.warns
     }
 
     resident["parents"].forEach(parent => {
