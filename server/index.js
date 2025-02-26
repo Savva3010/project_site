@@ -207,6 +207,201 @@ app.get("/residents/:id", (req, res) => {
 
 })
 
+app.post("/residents/:id/notes", (req, res) => {
+    let { id } = req.params
+    id = Number(id)
+    
+    let {content} = req.body
+
+    if (!content) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Не хватает данных",
+                "error_id": -2
+            }
+        })
+        return
+    }
+
+    let resident = residents.findIndex(resident => resident.id === id)
+
+    if (resident === -1) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Проживающий не найден",
+                "error_id": -3
+            }
+        })
+        return
+    }
+
+
+    residents[resident].notes.push({
+        "id": residents[resident].notes.length + 1,
+        "content": content
+    })
+    
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": null
+    })
+
+})
+
+app.delete("/residents/:id/notes", (req, res) => {
+    let { id } = req.params
+    id = Number(id)
+    
+    let note_id = req.body.id
+
+    let resident = residents.findIndex(resident => resident.id === id)
+
+    if (resident === -1) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Проживающий не найден",
+                "error_id": -3
+            }
+        })
+        return
+    }
+
+    let note = residents[resident].notes.findIndex(note => note.id === note_id)
+
+    if (note === -1) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Заметка не найдена",
+                "error_id": -4
+            }
+        })
+        return
+    }
+
+    residents[resident].notes.splice(note, 1)
+
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": null
+    })
+
+})
+
+app.post("/residents/:id/warns", (req, res) => {
+    let { id } = req.params
+    id = Number(id)
+    
+    let {content} = req.body
+
+    if (!content) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Не хватает данных",
+                "error_id": -2
+            }
+        })
+        return
+    }
+
+    let resident = residents.findIndex(resident => resident.id === id)
+
+    if (resident === -1) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Проживающий не найден",
+                "error_id": -3
+            }
+        })
+        return
+    }
+
+    let date = new Date(Date.now()).toISOString().split('T')[0].split('-')
+
+    residents[resident].warns.push({
+        "id": residents[resident].warns.length + 1,
+        "content": content,
+        "author": "Иванов Иван Иванович",
+        "created_at": date[2] + '.' + date[1] + '.' + date[0]
+    })
+    
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": null
+    })
+
+})
+
+app.delete("/residents/:id/warns", (req, res) => {
+    let { id } = req.params
+    id = Number(id)
+    
+    let warn_id = req.body.id
+
+    let resident = residents.findIndex(resident => resident.id === id)
+
+    if (resident === -1) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Проживающий не найден",
+                "error_id": -3
+            }
+        })
+        return
+    }
+
+    let warn = residents[resident].warns.findIndex(warn => warn.id === warn_id)
+
+    if (warn === -1) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Замечание не найдена",
+                "error_id": -4
+            }
+        })
+        return
+    }
+
+    residents[resident].warns.splice(warn, 1)
+
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": null
+    })
+
+})
+
 /*
     error ids:
     -1 - csrf token expired
@@ -435,6 +630,61 @@ app.get("/applications/leave", (req, res) => {
         "data": data
     })
 })
+
+app.post("/applications/leave", (req, res) => {
+
+    let {resident_id, leave_time, address, return_time, accompany} = req.body
+
+    if (!resident_id || !leave_time || !address || !return_time || !accompany) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Не хватает данных",
+                "error_id": -2
+            }
+        })
+        return
+    }
+
+    if (!residents.find(resident => resident.id === resident_id)) {  
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Проживающий не найден",
+                "error_id": -3
+            }
+        })
+        return
+    }
+
+    leave_time = new Date(leave_time).getTime() || 0
+    return_time = new Date(return_time).getTime() || 0
+
+    applications_leave.push({
+        "id": applications_leave.length + 1,
+        "resident_id": resident_id,
+        "leave": leave_time,
+        "address": address,
+        "return": return_time,
+        "accompany": accompany,
+        "created_at": Date.now(),
+        "files": [],
+        "comment": "",
+        "status": "review"
+    })
+    
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": null
+    })
+})
+
 
 /*
     error ids:

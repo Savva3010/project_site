@@ -12,10 +12,21 @@
     z-index: 25;
 }
 
+.inv {
+    top: unset;
+    bottom: 35px;
+}
+
 .wrapper svg {
     position: absolute;
     top: -15px;
     left: -15px;
+}
+
+.inv svg {
+    top: unset;
+    bottom: -15px;
+    transform: rotate(-90deg);
 }
 
 .wrapper div button {

@@ -78,11 +78,11 @@ export default function Login() {
                 {errorId != "200" ? showError() : <></>}
                 <div>
                     <label htmlFor="login">Имя пользователя</label>
-                    <input type="text" name="login" id="login" required/>
+                    <input type="text" name="login" id="login" required={true}/>
                 </div>
                 <div>
                     <label htmlFor="password">Пароль</label>
-                    <input type="password" name="password" id="password" required/>
+                    <input type="password" name="password" id="password" required={true}/>
                 </div>
                 <Submit />
             </form>

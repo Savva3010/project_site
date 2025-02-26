@@ -10,12 +10,10 @@ import { location } from '@/enums';
 
 import { SERVER_URL } from '@/globals';
 
-export default function MarkModal({ setMark }) {
-
-    //TODO: make modal inverse if in last rows
+export default function MarkModal({ setMark, isInv }) {
 
     return (<>
-        <div className={`${css["wrapper"]}`}>
+        <div className={`${css["wrapper"]} ${isInv ? css["inv"] : ""}`}>
             <svg width="35" height="35" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M0.838835 0.8389L35.01 19.7007L19.7007 35.0101L0.838835 0.8389Z" fill="white"/>
             </svg>

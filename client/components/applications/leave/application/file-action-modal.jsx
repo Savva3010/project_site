@@ -119,7 +119,7 @@ export default function FileActionModal({ applicationId, modalInfo, setModalInfo
     // Show add/delete
     function showContent() {
         if (modalInfo.category === "ADD") {
-            return <input type='file' name="file" accept='.png,.jpg,.jpeg,.svg' required/>
+            return <input type='file' name="file" accept='.png,.jpg,.jpeg,.svg' required={true}/>
         } else {
             return <a
                 href={`${SERVER_URL}${modalInfo.info?.src}`}

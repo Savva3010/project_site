@@ -84,7 +84,6 @@ export default function DateModal({ dates, modalInfo, setModalInfo }) {
     }
 
     const [ selectedMonth, setSelectedMonth ] = useState("СЕН")
-    const [ selectedDay, setSelectedDay ] = useState(1)
 
     // You can select only days that are not added yet
     const daysToSelect = useMemo(() => {
@@ -200,7 +199,7 @@ export default function DateModal({ dates, modalInfo, setModalInfo }) {
         return <div className={`${css["selectors"]}`}>
             <div className={`${css["selector"]}`}>
                 <label htmlFor="month">Месяц</label>
-                <select value={selectedMonth} onChange={(evt) => setSelectedMonth(evt.target.value)} name="month" id="month" required>
+                <select value={selectedMonth} onChange={(evt) => setSelectedMonth(evt.target.value)} name="month" id="month" required={true}>
                     {months.map((month, idx) => {
                         return <option key={idx} value={month.value}>{month.text}</option>
                     })}
@@ -208,7 +207,7 @@ export default function DateModal({ dates, modalInfo, setModalInfo }) {
             </div>
             <div className={`${css["selector"]}`}>
                 <label htmlFor="day">Число</label>
-                <select onChange={(evt) => setSelectedDay(evt.target.value)} name="day" id="day" required>
+                <select name="day" id="day" required={true}>
                     {daysToSelect.map((day, idx) => {
                         return <option key={idx} value={day.value}>{day.text}</option>
                     })}

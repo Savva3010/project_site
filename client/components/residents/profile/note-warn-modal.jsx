@@ -10,10 +10,12 @@ import { location } from '@/enums';
 
 import { SERVER_URL } from '@/globals';
 
+import { toast } from 'react-toastify';
+
 import Note from './note';
 import Warn from './warn';
 
-export default function NoteWarnModal({ modalInfo, setModalInfo }) {
+export default function NoteWarnModal({ info, modalInfo, setModalInfo }) {
 
     const [ addContent, setAddContent ] = useState("")
 
@@ -22,13 +24,92 @@ export default function NoteWarnModal({ modalInfo, setModalInfo }) {
         setModalInfo({type: "CLOSE"})
     }
 
-    // TODO: Notes and warns are static yet. There will be add_note/add_warn and delete_note/delete_warn API request
-    function addNoteWarn() {
+    // Add note/warn
+    function addNoteWarn(formData) {
+        let content = formData.get("input")
 
+        setModalInfo({type: "CLOSE"})
+        let promise = new Promise((resolve, reject) => {
+            fetch(SERVER_URL + `/residents/${info.id}/${modalInfo.category === "NOTE" ? "notes" : "warns"}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Key": "Authorization",
+                    "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
+                },
+                mode: "cors",
+                body: JSON.stringify({
+                    "content": content
+                })
+            })
+            .then(res => res.json())
+            .then((res) => {
+                if (!res.success) {
+                    reject(res.data.message)
+                } else {
+                    resolve()
+                }
+            })
+            .catch(err => {
+                reject()
+                console.log(err)
+            })
+        })
+
+        toast.promise(promise, {
+            pending: `Добавление ${modalInfo.category === "NOTE" ? "заметки" : "замечания"}`,
+            success: (modalInfo.category === "NOTE" ? "Заметка доваблена" : "Замечание добавлено"),
+            error: {
+                theme: "colored",
+                autoClose: 10000,
+                render({data}) {
+                    return `Не удалось добавить ${modalInfo.category === "NOTE" ? "заметку" : "замечание"}: ` + (data || "")
+                }
+            }   
+        })
     }
 
-    function deleteNoteWarn() {
+    // Delete note/warn
+    function deleteNoteWarn(formData) {
+        setModalInfo({type: "CLOSE"})
+        let promise = new Promise((resolve, reject) => {
+            fetch(SERVER_URL + `/residents/${info.id}/${modalInfo.category === "NOTE" ? "notes" : "warns"}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Key": "Authorization",
+                    "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
+                },
+                mode: "cors",
+                body: JSON.stringify({
+                    "id": modalInfo.info.id
+                })
+            })
+            .then(res => res.json())
+            .then((res) => {
+                if (!res.success) {
+                    reject(res.data.message)
+                } else {
+                    resolve()
+                }
+            })
+            .catch(err => {
+                reject()
+                console.log(err)
+            })
+        })
 
+        toast.promise(promise, {
+            pending: `Удаление ${modalInfo.category === "NOTE" ? "заметки" : "замечания"}`,
+            success: (modalInfo.category === "NOTE" ? "Заметка удалена" : "Замечание удалено"),
+            error: {
+                theme: "colored",
+                autoClose: 10000,
+                render({data}) {
+                    return `Не удалось удалить ${modalInfo.category === "NOTE" ? "заметку" : "замечание"}: ` + (data || "")
+                }
+            }   
+        })
     }
 
     // Show hint above the note/warn

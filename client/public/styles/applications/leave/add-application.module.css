@@ -63,7 +63,8 @@
     justify-content: space-between;
 }
 
-.selector select {
+.selector select,
+.selector input {
     width: 300px;
     height: 20px;
 }

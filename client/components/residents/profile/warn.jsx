@@ -20,12 +20,12 @@ export default function Warn({ warn, onDelete, content, setContent, placeholder 
             }
 
             {!setContent ? 
-            <p>{warn?.text}</p> :
-            <textarea placeholder={placeholder} onChange={(evt) => setContent(evt.target.value)}>{content}</textarea>
+            <p>{warn?.content}</p> :
+            <textarea placeholder={placeholder} name="input" onChange={(evt) => setContent(evt.target.value)}>{content}</textarea>
             }
             <p>&nbsp;</p>
             <p>От {warn?.author}</p>
-            <p>{warn?.date}</p>
+            <p>{warn?.created_at}</p>
         </div>
     </>);
 }

@@ -16,14 +16,14 @@ export default function Row({ isGrey, dates, room, rowIdx, markModal, setMarkMod
             <th><div><p>{room.room_number}</p></div></th>
             {dates.map((date, idx) => {
                 let mark = room.marks.find(mark => mark.date === date)
-                if (mark?. mark) {
+                if (mark?.mark) {
                     sum += mark.mark
                     ++ammount
                 }
                 return <td key={idx}><div>
                         {rowIdx != markModal.room || idx != markModal.date ?
                         <></> :
-                        <MarkModal setMark={setMark}/>}
+                        <MarkModal setMark={setMark} isInv={rowIdx > dates.length - 8}/>}
                         <button onClick={() => setMarkModal({type: "OPEN", payload: {room: rowIdx, date: idx}})}>
                             <p>{mark?.mark || ""}</p>
                         </button>

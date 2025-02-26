@@ -25,8 +25,8 @@ export default function Note({ note, onDelete, content, setContent, placeholder 
             }
 
             {!setContent ?
-            <p>{note}</p> :
-            <textarea placeholder={placeholder} value={content} onChange={(evt) => setContent(evt.target.value)} required></textarea>
+            <p>{note?.content}</p> :
+            <textarea placeholder={placeholder} name="input" value={content} onChange={(evt) => setContent(evt.target.value)} required={true}></textarea>
             }
         </div>
     </>);

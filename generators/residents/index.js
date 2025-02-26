@@ -65,11 +65,13 @@ function GenerateResident(id) {
     let notes = Random(0, randoms.notes.length)
     for (let i = 0; i < notes; ++i) {
         push.notes.push(randoms.notes[Random(0, randoms.notes.length - 1)])
+        push.notes[0].id = i + 1
     }
 
     let warns = Random(0, randoms.warns.length)
     for (let i = 0; i < warns; ++i) {
         push.warns.push(randoms.warns[Random(0, randoms.warns.length - 1)])
+        push.warns[0].id = i + 1
     }
 
     residents.push(push)

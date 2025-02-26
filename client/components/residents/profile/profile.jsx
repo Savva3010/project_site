@@ -167,7 +167,7 @@ export default function Profile({ openedProfileId, setOpenedProfileId }) {
                     {noteWarnModal.category === null ?
                     <></> :
 
-                    <NoteWarnModal modalInfo={noteWarnModal} setModalInfo={setNoteWarnModal}/>
+                    <NoteWarnModal info={resident.data} modalInfo={noteWarnModal} setModalInfo={setNoteWarnModal}/>
                     }
 
                     <div className={`${css["profile"]}`}>
