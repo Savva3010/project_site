@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, Depends, UploadFile, File, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, Depends, UploadFile, File, WebSocketDisconnect, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.responses import JSONResponse
@@ -24,7 +24,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -186,9 +186,9 @@ class BaseResponse(BaseModel):
     data: Union[dict, list]
 
 def error_response(message: str, error_id: str, status_code: int = 400):
-    return JSONResponse(
+    raise HTTPException(
         status_code=status_code,
-        content={
+        detail={
             "success": False,
             "data": {
                 "message": message,
@@ -321,17 +321,18 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("sub")
         if not username:
-            return error_response("Неправильный токен", "BAD_TOKEN", 401)
+            error_response("Неправильный токен", "BAD_TOKEN", 401)
     except jwt.PyJWTError:
-        return error_response("Неправильный токен", "BAD_TOKEN", 401)
-
+        error_response("Неправильный токен", "BAD_TOKEN", 401)
+        
     db = get_db()
     user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
     db.close()
-
+    
     if not user:
-        return error_response("Пользователь не найден", "ACCOUNT_NOT_FOUND", 401)
-    return user
+        error_response("Пользователь не найден", "USER_NOT_FOUND", 401)
+    
+    return dict(user)
 
 @app.post("/register", response_model=BaseResponse)
 async def register(user: UserCreate):
