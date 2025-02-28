@@ -286,8 +286,8 @@ class ApplicationComment(BaseModel):
 
 class ApplicationCreate(BaseModel):
     resident_id: int
-    leave_ts: int = Field(alias="leave")
-    return_ts: int = Field(alias="return")
+    leave_ts: int = Field(alias="leave_time")
+    return_ts: int = Field(alias="return_time")
     address: str
     accompany: Optional[str] = None
 
@@ -799,7 +799,7 @@ async def get_leave_detail(leave_id: int, current_user: dict = Depends(get_curre
     conn = get_db()
     leave = conn.execute('''
         SELECT lj.*, 
-               r.full_name, r.class_name, r.room, r.class_teacher, r.class_mentor,
+               r.full_name, r.class_name, r.age, r.room, r.class_teacher, r.class_mentor,
                r.mobile, r.status_type, r.status_place, r.status_until,
                r.parents_json, r.profile_image, r.blur_hash
         FROM leave_journal lj
@@ -942,7 +942,7 @@ async def get_rooms():
 
     for room in rooms:
         residents = db.execute(
-            "SELECT id, full_name, class_name FROM residents WHERE room = ?",
+            "SELECT id, full_name, class_name as class FROM residents WHERE room = ?",
             (room['room'],)
         ).fetchall()
 
