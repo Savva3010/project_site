@@ -1,0 +1,177 @@
+.loading {
+    font-size: 2rem;
+}
+.error {
+    font-size: 1.5rem;
+    color: #CC0000;
+}
+.empty {
+    font-size: 2rem;
+}
+
+.list {
+    width: 100%;
+}
+
+.list ul {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.list-header {
+    position: sticky;
+    top: -10px;
+    box-sizing: content-box;
+    padding-top: 10px;
+    margin-top: -10px;
+    background: #FFFFFF;
+}
+
+.list li {
+    list-style: none;
+    display: flex;
+    height: 40px;
+    width: 100%;
+}
+
+.list li div {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+}
+
+.list li div:not(.list-el-expired div) {
+    border: solid 1px #000000;
+    border-right: 0;
+}
+
+.list-el-expired div {
+    border: solid 1px #AAAAAA;
+    border-right: 0;
+}
+
+.list li div p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.list-el-expired p {
+    color: #AAAAAA;
+}
+
+.list li div:nth-child(1) {
+    width: 75px;
+    max-width: 75px;
+    min-width: 75px;
+}
+.list li div:nth-child(2) {
+    width: 800px;
+    min-width: 200px;
+}
+
+.list li div:nth-child(3) {
+    width: 350px;
+    min-width: 175px;
+}
+.list li div:nth-child(4) {
+    width: 350px;
+    min-width: 175px;
+}
+
+.list li:not(.list-header) div:nth-child(3),
+.list li:not(.list-header) div:nth-child(4) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+}
+
+.list li div:nth-child(5) {
+    width: 500px;
+    min-width: 100px;
+}
+.list li div:nth-child(6) {
+    width: 400px;
+    max-width: 225px;
+    min-width: 100px;
+}
+.list li div:nth-child(7) {
+    width: 450px;
+    max-width: 225px;
+    min-width: 225px;
+}
+.list li div:nth-child(8) {
+    width: 110px;
+    max-width: 110px;
+    min-width: 110px;
+}
+
+.list-el-expired div:nth-child(8) {    
+    border-right: solid 1px #AAAAAA;
+}
+
+.list li div:nth-child(8):not(.list-el-expired div) {    
+    border-right: solid 1px #000000;
+}
+
+.list li div:nth-child(8) button {
+    color: #007BFF;
+}
+
+@media (max-width: 1440px) {
+    .list li div:nth-child(6) {
+        display: none;
+    }
+}
+@media (max-width: 1400px) {
+    .list li div:nth-child(5) {
+        display: none;
+    }
+}
+@media (max-width: 1250px) {
+    .list li div:nth-child(4) {
+        display: none !important;
+    }
+}
+@media (max-width: 1050px) {
+    .list li div:nth-child(3) {
+        display: none !important;
+    }
+}
+@media (max-width: 875px) {
+    .list li div:nth-child(7) {
+        display: none;
+    }
+}
+@media (max-width: 650px) {
+    .list li div:nth-child(1) {
+        display: none;
+    }
+}
+
+
+
+
+.status-review {
+    background: #FFFF80;
+}
+.status-denied {
+    background: #FF8080;
+}
+.status-cancelled {
+    background: #FF8080;
+}
+.status-accepted {
+    background: #FFBB80;
+}
+.status-active {
+    background: #80FF80;
+}
+.status-expired {
+    background: #EEEEEE;
+}

@@ -3,8 +3,14 @@
     "baseUrl": "./app",
     "paths": {
       "@/*": ["./*"],
+      "@/public/*": ["../public/*"],
       "@/styles/*": ["../public/styles/*"],
-      "@/fonts/*": ["../public/fonts/*"]
+      "@/fonts/*": ["../public/fonts/*"],
+      "@/images/*": ["../public/images/*"],
+      "@/components/*": ["../components/*"],
+      "@/enums": ["../enums.js"],
+      "@/globals": ["../globals.js"],
+      "@/lib/*": ["../lib/*"]
     }
   }
 }

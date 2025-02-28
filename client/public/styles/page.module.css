@@ -1,0 +1,9 @@
+.wrapper button  {
+    color: #007BFF;
+}
+
+.wrapper p,
+.wrapper button {
+    display: block;
+    padding: 5px 0;
+}

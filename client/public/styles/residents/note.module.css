@@ -1,0 +1,48 @@
+.note {
+    width: 100%;
+    border-radius: 10px;
+    background: #FFEEAA;
+    padding: 10px;
+    position: relative;
+    height: max-content;
+}
+
+.note-corner {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    top: -15px;
+    left: -15px;
+}
+
+.note-close {
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.note p {
+    text-wrap: wrap;
+    width: 100%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.note textarea {
+    max-width: 100%;
+    min-width: 100%;
+    max-height: 500px;
+    min-height: 50px;
+    background: none;
+    border: none;
+    font-size: 1rem;
+}
+
+.note textarea::placeholder {
+    font-size: 1rem;
+}

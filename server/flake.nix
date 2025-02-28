@@ -25,8 +25,9 @@
             python-multipart
             uvicorn
             pyjwt
-            passlib
-              # asyncio
+              passlib
+              websockets
+
           ])
         ];
       };
