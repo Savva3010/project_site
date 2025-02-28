@@ -1,0 +1,52 @@
+{
+    "editor.detectIndentation": false,
+    "files.associations": {
+        "vector": "cpp"
+    },
+    "todo-tree.highlights.defaultHighlight": {
+        "icon": "alert",
+        "type": "tag",
+        "foreground": "black",
+        "background": "white",
+        "opacity": 50,
+        "iconColour": "blue",
+        "gutterIcon": true
+    },
+    "todo-tree.highlights.customHighlight": {
+        "TODO": {
+            "icon": "check",
+            "iconColour": "red",
+            "background": "yellow"
+        },
+        "FIXME": {
+            "iconColour": "yellow",
+            "background": "yellow"
+        },
+        "[ ]": {
+            "iconColour": "red"
+        },
+        "[x]": {
+            "iconColour": "green",
+            "background": "green",
+            "foreground": "white"
+        },
+        "HACK": {
+            "iconColour": "white",
+            "background": "red",
+            "foreground": "white"
+        },
+        "BUG": {
+            "background": "red",
+            "foreground": "white"
+        }
+    },
+    "todo-tree.general.tagGroups": {
+        "FIXME": [
+            "FIXME",
+            "FIXIT",
+            "FIX",
+        ]
+    },
+    "todo-tree.tree.showCountsInTree": true,
+    "todo-tree.tree.scanMode": "workspace only",
+}
