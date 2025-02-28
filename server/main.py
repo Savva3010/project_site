@@ -1,9 +1,8 @@
-from fastapi import FastAPI, WebSocket, Depends, UploadFile, File, WebSocketDisconnect, HTTPException, status
+from fastapi import FastAPI, WebSocket, Depends, UploadFile, File, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
-from typing import List, Optional, Union
+from pydantic import BaseModel, Field, validator
+from typing import List, Optional, Union, Literal
 from datetime import datetime, timedelta
 import sqlite3
 import os
@@ -172,6 +171,22 @@ def init_db():
         UNIQUE(date, room),
         FOREIGN KEY(date) REFERENCES cleaning_dates(date)
     )''')
+    
+    c.execute('''CREATE TABLE IF NOT EXISTS leave_journal (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        resident_id INTEGER NOT NULL,
+        application_id INTEGER REFERENCES applications(id),
+        leave_time INTEGER NOT NULL,
+        leave_marked INTEGER,
+        return_time INTEGER NOT NULL,
+        return_marked INTEGER,
+        address TEXT NOT NULL,
+        status TEXT CHECK(status IN ('inside', 'school', 'outside', 'returned')) NOT NULL DEFAULT 'inside',
+        type TEXT CHECK(type IN ('self', 'application')) NOT NULL,
+        comment TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(resident_id) REFERENCES residents(id)
+    )''')
 
     c.execute('CREATE INDEX IF NOT EXISTS idx_residents_room ON residents(room)')
     c.execute('CREATE INDEX IF NOT EXISTS idx_marks_date ON cleaning_marks(date)')
@@ -290,6 +305,65 @@ class CleaningMarkUpdate(BaseModel):
     room: str
     mark: int
 
+class ResidentResponse(BaseModel):
+    id: int
+    profile_image: dict = {
+        "src": "",
+        "blur_hash": ""
+    }
+    full_name: str
+    age: int
+    room: str
+    class_name: str = Field(alias="class")
+    class_teacher: str
+    class_mentor: str
+    mobile: str
+    status: dict
+    parents: list
+
+class LeaveEntry(BaseModel):
+    id: int
+    resident_id: int
+    full_name: str
+    class_name: str
+    room: str
+    leave: int
+    leave_marked: Optional[int] = None
+    return_time: int
+    return_marked: Optional[int] = None
+    address: str
+    status: str
+    type: str
+
+class LeaveDetail(LeaveEntry):
+    resident: ResidentResponse
+    comment: Optional[str] = None
+    application_id: Optional[int] = None
+    created_at: str
+
+class LeaveStatusUpdate(BaseModel):
+    status: Literal['inside', 'outside', 'returned']
+
+class LeaveCreate(BaseModel):
+    type: Literal['self', 'application']
+    resident_id: int
+    leave_time: Optional[int]
+    return_time: Optional[int]
+    address: Optional[str]
+    application_id: Optional[int] = None
+
+    @validator('application_id')
+    def check_application(cls, v, values):
+        if values['type'] == 'application' and not v:
+            raise ValueError('application_id required for application type')
+        return v
+
+class CommentCreate(BaseModel):
+    content: str
+
+    class Config:
+        orm_mode = True
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -317,6 +391,7 @@ def authenticate_user(username: str, password: str):
     return user
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
+    username = ""
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("sub")
@@ -427,11 +502,9 @@ async def get_residents(current_user: dict = Depends(get_current_user)):
                 "place": resident_dict['status_place'],
                 "until": resident_dict['status_until']
             },
-            "contacts": {
-                "mobile": resident_dict['mobile'],
-                "email": resident_dict['email'],
-                "telegram": resident_dict['telegram']
-            },
+            "mobile": resident_dict['mobile'],
+            "email": resident_dict['email'],
+            "telegram": resident_dict['telegram'],
             "parents": parents,
             "profile_image": resident_dict['profile_image']
         })
@@ -706,8 +779,157 @@ async def delete_cleaning_date(
     finally:
         conn.close()
 
+@app.get("/journals/leave", response_model=BaseResponse)
+async def get_leave_journal(current_user: dict = Depends(get_current_user)):
+    conn = get_db()
+    cursor = conn.execute('''
+        SELECT lj.*, r.full_name, r.class_name, r.room 
+        FROM leave_journal lj
+        JOIN residents r ON lj.resident_id = r.id
+    ''')
+    data = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return {"success": True, "data": data}
 
+@app.get("/journals/leave/{leave_id}", response_model=BaseResponse)
+async def get_leave_detail(leave_id: int, current_user: dict = Depends(get_current_user)):
+    conn = get_db()
+    leave = conn.execute('''
+        SELECT lj.*, 
+               r.full_name, r.class_name, r.room, r.class_teacher, r.class_mentor,
+               r.mobile, r.status_type, r.status_place, r.status_until,
+               r.parents_json, r.profile_image, r.blur_hash
+        FROM leave_journal lj
+        JOIN residents r ON lj.resident_id = r.id
+        WHERE lj.id = ?
+    ''', (leave_id,)).fetchone()
+    
+    if not leave:
+        raise HTTPException(status_code=404, detail="Leave record not found")
+    
+    resident_data = {
+        "id": leave['resident_id'],
+        "profile_image": {
+            "src": leave['profile_image'] or "",
+            "blur_hash": leave['blur_hash'] or ""
+        },
+        "full_name": leave['full_name'],
+        "age": leave['age'],
+        "room": leave['room'],
+        "class": leave['class_name'],
+        "class_teacher": leave['class_teacher'],
+        "class_mentor": leave['class_mentor'],
+        "mobile": leave['mobile'],
+        "status": {
+            "status": leave['status_type'],
+            "place": leave['status_place'],
+            "until": leave['status_until']
+        },
+        "parents": json.loads(leave['parents_json'])
+    }
+    
+    return {
+        "success": True,
+        "data": {
+            **dict(leave),
+            "resident": resident_data
+        }
+    }
 
+@app.put("/journals/leave/{leave_id}/comment", response_model=BaseResponse)
+async def update_leave_comment(
+    leave_id: int,
+    comment: CommentCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    conn = get_db()
+    conn.execute('''
+        UPDATE leave_journal
+        SET comment = ?
+        WHERE id = ?
+    ''', (comment.content, leave_id))
+    conn.commit()
+    conn.close()
+    return {"success": True, "data": {}}
+
+@app.put("/journals/leave/{leave_id}/status", response_model=BaseResponse)
+async def update_leave_status(
+    leave_id: int,
+    status_data: LeaveStatusUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    conn = get_db()
+    leave = conn.execute('SELECT address FROM leave_journal WHERE id = ?', (leave_id,)).fetchone()
+    
+    if not leave:
+        raise HTTPException(status_code=404, detail="Leave record not found")
+    
+    # Логика изменения статуса
+    new_status = status_data.status
+    if new_status == 'outside' and leave['address'] == 'ФТЛ':
+        new_status = 'school'
+    
+    update_params = {'status': new_status}
+    if new_status != 'inside':
+        update_params['leave_marked'] = str(int(datetime.utcnow().timestamp()))
+    if new_status == 'returned':
+        update_params['return_marked'] = str(int(datetime.utcnow().timestamp()))
+    
+    set_clause = ', '.join(f"{k} = ?" for k in update_params)
+    conn.execute(f'''
+        UPDATE leave_journal
+        SET {set_clause}
+        WHERE id = ?
+    ''', (*update_params.values(), leave_id))
+    conn.commit()
+    conn.close()
+    
+    message = {
+        "op": "leave:update",
+        "path": "/journals/leave",
+        "data": {"id": leave_id, "status": new_status}
+    }
+    asyncio.create_task(broadcast_message(message))
+    
+    return {"success": True, "data": {}}
+
+@app.post("/journals/leave", response_model=BaseResponse)
+async def create_leave_entry(
+    entry: LeaveCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    conn = get_db()
+    
+    # Проверка resident_id
+    resident = conn.execute('SELECT 1 FROM residents WHERE id = ?', (entry.resident_id,)).fetchone()
+    if not resident:
+        raise HTTPException(status_code=404, detail="Resident not found")
+    
+    # Проверка application_id для типа application
+    if entry.type == 'application':
+        app_exists = conn.execute('SELECT 1 FROM applications WHERE id = ?', (entry.application_id,)).fetchone()
+        if not app_exists:
+            raise HTTPException(status_code=404, detail="Application not found")
+    
+    # Вставка записи
+    cursor = conn.execute('''
+        INSERT INTO leave_journal 
+        (resident_id, application_id, leave_time, return_time, address, type)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (
+        entry.resident_id,
+        entry.application_id,
+        entry.leave_time,
+        entry.return_time,
+        entry.address,
+        entry.type
+    ))
+    
+    conn.commit()
+    new_id = cursor.lastrowid
+    conn.close()
+    
+    return {"success": True, "data": {"id": new_id}}
 
 @app.get("/rooms", dependencies=[Depends(get_current_user)])
 async def get_rooms():
