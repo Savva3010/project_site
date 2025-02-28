@@ -1,6 +1,7 @@
 from fastapi import FastAPI, WebSocket, Depends, UploadFile, File, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Union, Literal
 from datetime import datetime, timedelta
@@ -268,11 +269,14 @@ class ResidentCreate(BaseModel):
     comments: List[Note] = []
     warnings: List[Warn] = []
 
+class NotesCreate(BaseModel):
+    content: str
+    
 class NotesDelete(BaseModel):
     id: int
 
-class NotesCreate(BaseModel):
-    content: str
+class WarnsDelete(BaseModel):
+    id: int
 
 class ApplicationStatusUpdate(BaseModel):
     status: str
@@ -591,7 +595,7 @@ def create_note(
 @app.delete("/residents/{resident_id}/notes")
 def delete_note(
     resident_id: int,
-    note_id: int,
+    data: NotesDelete,  # Теперь принимаем JSON-тело
     current_user: dict = Depends(get_current_user)
 ):
     conn = get_db()
@@ -601,7 +605,7 @@ def delete_note(
             return error_response("Интернатовец не найден", "RESIDENT_NOT_FOUND", 404)
 
         comments = json.loads(resident['comments']) if resident['comments'] else []
-        updated_comments = [note for note in comments if note.get('id') != note_id]
+        updated_comments = [note for note in comments if note.get('id') != data.id]  # Используем data.id
 
         conn.execute("UPDATE residents SET comments = ? WHERE id = ?",
                     (json.dumps(updated_comments), resident_id))
@@ -643,7 +647,7 @@ def create_warn(
 @app.delete("/residents/{resident_id}/warns")
 def delete_warn(
     resident_id: int,
-    warn_id: int,
+    data: WarnsDelete,  # Теперь принимаем JSON-тело
     current_user: dict = Depends(get_current_user)
 ):
     conn = get_db()
@@ -653,16 +657,15 @@ def delete_warn(
             return error_response("Интернатовец не найден", "RESIDENT_NOT_FOUND", 404)
 
         warnings = json.loads(resident['warnings']) if resident['warnings'] else []
-        updated_warnings = [warn for warn in warnings if warn.get('id') != warn_id]
+        updated_warnings = [warn for warn in warnings if warn.get('id') != data.id]  # Используем data.id
 
         conn.execute("UPDATE residents SET warnings = ? WHERE id = ?",
-                    (json.dumps(updated_warnings), resident_id))
+                     (json.dumps(updated_warnings), resident_id))
         conn.commit()
 
         return {"success": True, "data": {}}
     finally:
-        conn.close()
-
+        conn.close() 
 
 @app.post("/residents", status_code=201)
 async def create_resident(
@@ -1380,6 +1383,24 @@ async def update_cleaning_mark(
         return {"success": True, "data": {}}
     finally:
         conn.close()
+
+@app.get("/no_img.png")
+async def get_no_image():
+    # Путь к файлу изображения
+    file_path = os.path.join(os.getcwd(), "uploads", "no_img.png")
+    
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Image not found")
+    
+    return FileResponse(
+        path=file_path,
+        media_type="image/png",
+        filename="no_img.png",
+        headers={
+            "Cache-Control": "public, max-age=86400",
+            "Content-Disposition": "inline"
+        }
+    )
 
 if __name__ == "__main__":
     import uvicorn
