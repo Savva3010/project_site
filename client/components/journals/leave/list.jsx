@@ -199,7 +199,7 @@ export default function List({ sortParams, setTotal, listCategory }) {
             </p>
         }
         if (records.data.length === 0) {
-            return <p className={`${css["empty"]}`}>Заялений нет, меньше работы ^_^</p>
+            return <p className={`${css["empty"]}`}>Записей нет, меньше работы ^_^</p>
         }
 
         return (
