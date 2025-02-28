@@ -286,8 +286,8 @@ class ApplicationComment(BaseModel):
 
 class ApplicationCreate(BaseModel):
     resident_id: int
-    leave_ts: int
-    return_ts: int
+    leave_ts: int = Field(alias="leave")
+    return_ts: int = Field(alias="return")
     address: str
     accompany: Optional[str] = None
 
@@ -329,7 +329,7 @@ class LeaveEntry(BaseModel):
     id: int
     resident_id: int
     full_name: str
-    class_name: str
+    class_name: str = Field(alias="class")
     room: str
     leave: int
     leave_marked: Optional[int] = None
