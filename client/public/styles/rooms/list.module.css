@@ -1,0 +1,81 @@
+.loading {
+    font-size: 2rem;
+}
+.error {
+    font-size: 1.5rem;
+    color: #CC0000;
+}
+.empty {
+    font-size: 2rem;
+}
+
+.list {
+    width: 100%;
+}
+
+.list ul {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.list-header {
+    position: sticky;
+    top: -10px;
+    box-sizing: content-box;
+    padding-top: 10px;
+    margin-top: -10px;
+    background: #FFFFFF;
+}
+
+.list li {
+    list-style: none;
+    display: flex;
+    height: 40px;
+    width: 100%;
+}
+
+.list li div {
+    border: solid 1px #000000;
+    border-right: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+}
+
+.list li div p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.list li div:nth-child(1) {
+    width: 75px;
+    max-width: 75px;
+    min-width: 75px;
+}
+.list li div:nth-child(2),
+.list li div:nth-child(3),
+.list li div:nth-child(4) {
+    width: 900px;
+    min-width: 0;
+}
+
+.list li div:nth-child(5) {
+    width: 110px;
+    max-width: 110px;
+    min-width: 110px;
+    border-right: solid 1px #000000;
+}
+
+.list li div:nth-child(5) button {
+    color: #007BFF;
+}
+
+@media (max-width: 675px) {
+    .list li div:nth-child(1) {
+        display: none;
+    }
+}

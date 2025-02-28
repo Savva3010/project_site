@@ -1,0 +1,111 @@
+.wrapper {
+    background: #FFFFFF;
+    position: absolute;
+    top: 35px;
+    left: 35px; 
+    width: 40px;
+    height: max-content;
+    border-radius: 5px;
+    box-shadow: 0px 0px 15px 10px rgba(0, 0, 0, 0.75);
+    display: flex;
+    flex-direction: column;
+    z-index: 25;
+}
+
+.inv {
+    top: unset;
+    bottom: 35px;
+}
+
+.wrapper svg {
+    position: absolute;
+    top: -15px;
+    left: -15px;
+}
+
+.inv svg {
+    top: unset;
+    bottom: -15px;
+    transform: rotate(-90deg);
+}
+
+.wrapper div button {
+    width: 40px;
+    aspect-ratio: 1;
+    border-top: 1px solid #000000;
+}
+
+.wrapper div button:nth-child(1) {
+    border: none;
+}
+
+.title {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.3rem;
+    z-index: 51;
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.modal {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    height: max-content;
+    width: 100%;
+}
+
+.hint {
+    font-size: 1.3rem;
+}
+
+.selectors {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+}
+
+.selector {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.selector select {
+    width: 300px;
+    height: 20px;
+}
+
+.buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.buttons button {
+    height: 30px;
+    align-items: center;
+    border-radius: 2px;
+    border: 1px solid #007BFF;
+    color: #007BFF;
+}
+
+.button-add {
+    width: 150px;
+}
+
+.button-delete {
+    width: 70px;
+}

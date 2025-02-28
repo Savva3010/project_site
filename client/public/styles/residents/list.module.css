@@ -1,0 +1,132 @@
+.loading {
+    font-size: 2rem;
+}
+.error {
+    font-size: 1.5rem;
+    color: #CC0000;
+}
+.empty {
+    font-size: 2rem;
+}
+
+.list {
+    width: 100%;
+}
+
+.list ul {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.list-header {
+    position: sticky;
+    top: -10px;
+    box-sizing: content-box;
+    padding-top: 10px;
+    margin-top: -10px;
+    background: #FFFFFF;
+}
+
+.list li {
+    list-style: none;
+    display: flex;
+    height: 40px;
+    width: 100%;
+}
+
+.list li div {
+    border: solid 1px #000000;
+    border-right: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+}
+
+.list li div p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.list li div:nth-child(1) {
+    width: 75px;
+    max-width: 75px;
+    min-width: 75px;
+}
+.list li div:nth-child(2) {
+    width: 900px;
+    min-width: 200px;
+}
+.list li div:nth-child(3) {
+    width: 400px;
+    min-width: 175px;
+}
+.list li div:nth-child(4) {
+    width: 550px;
+    min-width: 100px;
+}
+.list li div:nth-child(5) {
+    width: 550px;
+    min-width: 100px;
+}
+.list li div:nth-child(6) {
+    width: 225px;
+    max-width: 225px;
+    min-width: 225px;
+}
+.list li div:nth-child(7) {
+    width: 110px;
+    max-width: 110px;
+    min-width: 110px;
+    border-right: solid 1px #000000;
+}
+
+.list li div:nth-child(7) button {
+    color: #007BFF;
+}
+
+@media (max-width: 1350px) {
+    .list li div:nth-child(4) {
+        display: none;
+    }
+}
+
+@media (max-width: 1200px) {
+    .list li div:nth-child(5) {
+        display: none;
+    }
+}
+
+@media (max-width: 1075px) {
+    .list li div:nth-child(3) {
+        display: none;
+    }
+}
+
+@media (max-width: 900px) {
+    .list li div:nth-child(6) {
+        display: none;
+    }
+}
+
+@media (max-width: 675px) {
+    .list li div:nth-child(1) {
+        display: none;
+    }
+}
+
+.status-inside {
+    background: #80FF80;
+}
+.status-isolator {
+    background: #DDFF80;
+}
+.status-outside {
+    background: #FF8080;
+}
+.status-school {
+    background: #FF8080;
+}

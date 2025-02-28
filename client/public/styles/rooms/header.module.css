@@ -1,0 +1,115 @@
+.header {
+    height: 25px;
+    width: 100%;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    color: #808080;
+}
+
+.header p {
+    text-wrap: nowrap;
+}
+
+.header > p {
+    color: #212529;
+    font-size: 1.3rem;
+}
+
+.header button {
+    color: #007BFF;
+    font-size: 1.1rem;
+}
+
+@media (max-width: 1075px) {
+    .header{
+        font-size: 1rem;
+    }
+    .header button {
+        font-size: 1rem;
+    }
+    .header > p {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 975px) {
+    .header{
+        font-size: .9rem;
+    }
+    .header button {
+        font-size: .9rem;
+    }
+    .header > p {
+        font-size: 1.1rem;
+    }
+}
+
+.sort {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    height: 100%;
+    width: max-content;
+}
+
+.sort-filter {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    width: max-content;
+}
+
+@media (max-width: 750px) {
+    .sort-filter {
+        display: none;
+    }
+}
+
+.sort-filter input {
+    height: 100%;
+    padding: 5px;
+    font-size: 1.3rem;
+    width: 200px;
+}
+
+@media (max-width: 1440px) {
+    .sort-filter input{
+        width: 100px;
+    }
+}
+
+.sort-filter input::placeholder {
+    font-size: 1.1rem;
+    color: #808080;
+}
+
+.sort-filter button {
+    height: 25px;
+    aspect-ratio: 1;
+}
+
+.sort-sort {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    gap: 5px;
+}
+
+@media (max-width: 1200px) {
+    .sort-sort p{
+        display: none;
+    }
+}
+
+@media (max-width: 625px) {
+    .sort-sort {
+        display: none;
+    }
+}
+
+.sort-sort-selected {
+    text-decoration: underline;
+}
