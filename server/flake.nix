@@ -26,6 +26,7 @@
             uvicorn
             pyjwt
             passlib
+              # asyncio
           ])
         ];
       };

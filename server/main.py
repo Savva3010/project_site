@@ -12,12 +12,13 @@ import jwt
 import secrets
 import json
 from passlib.context import CryptContext
+import asyncio
 
 app = FastAPI()
 
 SECRET_KEY = secrets.token_urlsafe(64)
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 1440
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -29,6 +30,68 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+active_connections = set()
+connections_lock = asyncio.Lock()
+
+async def broadcast_message(message: dict):
+    async with connections_lock:
+        for connection in list(active_connections):
+            try:
+                await connection.send_json(message)
+            except:
+                await connection.close()
+                active_connections.remove(connection)
+
+@app.websocket("/")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    async with connections_lock:
+        active_connections.add(websocket)
+    
+    heartbeat_task = asyncio.create_task(send_heartbeats(websocket))
+    
+    try:
+        while True:
+            data = await websocket.receive_json()
+            if data.get("op") == "ping":
+                await websocket.send_json({"op": "pong"})
+    except WebSocketDisconnect:
+        heartbeat_task.cancel()
+        async with connections_lock:
+            active_connections.remove(websocket)
+
+async def send_heartbeats(websocket: WebSocket):
+    try:
+        while True:
+            await asyncio.sleep(120)  # Send ping every 2 minutes
+            await websocket.send_json({"op": "ping"})
+    except asyncio.CancelledError:
+        pass
+
+def format_date(date_str: str) -> str:
+    month_map = {
+        "ЯНВ": "января",
+        "ФЕВ": "февраля",
+        "МАР": "марта",
+        "АПР": "апреля",
+        "МАЙ": "мая",
+        "ИЮН": "июня",
+        "ИЮЛ": "июля",
+        "АВГ": "августа",
+        "СЕН": "сентября",
+        "ОКТ": "октября",
+        "НОЯ": "ноября",
+        "ДЕК": "декабря"
+    }
+    
+    try:
+        day_part, month_part = date_str.split()
+        formatted_month = month_map.get(month_part, month_part.lower())
+        return f"{day_part} {formatted_month}"
+    except ValueError:
+        return date_str
+
+
 def init_db():
     conn = sqlite3.connect('internat.db')
     c = conn.cursor()
@@ -38,6 +101,7 @@ def init_db():
         username TEXT UNIQUE,
         hashed_password TEXT,
         salt TEXT,
+        full_name TEXT,
         disabled BOOLEAN DEFAULT FALSE
     )''')
     
@@ -57,7 +121,21 @@ def init_db():
         status_until INTEGER,
         parents_json TEXT NOT NULL,
         profile_image TEXT,
-        blur_hash TEXT
+        blur_hash TEXT,
+        comments TEXT,
+        warnings TEXT
+    )''')
+    
+    c.execute('''CREATE TABLE IF NOT EXISTS comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        content TEXT
+    )''')
+    
+    c.execute('''CREATE TABLE IF NOT EXISTS warns (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        created_at TEXT NOT NULL,
+        author TEXT NOT NULL,
+        content TEXT
     )''')
 
     c.execute('''CREATE TABLE IF NOT EXISTS applications (
@@ -122,6 +200,7 @@ def error_response(message: str, error_id: str, status_code: int = 400):
 class UserCreate(BaseModel):
     username: str
     password: str
+    full_name: str
 
 class UserLogin(BaseModel):
     username: str
@@ -136,6 +215,16 @@ class Parent(BaseModel):
     mobile: str
     email: Optional[str] = None
     telegram: Optional[str] = None
+
+class Note(BaseModel):
+    id: int
+    content: str
+
+class Warn(BaseModel):
+    id: int
+    created_at: str
+    author: str
+    content: str
 
 class ResidentStatus(BaseModel):
     status: str
@@ -156,6 +245,14 @@ class ResidentCreate(BaseModel):
     parents: List[Parent]
     profile_image: Optional[str] = None
     blur_hash: Optional[str] = 'default'
+    comments: List[Note] = []
+    warnings: List[Warn] = []
+
+class NotesDelete(BaseModel):
+    id: int
+
+class NotesCreate(BaseModel):
+    content: str
 
 class ApplicationStatusUpdate(BaseModel):
     status: str
@@ -241,8 +338,8 @@ async def register(user: UserCreate):
     try:
         conn = get_db()
         conn.execute(
-            "INSERT INTO users (username, hashed_password, salt) VALUES (?, ?, ?)",
-            (user.username, hashed, salt)
+            "INSERT INTO users (username, hashed_password, salt, full_name) VALUES (?, ?, ?, ?)",
+            (user.username, hashed, salt, user.full_name)
         )
         conn.commit()
         
@@ -323,51 +420,152 @@ async def get_resident(
     current_user: dict = Depends(get_current_user)
 ):
     conn = get_db()
-    cursor = conn.execute('''
+    resident = conn.execute('''
         SELECT * FROM residents WHERE id = ?
-    ''', (resident_id,))
-    resident = cursor.fetchone()
+    ''', (resident_id,)).fetchone()
     conn.close()
 
     if not resident:
-        return error_response("Интернатовец не найден", "RESIDENT_NOT_FOUND", 404);
+        return error_response("Интернатовец не найден", "RESIDENT_NOT_FOUND", 404)
 
     resident_dict = dict(resident)
     
-    parents = []
-    try:
-        parents = json.loads(resident_dict['parents_json'])
-    except (json.JSONDecodeError, KeyError, TypeError):
-        pass
+    # Парсинг JSON полей
+    parents = json.loads(resident_dict['parents_json']) if resident_dict['parents_json'] else []
+    notes = json.loads(resident_dict['comments']) if resident_dict['comments'] else []
+    warns = json.loads(resident_dict['warnings']) if resident_dict['warnings'] else []
 
     formatted_resident = {
         "id": resident_dict['id'],
+        "profile_image": {
+            "src": resident_dict['profile_image'] or "",
+            "blur_hash": resident_dict['blur_hash'] or ""
+        },
         "full_name": resident_dict['full_name'],
         "age": resident_dict['age'],
         "room": resident_dict['room'],
         "class": resident_dict['class_name'],
+        "class_teacher": resident_dict['class_teacher'],
+        "class_mentor": resident_dict['class_mentor'],
+        "mobile": resident_dict['mobile'],
+        "email": resident_dict.get('email'),
+        "telegram": resident_dict.get('telegram'),
         "status": {
             "status": resident_dict['status_type'],
             "place": resident_dict.get('status_place'),
             "until": resident_dict.get('status_until')
         },
-        "contacts": {
-            "mobile": resident_dict['mobile'],
-            "email": resident_dict.get('email'),
-            "telegram": resident_dict.get('telegram')
-        },
-        "profile_image": resident_dict.get('profile_image'),
         "parents": parents,
-        "teachers": {
-            "class_teacher": resident_dict['class_teacher'],
-            "class_mentor": resident_dict['class_mentor']
-        }
+        "notes": notes,
+        "warns": warns
     }
 
-    return {
-        "success": True,
-        "data": formatted_resident
-    }
+    return {"success": True, "data": formatted_resident}
+
+@app.post("/residents/{resident_id}/notes")
+def create_note(
+    resident_id: int,
+    note_data: NotesCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    conn = get_db()
+    try:
+        resident = conn.execute("SELECT comments FROM residents WHERE id = ?", (resident_id,)).fetchone()
+        if not resident:
+            return error_response("Интернатовец не найден", "RESIDENT_NOT_FOUND", 404)
+        
+        comments = json.loads(resident['comments']) if resident['comments'] else []
+        new_note = {
+            "id": int(datetime.utcnow().timestamp() * 1000),
+            "content": note_data.content,
+            "author": current_user['full_name'],
+            "created_at": datetime.utcnow().strftime("%d.%m.%Y")
+        }
+        comments.append(new_note)
+        
+        conn.execute("UPDATE residents SET comments = ? WHERE id = ?", 
+                    (json.dumps(comments), resident_id))
+        conn.commit()
+        
+        return {"success": True, "data": {"id": new_note['id']}}
+    finally:
+        conn.close()
+
+@app.delete("/residents/{resident_id}/notes")
+def delete_note(
+    resident_id: int,
+    note_id: int,
+    current_user: dict = Depends(get_current_user)
+):
+    conn = get_db()
+    try:
+        resident = conn.execute("SELECT comments FROM residents WHERE id = ?", (resident_id,)).fetchone()
+        if not resident:
+            return error_response("Интернатовец не найден", "RESIDENT_NOT_FOUND", 404)
+        
+        comments = json.loads(resident['comments']) if resident['comments'] else []
+        updated_comments = [note for note in comments if note.get('id') != note_id]
+        
+        conn.execute("UPDATE residents SET comments = ? WHERE id = ?", 
+                    (json.dumps(updated_comments), resident_id))
+        conn.commit()
+        
+        return {"success": True, "data": {}}
+    finally:
+        conn.close()
+
+@app.post("/residents/{resident_id}/warns")
+def create_warn(
+    resident_id: int,
+    warn_data: NotesCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    conn = get_db()
+    try:
+        resident = conn.execute("SELECT warnings FROM residents WHERE id = ?", (resident_id,)).fetchone()
+        if not resident:
+            return error_response("Интернатовец не найден", "RESIDENT_NOT_FOUND", 404)
+        
+        warnings = json.loads(resident['warnings']) if resident['warnings'] else []
+        new_warn = {
+            "id": int(datetime.utcnow().timestamp() * 1000),
+            "content": warn_data.content,
+            "author": current_user['full_name'],
+            "created_at": datetime.utcnow().strftime("%d.%m.%Y")
+        }
+        warnings.append(new_warn)
+        
+        conn.execute("UPDATE residents SET warnings = ? WHERE id = ?", 
+                    (json.dumps(warnings), resident_id))
+        conn.commit()
+        
+        return {"success": True, "data": {"id": new_warn['id']}}
+    finally:
+        conn.close()
+
+@app.delete("/residents/{resident_id}/warns")
+def delete_warn(
+    resident_id: int,
+    warn_id: int,
+    current_user: dict = Depends(get_current_user)
+):
+    conn = get_db()
+    try:
+        resident = conn.execute("SELECT warnings FROM residents WHERE id = ?", (resident_id,)).fetchone()
+        if not resident:
+            return error_response("Интернатовец не найден", "RESIDENT_NOT_FOUND", 404)
+        
+        warnings = json.loads(resident['warnings']) if resident['warnings'] else []
+        updated_warnings = [warn for warn in warnings if warn.get('id') != warn_id]
+        
+        conn.execute("UPDATE residents SET warnings = ? WHERE id = ?", 
+                    (json.dumps(updated_warnings), resident_id))
+        conn.commit()
+        
+        return {"success": True, "data": {}}
+    finally:
+        conn.close()
+
 
 @app.post("/residents", status_code=201)
 async def create_resident(
@@ -436,12 +634,56 @@ async def update_resident(
                 resident_id
             ))
         db.commit()
+        
+        # WebSocket broadcast for status update
+        resident_status = {
+            "id": resident_id,
+            "status": {
+                "status": resident.status.status,
+                "place": resident.status.place,
+                "until": resident.status.until
+            }
+        }
+        message = {
+            "op": "status:update",
+            "path": "/residents",
+            "data": resident_status
+        }
+        asyncio.create_task(broadcast_message(message))
+        
+        return {"success": True, "data": {}}
+        
     except sqlite3.Error:
         return error_response("Ошибка сервера", "DB_ERROR", 500)
     finally:
         db.close()
-    
-    return {"success": True, "data": {}}
+
+
+@app.delete("/journals/cleaning/dates")
+async def delete_cleaning_date(
+    date_data: CleaningDateDelete,
+    current_user: dict = Depends(get_current_user)
+):
+    conn = get_db()
+    try:
+        conn.execute("DELETE FROM cleaning_dates WHERE date = ?", (date_data.date,))
+        conn.execute("DELETE FROM cleaning_marks WHERE date = ?", (date_data.date,))
+        conn.commit()
+        
+        # WebSocket broadcast
+        message = {
+            "op": "date:delete",
+            "path": "/journals/cleaning",
+            "data": {"date": date_data.date}
+        }
+        asyncio.create_task(broadcast_message(message))
+        
+        return {"success": True, "data": {}}
+    finally:
+        conn.close()
+
+
+
 
 @app.get("/rooms", dependencies=[Depends(get_current_user)])
 async def get_rooms():
@@ -774,6 +1016,18 @@ async def update_application_status(
             return error_response("Заявление не найдено", "APPLICATION_NOT_FOUND", 404)
             
         conn.commit()
+        
+        # WebSocket broadcast
+        message = {
+            "op": "status:update",
+            "path": "/applications/leave",
+            "data": {
+                "id": application_id,
+                "status": {"status": status_data.status}
+            }
+        }
+        asyncio.create_task(broadcast_message(message))
+        
         return {"success": True, "data": {}}
     except sqlite3.Error:
         return error_response("Ошибка сервера", "DB_ERROR", 500)
@@ -829,25 +1083,21 @@ async def add_cleaning_date(
     try:
         conn.execute("INSERT INTO cleaning_dates (date) VALUES (?)", (date_str,))
         conn.commit()
+        
+        # WebSocket broadcast
+        message = {
+            "op": "date:add",
+            "path": "/journals/cleaning",
+            "data": {"date": date_str}
+        }
+        asyncio.create_task(broadcast_message(message))
+        
         return {"success": True, "data": {}}
     except sqlite3.IntegrityError:
-        return error_response("Дата уже существует", "DATE_ALREADY_EXIST", 400);
+        return error_response("Дата уже существует", "DATE_ALREADY_EXIST", 400)
     finally:
         conn.close()
 
-@app.delete("/journals/cleaning/dates")
-async def delete_cleaning_date(
-    date_data: CleaningDateDelete,
-    current_user: dict = Depends(get_current_user)
-):
-    conn = get_db()
-    try:
-        conn.execute("DELETE FROM cleaning_dates WHERE date = ?", (date_data.date,))
-        conn.execute("DELETE FROM cleaning_marks WHERE date = ?", (date_data.date,))
-        conn.commit()
-        return {"success": True, "data": {}}
-    finally:
-        conn.close()
 
 @app.put("/journals/cleaning/marks")
 async def update_cleaning_mark(
@@ -868,45 +1118,22 @@ async def update_cleaning_mark(
             ''', (mark_data.date, mark_data.room, mark_data.mark))
         
         conn.commit()
+        
+        # WebSocket broadcast
+        message = {
+            "op": "mark:update",
+            "path": "/journals/cleaning",
+            "data": {
+                "room": mark_data.room,
+                "date": mark_data.date,
+                "mark": mark_data.mark
+            }
+        }
+        asyncio.create_task(broadcast_message(message))
+        
         return {"success": True, "data": {}}
     finally:
         conn.close()
-
-def format_date(date_str: str) -> str:
-    month_map = {
-        "ЯНВ": "января", "ФЕВ": "февраля", "МАР": "марта",
-        "АПР": "апреля", "МАЙ": "мая", "ИЮН": "июня",
-        "ИЮЛ": "июля", "АВГ": "августа", "СЕН": "сентября",
-        "ОКТ": "октября", "НОЯ": "ноября", "ДЕК": "декабря"
-    }
-    
-    day, month_abbr = date_str.split()
-    return f"{day} {month_map.get(month_abbr, month_abbr)}"
-
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections = []
-
-    async def connect(self, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections.append(websocket)
-
-    async def broadcast(self, message: dict):
-        for connection in self.active_connections:
-            await connection.send_json(message)
-
-manager = ConnectionManager()
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
-    try:
-        while True:
-            data = await websocket.receive_json()
-            if data.get("op") == "ping":
-                await websocket.send_json({"op": "pong"})
-    except WebSocketDisconnect:
-        manager.active_connections.remove(websocket)
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,111 +1,77 @@
-Документация разработчика
+1. Общая архитектура 
+·	Технологии : FastAPI, SQLite, WebSocket, JWT-аутентификация.
+·	Основные компоненты :
+·	REST API для управления резидентами, заявлениями и журналом уборки.
+·	WebSocket для обновлений данных.
+·	База данных SQLite с таблицами: users, residents, applications, cleaning_dates, cleaning_marks, application_files.
+2. Структура базы данных 
+Таблицы и связи 
+1.	users 
+·	Поля: id, username, hashed_password, salt, disabled. 
+·	Назначение: Хранение учетных записей пользователей с хэшированными паролями.
+1.	residents 
+·	Поля: id, full_name, age, room, class_name, mobile, status_type, parents_json (JSON-массив родителей), profile_image и др. 
+·	Связи: Связана с applications (1:N) и cleaning_marks (1:N).
+1.	applications 
+·	Поля: id, resident_id (внешний ключ), leave_ts, return_ts, status (статус заявления: review/denied/accepted). 
+·	Связи: Связана с application_files (1:N).
+1.	cleaning_dates 
+·	Поля: date (первичный ключ). 
+·	Назначение: Хранение дат уборки.
+1.	cleaning_marks 
+·	Поля: date (внешний ключ), room, mark (оценка уборки). 
+·	Уникальность: Комбинация date и room.
+1.	application_files 
+·	Поля: id, application_id (внешний ключ), filename, filepath. 
+·	Назначение: Хранение файлов, прикрепленных к заявлениям.
+3. Основные endpoints 
+Аутентификация 
+1.	POST /register Регистрация нового пользователя. 
+2.	POST /token Получение JWT-токена. 
+Управление резидентами 
+1.	GET /residents Получение списка всех резидентов. 
+2.	GET /residents/{resident_id} Получение данных конкретного резидента. 
+3.	POST /residents Создание нового резидента. 
+4.	PUT /residents/{resident_id} Обновление данных резидента (включая WebSocket-уведомление при изменении статуса). 
+Заявления на отпуск 
+1.	GET /applications/leave Получение всех заявлений. 
+2.	GET /applications/leave/{application_id} Получение данных конкретного заявления с файлами. 
+3.	POST /applications/leave Создание нового заявления. 
+4.	POST /applications/leave/{application_id}/file Загрузка файла к заявлению. 
+5.	DELETE /applications/leave/{application_id}/file Удаление файла из заявления. 
+6.	PUT /applications/leave/{application_id}/comment Обновление комментария к заявлению. 
+7.	PUT /applications/leave/{application_id}/status Изменение статуса заявления (с WebSocket-уведомлением). 
+Журнал уборки 
+1.	GET /journals/cleaning Получение данных журнала уборки. 
+2.	POST /journals/cleaning/dates Добавление новой даты уборки (с WebSocket-уведомлением). 
+3.	DELETE /journals/cleaning/dates Удаление даты уборки (с WebSocket-уведомлением). 
+4.	PUT /journals/cleaning/marks Обновление оценки уборки для комнаты (с WebSocket-уведомлением). 
+Управление комнатами 
+1.	GET /rooms Получение списка комнат с проживающими. 
+2.	GET /rooms/{room_number} Получение данных конкретной комнаты. 
+3.	GET /rooms/{main_room}/{sub_room} Получение данных подкомнаты (например, "3/4"). 
+WebSocket 
+1.	/ws Подключение для получения уведомлений в реальном времени.
+Дополнительные операции 
+1.	DELETE /applications/leave/{application_id}/file Удаление файла из заявления. 
+2.	PUT /applications/leave/{application_id}/comment Обновление комментария к заявлению. 
+Примечание : Все endpoints требуют аутентификации через JWT-токен (кроме /register и /token). WebSocket-уведомления отправляются при изменении статусов, добавлении/удалении дат уборки и обновлении оценок. 
+4. Вспомогательные функции 
+·	Форматирование дат Функция format_date преобразует дату в формат "15 января". 
+·	Хэширование паролей Используется bcrypt с добавлением "соли" и "перца" (параметр окружения PEPPER). 
+·	Работа с файлами Загруженные файлы сохраняются в папку uploads с уникальными именами (UUID). 
+5. Безопасность 
+·	JWT-токены Срок действия: 30 минут.Алгоритм: HS256, секретный ключ генерируется при старте. 
+·	CORS Разрешены запросы с http://localhost:3000. 
+6. Зависимости 
+·	Основные библиотеки : 
+·	FastAPI: Документация 
+·	SQLite3: Документация 
+·	Дополнительно : 
+·	Pydantic для валидации данных. 
+·	JWT для токенов. 
+·	WebSocket для взаимодействия.
+7. Диаграммы 
+·	Диаграмма классов :Основные Pydantic-модели: UserCreate, ResidentCreate, ApplicationCreate и др.Связи: Например, ResidentCreate содержит вложенные объекты ResidentStatus и список Parent. 
+·	Схема БД :Основные связи:residents ↔ applications ↔ application_filescleaning_dates ↔ cleaning_marks 
 
-1. Общая информация
-Приложение использует FastAPI для создания веб-сервера с поддержкой CORS и JWT-авторизации. База данных SQLite содержит несколько таблиц для управления информацией об интернате.
-Если не указан метод запроса, значит метод - GET
-Перед запуском необходимо установить зависимости:
-pip install -r requirements.txt
-Для запуска необходимо выполнить данную команду:
-uvicorn main:app --host 0.0.0.0 --port 3001
-Приложение будет доступно на порту 3001
-
-2. Таблицы базы данных
-
-Таблица users:
-- id (PRIMARY KEY)
-- username (UNIQUE)
-- hashed_password
-- salt
-- disabled (BOOLEAN)
-
-Таблица residents:
-- id (PRIMARY KEY AUTOINCREMENT)
-- full_name
-- age
-- room
-- class_name
-- class_teacher
-- class_mentor
-- mobile
-- email
-- telegram
-- status_type
-- status_place
-- status_until
-- parents_json
-- profile_image
-- blur_hash
-
-Таблица applications:
-- id (PRIMARY KEY AUTOINCREMENT)
-- resident_id
-- leave_ts
-- return_ts
-- address
-- accompany
-- status ('review', 'denied', 'cancelled', 'accepted')
-- comment
-- created_at
-
-Таблица application_files:
-- id (PRIMARY KEY AUTOINCREMENT)
-- application_id
-- filename
-- filepath
-- blur_hash
-
-Таблица cleaning_dates:
-- date (PRIMARY KEY)
-
-Таблица cleaning_marks:
-- id (PRIMARY KEY AUTOINCREMENT)
-- date
-- room
-- mark
-
-3. Endpoints авторизации
-
-/register - регистрация нового пользователя
-/token - получение токена авторизации
-
-4. Endpoints жильцов
-
-/residents - получение списка всех жильцов
-/residents/{resident_id} - получение информации о конкретном жильце
-/residents - создание нового жильца (POST)
-/residents/{resident_id} - обновление информации о жильце (PUT)
-
-5. Endpoints комнат
-
-/rooms - получение списка всех комнат
-/rooms/{room_number} - информация о конкретной комнате
-/rooms/{main_room}/{sub_room} - информация о подкомнате
-
-6. Endpoints заявок на выход
-
-/applications/leave - список всех заявок
-/applications/leave/{application_id} - информация о конкретной заявке
-/applications/leave - создание новой заявки (POST)
-/applications/leave/{application_id}/file - загрузка файла к заявке (POST)
-/applications/leave/{application_id}/file - удаление файла из заявки (DELETE)
-/applications/leave/{application_id}/comment - обновление комментария к заявке (PUT)
-/applications/leave/{application_id}/status - обновление статуса заявки (PUT)
-
-7. Endpoints журнала уборки
-
-/journals/cleaning - получение журнала уборки
-/journals/cleaning/dates - добавление даты уборки (POST)
-/journals/cleaning/dates - удаление даты уборки (DELETE)
-/journals/cleaning/marks - обновление оценок уборки (PUT)
-
-8. WebSocket
-
-/ws - WebSocket соединение для пинг-понг проверок
-
-9. Дополнительная информация
-
-- Приложение использует JWT для авторизации
-- Все endpoints требуют авторизации, кроме /register и /token
-- Файлы загружаются в директорию uploads
-- Для хэширования паролей используется bcrypt
-- Время жизни токена доступа - 30 минут
