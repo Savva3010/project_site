@@ -1,3 +1,20 @@
+let token = "Bearer "
+
+fetch("http://localhost:3001/token", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        "username": "admin",
+        "password": "admin"
+    }),
+    mode: "cors"
+})
+.then(res => res.json())
+.then(data => token += data.data.access_token)
+
+
 const readline = require('node:readline');
 const { stdin: input, stdout: output } = require('node:process');
 
@@ -66,6 +83,27 @@ rl.question(`Введите кол-во записей: `, (need) => {
                 GenerateApp(id + 1, max_id, max_app_id)
             }
             
+
+            apps.forEach(push => {
+                fetch("http://localhost:3001/journals/leave", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Key": "Authorization",
+                        "Authorization": token
+                    },
+                    body: JSON.stringify({
+                        "resident_id": push.resident_id,
+                        "application_id": push.application_id,
+                        "leave_time": push.leave,
+                        "return_time": push.return,
+                        "address": push.address,
+                        "type": push.type
+                    }),
+                    mode: "cors"
+                })
+            })
+
             fs.writeFileSync("output/journals_leave.json", JSON.stringify(apps), (err) => {
                 if (err) {
                     console.log(err)

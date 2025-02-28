@@ -3,7 +3,7 @@
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import css from "@/styles/residents/note-warn-modal.module.css"
 
-import { useEffect, useState, useReducer } from 'react';
+import { useEffect, useState, useReducer, useContext } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { location } from '@/enums';
@@ -12,12 +12,16 @@ import { SERVER_URL } from '@/globals';
 
 import { toast } from 'react-toastify';
 
+import unixToString from '@/lib/unixToString';
+import { CurrentUser } from '@/layout';
+
 import Note from './note';
 import Warn from './warn';
 
 export default function NoteWarnModal({ info, modalInfo, setModalInfo }) {
 
     const [ addContent, setAddContent ] = useState("")
+    const currentUser = useContext(CurrentUser)
 
     // Close modal
     function closeModal() {
@@ -139,7 +143,7 @@ export default function NoteWarnModal({ info, modalInfo, setModalInfo }) {
             }
         } else {
             if (modalInfo.info === null) {
-                return <Warn warn={{"author": "Серебренников Савва Андреевич", "date": "19.09.2024"}} content={addContent} setContent={setAddContent} placeholder={"Замечание"}/>
+                return <Warn warn={{"author": `${currentUser?.surname} ${currentUser?.name} ${currentUser?.lastname}`, "created_at": unixToString(new Date(Date.now()))}} content={addContent} setContent={setAddContent} placeholder={"Замечание"}/>
             } else {
                 return <Warn warn={modalInfo.info}/>
             }

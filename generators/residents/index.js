@@ -1,3 +1,20 @@
+let token = "Bearer "
+
+fetch("http://localhost:3001/token", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        "username": "admin",
+        "password": "admin"
+    }),
+    mode: "cors"
+})
+.then(res => res.json())
+.then(data => token += data.data.access_token)
+
+
 const readline = require('node:readline');
 const { stdin: input, stdout: output } = require('node:process');
 
@@ -111,6 +128,33 @@ rl.question(`Введите кол-во проживающих(макс ${availa
             "class": residents[i].class
         })
     }
+
+    residents.forEach(push => {
+        fetch("http://localhost:3001/residents", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Key": "Authorization",
+                "Authorization": token
+            },
+            body: JSON.stringify({
+                "full_name": push.full_name,
+                "age": push.age,
+                "room": push.room,
+                "class": push.class,
+                "class_teacher": push.class_teacher,
+                "class_mentor": push.class_mentor,
+                "mobile": push.mobile,
+                "email": push.email,
+                "telegram": push.telegram,
+                "status": push.status,
+                "parents": push.parents,
+                "profile_image": "/no_img.png",
+                "blur_hash": "|RRMb$of_3ay-;j[WBt7M{xuayRjofj[ayoffQay~qWBIUofIUj[j[Rjt7IUof%MRjayofRjayj[%Mj[M{WBj[j[ofoft7-;WBM{t7j[Rjt7j[ay9Fay%Moft7WBWBj[RjWBofofRjj[t7WBayj[ofj[ayWBj[ofWBWBj[",
+            }),
+            mode: "cors"
+        })
+    })
 
     fs.writeFileSync("output/residents.json", JSON.stringify(residents), (err) => {
         if (err) {
