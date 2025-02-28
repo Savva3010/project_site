@@ -13,7 +13,7 @@ import { SERVER_URL } from '@/globals';
 import ImgBlurLoad from '@/components/shared/img-blur-load';
 import Status from './status';
 
-export default function Resident({ info }) {
+export default function Resident({ info, openedRoomId }) {
     const router = useRouter()
 
     return (<>
@@ -31,8 +31,21 @@ export default function Resident({ info }) {
                 let newParams = new URLSearchParams(`profile=${info?.id}`)
                 router.push(`/residents/?${newParams.toString()}`, { scroll: false })
             }}>Подробнее</button>
-            <button className={`${css["link"]}`}>Заявления</button>
-            <button className={`${css["link"]}`}>Журнал входов/выходов</button>
+            <button className={`${css["link"]}`} onClick={() => {
+                let newParams = new URLSearchParams()
+                let newFilter = `${openedRoomId} ${info?.full_name} ${info?.class}`
+                newParams.set("q", newFilter)
+                console.log("jeez")
+                router.push(`/applications/leave/?${newParams.toString()}`, { scroll: false })
+                closePanel()
+            }}>Заявления</button>
+            <button className={`${css["link"]}`} onClick={() => {
+                let newParams = new URLSearchParams()
+                let newFilter = `${info?.room} ${info?.full_name} ${info?.class}`
+                newParams.set("q", newFilter)
+                router.push(`/journals/leave/?${newParams.toString()}`, { scroll: false })
+                closePanel()
+            }}>Журнал входов/выходов</button>
 
             <Status info={info?.status} />
         </div>

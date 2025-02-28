@@ -116,7 +116,7 @@ export default function Room({ openedRoomId, setOpenedRoomId }) {
 
         return (<>
             {room.data.residents.map((resident, idx) => {
-                return <Resident key={idx} info={resident} />
+                return <Resident key={idx} info={resident} openedRoomId={openedRoomId}/>
             })}
         </>)
     }

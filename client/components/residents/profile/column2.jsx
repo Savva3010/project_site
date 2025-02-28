@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import Status from './status';
 
-export default function Column2({ info }) {
+export default function Column2({ info, setSortParams }) {
     const router = useRouter()
 
     return (<>
@@ -29,8 +29,20 @@ export default function Column2({ info }) {
                         let newParams = new URLSearchParams(`room=${info?.room}`)
                         router.push(`/rooms/?${newParams.toString()}`, { scroll: false })
                     }}>Комната</button>
-                    <button className={`${css["col2-link"]}`}>Заявления</button>
-                    <button className={`${css["col2-link"]}`}>Журнал входов/выходов</button>
+                    <button className={`${css["col2-link"]}`} onClick={() => {
+                        let newParams = new URLSearchParams()
+                        let newFilter = `${info?.room} ${info?.full_name} ${info?.class}`
+                        newParams.set("q", newFilter)
+                        router.push(`/applications/leave/?${newParams.toString()}`, { scroll: false })
+                        closePanel()
+                    }}>Заявления</button>
+                    <button className={`${css["col2-link"]}`} onClick={() => {
+                        let newParams = new URLSearchParams()
+                        let newFilter = `${info?.room} ${info?.full_name} ${info?.class}`
+                        newParams.set("q", newFilter)
+                        router.push(`/journals/leave/?${newParams.toString()}`, { scroll: false })
+                        closePanel()
+                    }}>Журнал входов/выходов</button>
                 </div>
 
                 <div className={`${css["col2-parents"]}`}>

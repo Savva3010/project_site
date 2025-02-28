@@ -1,0 +1,132 @@
+.disable-page-bg {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100dvw;
+    height: 100dvh;
+    background: #000000;
+    opacity: 0.5;
+    z-index: 50;
+}
+
+.wrapper {
+    background: #FFFFFF;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    width: 500px;
+    height: max-content;
+    border-radius: 5px;
+    box-shadow: 0px 0px 15px 10px rgba(0, 0, 0, 0.5);
+    padding: 50px 20px 20px 20px;
+    z-index: 550;
+}
+
+.title {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.3rem;
+    z-index: 51;
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.modal {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    height: max-content;
+    width: 100%;
+}
+
+.cat-select {
+    padding: 10px;
+    border: 1px solid #007BFF;
+    transition: background-color 0.1s ease-in-out;
+}
+
+.cat-active {
+    background-color: #007BFF;
+    color: #FFFFFF;
+}
+
+
+.cat-select:hover {
+    background-color: #F8F8F8;
+}
+
+.cat-active:hover {
+    
+    background-color: #005BDF;
+}
+
+.cat-select:active {
+    color: #fff;
+    background-color: #007bff;
+}
+
+.cat-warning {
+    color: #FF0000;
+}
+
+.category {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    height: max-content;
+    width: 100%;
+}
+
+.selector {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.selector select,
+.selector input {
+    width: 300px;
+    height: 20px;
+}
+
+.buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.buttons button {
+    align-items: center;
+    border-radius: 2px;
+    background: #007BFF;
+    color: #fff;
+    padding: 5px 15px;
+    transition: background-color 0.1s ease-in-out;
+}
+
+
+.modal:invalid .buttons button {
+    background-color: #c0dada;
+    border: 2px solid #7fa6cf;
+    color: #7fa6cf;
+}
+
+.modal:valid .buttons button:hover {
+    background-color: #30ABFF;
+}
+
+.modal:valid .buttons button:active {
+    background-color: #006BEF;
+}

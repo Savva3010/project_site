@@ -93,9 +93,9 @@ export default function AddApplication({ modalInfo, setModalInfo }) {
     function submit(formData) {
         let room = formData.get("room")
         let resident = Number(formData.get("resident"))
-        let leave_time = formData.get("leave")
+        let leave_time = new Date(formData.get("leave"))
         let address = formData.get("address")
-        let return_time = formData.get("return")
+        let return_time = new Date(formData.get("return"))
         let accompany = formData.get("accompany")
 
         closeModal()
@@ -110,9 +110,9 @@ export default function AddApplication({ modalInfo, setModalInfo }) {
                 mode: "cors",
                 body: JSON.stringify({
                     "resident_id": resident,
-                    "leave_time": leave_time,
+                    "leave_time": leave_time.getTime(),
                     "address": address,
-                    "return_time": return_time,
+                    "return_time": return_time.getTime(),
                     "accompany": accompany
                 })
             })

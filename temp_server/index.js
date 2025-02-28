@@ -14,6 +14,7 @@ import residents from "./data/residents.json" with {type: "json"}
 import journals_cleaing from "./data/journals_cleaning.json" with {type: "json"}
 import applications_leave from "./data/applications_leave.json" with {type: "json"}
 import rooms from "./data/rooms.json" with {type: "json"}
+import journals_leave from "./data/journals_leave.json" with {type: "json"}
 
 //heplers start
 import { errorMsg, successMsg } from './helpers/msg.js'
@@ -1249,6 +1250,208 @@ app.delete("/journals/cleaning/dates", (req, res) => {
         }))
     })
     
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": null
+    })
+})
+
+
+
+
+
+app.get("/journals/leave", (req, res) => {
+    let data = []
+    journals_leave.forEach(record => {
+        let resident = residents.find(resident => resident.id === record.resident_id)
+        let push = {
+            "id": record.id,
+            "resident_id": record.resident_id,
+            "full_name": resident.full_name,
+            "class": resident.class,
+            "room": resident.room,
+            "leave": record.leave,
+            "leave_marked": record.leave_marked,
+            "return": record.return,
+            "return_marked": record.return_marked,
+            "address": record.address,
+            "status": record.status,
+            "type": record.type
+        }
+        data.push(push)
+    })
+    
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": data
+    })
+})
+
+app.get("/journals/leave/:id", (req, res) => {
+    let { id } = req.params
+    id = Number(id)
+
+    let record = journals_leave.find(record => record.id === id)
+
+    if (!record) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Запись не найдено",
+                "error_id": -3
+            }
+        })
+        return
+    }
+
+    let resident = residents.find(resident => resident.id === record.resident_id)
+
+    let data = {
+        "id": record.id,
+        "resident": {
+            "id": resident.id,
+            "profile_image": {
+                "src": resident.profile_image.src,
+                "blur_hash": resident.profile_image.blur_hash
+            },
+            "full_name": resident.full_name,
+            "age": resident.age,
+            "room": resident.room,
+            "class": resident.class,
+            "class_teacher": resident.class_teacher,
+            "class_mentor": resident.class_mentor,
+            "mobile": resident.mobile,
+            "status": resident.status,
+            "parents": []
+
+        },
+        "leave": record.leave,
+        "leave_marked": record.leave_marked,
+        "return": record.return,
+        "return_marked": record.return_marked,
+        "address": record.address,
+        "status": record.status,
+        "comment": record.comment,
+        "type": record.type,
+        "application_id": record.application_id,
+        "created_at": record.created_at,
+    }
+
+    resident["parents"].forEach(parent => {
+        let push = {
+            "full_name": parent.full_name,
+            "mobile": parent.mobile,
+            "email": parent.email,
+            "telegram": parent.telegram
+        }
+
+        data["resident"]["parents"].push(push)
+    })
+
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": data
+    })
+})
+
+app.put("/journals/leave/:id/comment", (req, res) => {   
+    let { id } = req.params
+    id = Number(id)
+    let {content} = req.body
+    
+    let record = journals_leave.findIndex(record => record.id === id)
+
+    if (record === -1) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Запись не найдена",
+                "error_id": -3
+            }
+        })
+        return
+    }
+
+    if (content === null) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Не хватает данных",
+                "error_id": -2
+            }
+        })
+        return
+    }
+
+    journals_leave[record].comment = content
+
+    res
+    .status(200)
+    .json({
+        "success": true,
+        "data": null
+    })
+})
+
+app.put("/journals/leave/:id/status", (req, res) => {
+    let { id } = req.params
+    id = Number(id)
+    let {status} = req.body
+    
+    let record = journals_leave.findIndex(record => record.id === id)
+
+    if (record === -1) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Заявление не найдено",
+                "error_id": -3
+            }
+        })
+        return
+    }
+
+    if (status === null) {
+        res
+        .status(400)
+        .json({
+            "success": false,
+            "data": {
+                "message": "Не хватает данных",
+                "error_id": -2
+            }
+        })
+        return
+    }
+
+    journals_leave[record].status = status
+
+    wsServer.clients.forEach(client => {
+        if (client.readyState != WebSocket.OPEN) return
+        client.send(JSON.stringify({
+            "op": "status:update",
+            "path": "/journals/leave",
+            "data": {
+                "id": id,
+                "status": journals_leave[record].status
+            }
+        }))
+    })
+
     res
     .status(200)
     .json({

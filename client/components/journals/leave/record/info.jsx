@@ -1,7 +1,7 @@
 "use client"
 
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import css from "@/styles/applications/leave/application.module.css"
+import css from "@/styles/journals/leave/record.module.css"
 
 import { useEffect, useState, useReducer, useMemo, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -12,7 +12,7 @@ import { toast } from 'react-toastify';
 
 import ImgBlurLoad from '@/components/shared/img-blur-load';
 import Status from '@/components/residents/profile/status';
-import ApplicationStatus from './application-status';
+import RecordStatus from './record-status';
 
 import { SERVER_URL, WS_SERVER_URL } from '@/globals';
 
@@ -30,7 +30,7 @@ export default function Info({ info, closePanel, setSortParams }) {
     function saveComment() {
         
         let promise = new Promise((resolve, reject) => {
-            fetch(SERVER_URL + `/applications/leave/${info?.id}/comment`, {
+            fetch(SERVER_URL + `/journals/leave/${info?.id}/comment`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -72,7 +72,7 @@ export default function Info({ info, closePanel, setSortParams }) {
     function setStatus(status) {
         
         let promise = new Promise((resolve, reject) => {
-            fetch(SERVER_URL + `/applications/leave/${info?.id}/status`, {
+            fetch(SERVER_URL + `/journals/leave/${info?.id}/status`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -111,18 +111,26 @@ export default function Info({ info, closePanel, setSortParams }) {
                 })
     }
 
-    // TODO: add "applications" link from /residdents and /rooms
+    // TODO: add "journal_leave" link from /residdents and /rooms
 
     return (<>
         <div className={`${css["info"]}`}>
             <div className={`${css["col1"]}`}> 
                 <ImgBlurLoad src={info?.resident?.profile_image?.src? SERVER_URL + info.resident.profile_image.src : ""} hash={info?.resident?.profile_image?.blur_hash} className={`${css["col1-blur-img"]}`} alt="Фото проживающего"/>
                 <p>&nbsp;</p>
-                <p><b>Время выхода: </b>{  info?.leave ? unixToString(new Date(info["leave"]))           : <b>&minus;</b>}</p>
-                <p><b>Время входа: </b>{   info?.return ? unixToString(new Date(info["return"]))         : <b>&minus;</b>}</p>
-                <p><b>Адрес: </b>{         info?.address ? info["address"]                               : <b>&minus;</b>}</p>
-                <p><b>Сопровождающие: </b>{info?.accompany ? info["accompany"]                           : <b>&minus;</b>}</p>
-                <p><b>Добавлено: </b>{     info?.created_at ? unixToString(new Date(info["created_at"])) : <b>&minus;</b>}</p>
+                <span>
+                    <p><b>Время выхода: </b>{  info?.leave ? unixToString(new Date(info["leave"]))                           : <b>&minus;</b>}</p>
+                    <p><b>Отмеченное: </b>{  info?.leave_marked ? unixToString(new Date(info["leave_marked"]))  : <b>&minus;</b>}</p>
+                </span>
+                <span>
+                    <p><b>Время входа: </b>{   info?.return ? unixToString(new Date(info["return"]))                         : <b>&minus;</b>}</p>
+                    <p><b>Отмеченное: </b>{   info?.return_marked ? unixToString(new Date(info["return_marked"])) : <b>&minus;</b>}</p>
+                </span>
+                <p><b>Адрес: </b>{         info?.address ? info["address"]                                               : <b>&minus;</b>}</p>
+                <p><b>Тип записи: </b>{    info?.type === "application" ? 
+                    <button onClick={() => router.push("/applications/leave?app=" + info?.application_id, { scroll: false })}>По заявлению</button>
+                : "Самостоятельно"}</p>
+                <p><b>Добавлено: </b>{     info?.created_at ? unixToString(new Date(info["created_at"]))                 : <b>&minus;</b>}</p>
             </div>
             <div className={`${css["col2"]}`}>
                 <div className={`${css["col2-info"]}`}>
@@ -148,14 +156,14 @@ export default function Info({ info, closePanel, setSortParams }) {
                             let newFilter = `${info?.resident?.room} ${info?.resident?.full_name} ${info?.resident?.class}`
                             newParams.set("q", newFilter)
                             router.push(`/applications/leave?${newParams.toString()}`, { scroll: false })
-                            setSortParams({type: "FILTER", payload: newFilter})
                             closePanel()
                         }}>Заявления</button>
-                        <button className={`${css["col2-link"]}`} onClick={() => { 
+                        <button className={`${css["col2-link"]}`} onClick={() => {
                             let newParams = new URLSearchParams()
-                            let newFilter = `${info?.room} ${info?.full_name} ${info?.class}`
+                            let newFilter = `${info?.resident?.room} ${info?.resident?.full_name} ${info?.resident?.class}`
                             newParams.set("q", newFilter)
-                            router.push(`/journals/leave/?${newParams.toString()}`, { scroll: false })
+                            router.push(`/journals/leave?${newParams.toString()}`, { scroll: false })
+                            setSortParams({type: "FILTER", payload: newFilter})
                             closePanel()
                         }}>Журнал входов/выходов</button>
                     </div>
@@ -179,23 +187,23 @@ export default function Info({ info, closePanel, setSortParams }) {
                 <Status info={info?.resident?.status} />
             </div>
             <div className={`${css["col3"]}`}>
-                <ApplicationStatus info={info?.status} />
+                <RecordStatus info={info?.status} />
 
                 <p>&nbsp;</p>
 
-                {["review", "cancelled", "accepted", "active", "expired"].findIndex(status => status === info?. status) === -1 ?
-                <></> :
-                <button onClick={() => setStatus("denied")}>Отклонить</button>
-                }
 
-                {["review", "cancelled", "denied"].findIndex(status => status === info?. status) === -1 ?
-                <></> :
-                <button onClick={() => setStatus("accepted")}>Одобрить</button>
-                }
+                <div className={`${css["col3-change-status"]}`}>
+                    <label htmlFor="record-change-status">Изменить статус:</label>
+                    <select onChange={(evt) => {setStatus(evt.target.value)}} name="" id="record-change-status" value={info?.status === "school" ? "outside" : info?.status}>
+                        <option value="inside">Ещё не вышел</option>
+                        <option value="outside">Вышел/Вышел в ФТЛ</option>
+                        <option value="returned">Вернулся</option>
+                    </select>
+                </div>
 
-                {["cancelled"].findIndex(status => status === info?. status) != -1 ?
-                <></> :
-                <button onClick={() => setStatus("cancelled")}>Аннулировать</button>
+                {info?.type === "self" ?
+                    <p>Рекомендуется использовать только если проживающий сам не может отметиться</p> :
+                    <></>
                 }
 
                 <div className={`${css["col3-comment"]}`}>

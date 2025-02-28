@@ -11,7 +11,7 @@ export default function Sidebar({ collapsed }) {
             <SidebarCatalog name="Список проживающих" href="/residents" />
             <SidebarCatalog name="Сведения о комнатах" href="/rooms" />
             <SidebarCatalog name="Журналы">
-                <SidebarCatalog name="Вход/выход" href="/" />
+                <SidebarCatalog name="Вход/выход" href="/journals/leave" />
                 <SidebarCatalog name="Уборка комнат" href="/journals/cleaning" />
             </SidebarCatalog>
             <SidebarCatalog name="Заявления на выход" href="/applications/leave" />

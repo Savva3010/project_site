@@ -99,3 +99,47 @@ export const application_leave_status = {
         }
     }
 }
+
+export const journals_leave_status = {
+    "INSIDE": Symbol(),
+    "OUTSIDE": Symbol(),
+    "SCHOOL": Symbol(),
+    "RETURNED": Symbol(),
+
+    "getInfo": (val) => {
+        switch (val) {
+            case "INSIDE":
+            case "inside":
+            case location.INSIDE:
+                return ["Ещё не вышел", "inside"]
+            case "OUTSIDE":
+            case "outside":
+            case location.OUTSIDE:
+                return ["Вышел", "outside"]
+            case "SCHOOL":
+            case "school":
+            case location.SCHOOL:
+                return ["Вышел в ФТЛ", "school"]
+            case "RETURNED":
+            case "returned":
+            case location.RETURNED:
+                return ["Вернулся", "returned"]
+            default:
+                return ["Нет информации ¯\\_(ツ)_/¯", ""]
+        }
+    },
+    "toEnum": (val) => {
+        switch (val) {
+            case "inside":
+                return location.INSIDE
+            case "outside":
+                return location.OUTSIDE
+            case "school":
+                return location.SCHOOL
+            case "returned":
+                return location.RETURNED
+            default:
+                return null
+        }
+    }
+}

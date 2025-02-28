@@ -36,54 +36,77 @@
     width: 100%;
 }
 
-.list li div {
+.list-el-late {
+    background-color: #FFFFBB;
+}
+
+.list-el-late-30 {
+    background-color: #FFBBBB;
+}
+
+.list-el-double {
+    height: 80px !important;
+}
+
+.list li > div {
     height: 100%;
     display: flex;
     align-items: center;
     padding: 10px;
 }
 
-.list li div:not(.list-el-expired div) {
+.list li > div:not(.list-el-returned div) {
     border: solid 1px #000000;
     border-right: 0;
 }
 
-.list-el-expired div {
+.list-el-returned > div {
     border: solid 1px #AAAAAA;
     border-right: 0;
 }
 
-.list li div p {
+.list li > div p {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.list-el-expired p {
+.list-el-returned p {
     color: #AAAAAA;
 }
 
-.list li div:nth-child(1) {
+.list li > div:nth-child(1) {
     width: 75px;
     max-width: 75px;
     min-width: 75px;
 }
-.list li div:nth-child(2) {
+.list li > div:nth-child(2) {
     width: 800px;
     min-width: 200px;
 }
 
-.list li div:nth-child(3) {
+.list li > div:nth-child(3) {
     width: 350px;
     min-width: 175px;
 }
-.list li div:nth-child(4) {
+.list li > div:nth-child(4) {
     width: 350px;
     min-width: 175px;
 }
 
-.list li:not(.list-header) div:nth-child(3),
-.list li:not(.list-header) div:nth-child(4) {
+.list li:not(.list-header) > div:nth-child(3),
+.list li:not(.list-header) > div:nth-child(4) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.list li:not(.list-header) > div:nth-child(3) div:not(.double-el-hor-divider),
+.list li:not(.list-header) > div:nth-child(4) div:not(.double-el-hor-divider) {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -91,44 +114,54 @@
 
 }
 
-.list li div:nth-child(5) {
-    width: 500px;
-    min-width: 100px;
+.double-el-hor-divider {
+    width: calc(100% + 20px);
+    background: #000000;
+    border-top: 1px solid #0000;
 }
-.list li div:nth-child(6) {
-    width: 400px;
-    max-width: 225px;
-    min-width: 100px;
+
+.list-el-returned .double-el-hor-divider {
+    border-color: #AAAAAA;
 }
-.list li div:nth-child(7) {
+
+.list li > div:nth-child(5) {
+    width: 800px;
+    min-width: 200px;
+}
+
+.list li > div:nth-child(6) {
     width: 450px;
     max-width: 225px;
     min-width: 225px;
 }
-.list li div:nth-child(8) {
+
+.list-el-late > div:nth-child(6) {
+    background-color: #FFFF00;
+}
+
+.list-el-late-30 > div:nth-child(6) {
+    background-color: #FFBB80;
+}
+
+.list li > div:nth-child(7) {
     width: 110px;
     max-width: 110px;
     min-width: 110px;
 }
 
-.list-el-expired div:nth-child(8) {    
+.list-el-returned > div:nth-child(7) {    
     border-right: solid 1px #AAAAAA;
 }
 
-.list li div:nth-child(8):not(.list-el-expired div) {    
+.list li > div:nth-child(7):not(.list-el-returned div) {    
     border-right: solid 1px #000000;
 }
 
-.list li div:nth-child(8) button {
+.list li > div:nth-child(7) button {
     color: #007BFF;
 }
 
 @media (max-width: 1440px) {
-    .list li div:nth-child(6) {
-        display: none;
-    }
-}
-@media (max-width: 1400px) {
     .list li div:nth-child(5) {
         display: none;
     }
@@ -138,13 +171,13 @@
         display: none !important;
     }
 }
-@media (max-width: 1050px) {
+@media (max-width: 1100px) {
     .list li div:nth-child(3) {
         display: none !important;
     }
 }
-@media (max-width: 875px) {
-    .list li div:nth-child(7) {
+@media (max-width: 950px) {
+    .list li div:nth-child(6) {
         display: none;
     }
 }
@@ -156,22 +189,15 @@
 
 
 
-
-.status-review {
-    background: #FFFF80;
-}
-.status-denied {
-    background: #FF8080;
-}
-.status-cancelled {
-    background: #FF8080;
-}
-.status-accepted {
-    background: #FFBB80;
-}
-.status-active {
+.status-inside {
     background: #80FF80;
 }
-.status-expired {
-    background: #EEEEEE;
+.status-outside {
+    background: #FF8080;
+}
+.status-school {
+    background: #FF8080;
+}
+.status-returned {
+    background: #DDDDDD;
 }

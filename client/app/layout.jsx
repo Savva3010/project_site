@@ -136,6 +136,3 @@ export default function RootLayout({ children }) {
         </html>
     );
 }
-
-
-// TODO: Make journals/leave page

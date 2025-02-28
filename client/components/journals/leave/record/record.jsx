@@ -1,7 +1,7 @@
 "use client"
 
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import css from "@/styles/residents/profile.module.css"
+import css from "@/styles/journals/leave/record.module.css"
 
 import { useEffect, useState, useReducer } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -13,77 +13,56 @@ import CustomServerError from '@/lib/customServerError';
 
 import { location } from '@/enums';
 
-import Column1 from './column1';
-import Column2 from './column2';
-import Column3 from './column3';
-
-import NoteWarnModal from './note-warn-modal';
+import Info from './info';
 
 import { SERVER_URL, WS_SERVER_URL } from '@/globals';
 
-export default function Profile({ openedProfileId, setOpenedProfileId, setSortParams }) {
+export default function Record({ openedRecordId, setOpenedRecordId, setSortParams }) {
     const router = useRouter()
     const searchParams = useSearchParams()
 
-    const [ resident, setResident ] = useLoader()
+    const [ reccord, setRecord ] = useLoader()
 
     // Connect to websocket
     const {sendJsonMessage, lastJsonMessage, readyState} = useDefaultWebsocket()
 
     // Handle websocket messages
     useEffect(() => {
-        if (openedProfileId === null) return
+        if (openedRecordId === null) return
         let op = lastJsonMessage?.op
         let ws_data = lastJsonMessage?.data
         if (!op || !lastJsonMessage.path) return
 
         if (lastJsonMessage.path === "/residents") {
             if (op === "status:update") {
-                if (resident.data.id != ws_data.id) return
-                let newResident = {...resident.data}
+                if (reccord.data.resident.id != ws_data.id) return
+                let newResident = {...reccord.data.resident}
                 newResident.status = ws_data.status
-                setResident({type: "SUCCESS", payload: newResident})
+                setRecord({type: "SUCCESS", payload: {...reccord.data, resident: newResident}})
+            }
+        } else if (lastJsonMessage.path === "/journals/leave") {
+            if (op === "status:update") {
+                if (reccord.data.id != ws_data.id) return
+                setRecord({type: "SUCCESS", payload: {...reccord.data, status: ws_data.status}})
             }
         }
     }, [lastJsonMessage])
 
-    // Note/warn modal info
-    const [ noteWarnModal, setNoteWarnModal ] = useReducer((state, {type, payload}) => {
-        switch (type) {
-            case "ADD_NOTE":
-                return {...state, category: "NOTE", info: null}
-            case "ADD_WARN":
-                return {...state, category: "WARN", info: null}
-            case "DELETE_NOTE":
-                return {...state, category: "NOTE", info: payload}
-            case "DELETE_WARN":
-                return {...state, category: "WARN", info: payload}
-            case "CLOSE":
-                return {...state, category: null, info: null}
-            default:
-                return {...state}
-        }
-    }, {
-        "category": null,
-        "info": null
-    })
-
     // Close modal
     function closePanel() {
-        setOpenedProfileId(null)
-        setResident({type: "INITIALIZE"})
-        setNoteWarnModal({type: "CLOSE"})
+        setOpenedRecordId(null)
+        setRecord({type: "INITIALIZE"})
         let newParams = new URLSearchParams(searchParams.toString())
-        newParams.delete("profile")
-        router.replace(`/residents/?${newParams.toString()}`, { scroll: false })
+        newParams.delete("app")
+        router.replace(`/journals/leave/?${newParams.toString()}`, { scroll: false })
     }
 
-    // Fetch resident profile
+    // Fetch reccord
     useEffect(() => {
-        if (openedProfileId === null) return
-        setResident({type: "LOADING"})
+        if (openedRecordId === null) return
+        setRecord({type: "LOADING"})
         let controller = new AbortController()
-        fetch(SERVER_URL + "/residents/" + openedProfileId, {
+        fetch(SERVER_URL + "/journals/leave/" + openedRecordId, {
             method: "GET",
             headers: {
                 "Key": "Authorization",
@@ -101,43 +80,41 @@ export default function Profile({ openedProfileId, setOpenedProfileId, setSortPa
             })
         })
         .then(data => {
-            setResident({type: "SUCCESS", payload: data.data})
+            setRecord({type: "SUCCESS", payload: data.data})
         })
         .catch(err => {
             if (err.name === "AbortError") return
             console.error(err)
-            setResident({type: "ERROR", payload: err})
+            setRecord({type: "ERROR", payload: err})
         })
 
         return () => {
             controller.abort()
         }
-    }, [openedProfileId])
+    }, [openedRecordId])
 
     // Show modal content
-    function showResident() {
-        if (resident.status === "ERROR") {
+    function showRecord() {
+        if (reccord.status === "ERROR") {
             return <p style={{whiteSpace: "pre-wrap", height: "100%"}} className={`${css["error"]}`}>Произошла ошибка (да, и такое бывает) ¯\_(ツ)_/¯ 
                 <br/>
                 Обратитесь к специалисту и попробуйте позже
                 <br/>
                 <br/>                           
-                {resident.error.name}
+                {reccord.error.name}
                 <br/>
-                {resident.error.message}
+                {reccord.error.message}
                 <br/>
-                {resident.error.stack}
+                {reccord.error.stack}
             </p>
         }
 
         return (<>
-                <Column1 info={resident.data} />
-                <Column2 info={resident.data} setSortParams={setSortParams}/>
-                <Column3 info={resident.data} setNoteWarnModal={setNoteWarnModal}/>
+            <Info info={reccord.data} closePanel={closePanel} setSortParams={setSortParams}/>
         </>)
     }
     return (<>
-        {openedProfileId === null ?
+        {openedRecordId === null ?
             <></> :
 
             <>
@@ -155,7 +132,7 @@ export default function Profile({ openedProfileId, setOpenedProfileId, setSortPa
                         </svg>
                     </button>
 
-                    {resident.status != "LOADING" ?
+                    {reccord.status != "LOADING" ?
                     <></> :
 
                     <>
@@ -164,14 +141,8 @@ export default function Profile({ openedProfileId, setOpenedProfileId, setSortPa
                     </>
                     }
 
-                    {noteWarnModal.category === null ?
-                    <></> :
-
-                    <NoteWarnModal info={resident.data} modalInfo={noteWarnModal} setModalInfo={setNoteWarnModal}/>
-                    }
-
-                    <div className={`${css["profile"]}`}>
-                        {showResident()}
+                    <div className={`${css["record"]}`}>
+                        {showRecord()}
                     </div>
                 </div>
             </>

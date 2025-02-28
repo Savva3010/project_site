@@ -7,6 +7,7 @@
     justify-content: space-between;
     margin-bottom: 10px;
     color: #808080;
+    background: #FFFFFF;
 }
 
 .header p {
@@ -24,7 +25,7 @@
 }
 
 @media (max-width: 1075px) {
-    .header{
+    .header {
         font-size: 1rem;
     }
     .header button {
@@ -75,7 +76,7 @@
     width: 200px;
 }
 
-@media (max-width: 1440px) {
+@media (max-width: 1300px) {
     .sort-filter input{
         width: 100px;
     }
@@ -112,4 +113,46 @@
 
 .sort-sort-selected {
     text-decoration: underline;
+}
+
+.header2 {
+    height: max-content;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    background: #FFFFFF;
+}
+
+.header2 div button {
+    padding: 10px;
+    border: 1px solid #007BFF;
+}
+
+.cat-active {
+    background-color: #007BFF;
+    color: #FFFFFF;
+}
+
+.header2 > button {
+    color: #007BFF;
+    border: 1px solid #007BFF;
+    border-radius: 5px;
+    padding: 5px 15px;
+    transition: background-color 0.1s ease-in-out;
+}
+
+.header2 button:hover {
+    background-color: #F8F8F8;
+}
+
+.header2 button.cat-active:hover {
+    
+    background-color: #005BDF;
+}
+
+.header2 button:active {
+    color: #fff;
+    background-color: #007bff;
 }

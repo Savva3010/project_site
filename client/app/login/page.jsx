@@ -5,18 +5,12 @@ import css from "@/styles/login/page.module.css"
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useFormStatus } from 'react-dom';
 
 import { useCookies } from 'react-cookie';
 
 import { CLIENT_URL, SERVER_URL } from '@/globals';
 
-function Submit() {
-    const { pending } = useFormStatus();
-    return <button type="submit" disabled={pending}>
-        <b>{pending ? "Загрузка..." : "Вход"}</b>
-    </button>
-}
+import FormSubmitButton from "@/components/shared/form-submit-button"
 
 export default function Login() {
 
@@ -84,7 +78,7 @@ export default function Login() {
                     <label htmlFor="password">Пароль</label>
                     <input type="password" name="password" id="password" required={true}/>
                 </div>
-                <Submit />
+                <FormSubmitButton text="Вход" loadingText="Загрузка..." />
             </form>
         </div>
     </>);

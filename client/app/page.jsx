@@ -31,7 +31,7 @@ export default function Home() {
             }>Сведения о комнатах</button>
 
             <button onClick={() => 
-                router.push("/", { scroll: false })
+                router.push("/journals/leave", { scroll: false })
             }>Журнал входов/выходов</button>
 
             <button onClick={() => 

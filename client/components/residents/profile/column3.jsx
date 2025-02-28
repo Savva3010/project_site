@@ -26,7 +26,7 @@ export default function Column3({ info, setNoteWarnModal }) {
                     {page === "WARNS" ? 
                     <b>Замечания</b> :
                     "Замечания"
-                    }  
+                    }
                     <button className={`${css["col3-btn-add"]}`} onClick={() => setNoteWarnModal({type: "ADD_WARN"})}>&#43;</button>
                 </button>
             </div>
