@@ -291,7 +291,7 @@ class CleaningMarkUpdate(BaseModel):
     mark: int
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 def get_db():
     conn = sqlite3.connect('internat.db')
@@ -318,11 +318,12 @@ def authenticate_user(username: str, password: str):
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(jwt=token, key=SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("sub")
         if not username:
             return error_response("Неправильный токен", "BAD_TOKEN", 401)
     except jwt.PyJWTError:
+        print("AAAAAAAAAAAAAAAaaaaa")
         return error_response("Неправильный токен", "BAD_TOKEN", 401)
 
     db = get_db()
@@ -331,7 +332,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
     if not user:
         return error_response("Пользователь не найден", "ACCOUNT_NOT_FOUND", 401)
-    return user
+    return dict(user)
 
 @app.post("/register", response_model=BaseResponse)
 async def register(user: UserCreate):
@@ -382,6 +383,8 @@ async def login(user: UserLogin):
 
 @app.get("/profile", response_model=BaseResponse)
 async def get_profile(current_user: dict = Depends(get_current_user)):
+    print(type(current_user))
+    print(*current_user)
     full_name = current_user.get('full_name', '')
     parts = full_name.split(maxsplit=2)
     

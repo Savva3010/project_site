@@ -40,7 +40,7 @@ app.use(methodOverride("_method"))
 app.use((req, res, next) => {
     res.set('Access-Control-Allow-Origin', "*")
     res.set("Access-Control-Allow-Methods", "*")
-    res.set("Access-Control-Allow-Headers", ["Content-Type", "Key", "Value"])
+    res.set("Access-Control-Allow-Headers", ["Content-Type", "Key", "Authorization"])
     next()
 })
 app.use(express.static("public"))
@@ -58,7 +58,7 @@ app.options("/*", (req, res) => {
 
 
 app.get('/profile', (req, res) => {
-    let token = req.get("Value")
+    let token = req.get("Authorization")
 
     if (!token || token.split(' ')[1].length < 7) {
         res

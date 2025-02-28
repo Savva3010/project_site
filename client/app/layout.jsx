@@ -67,7 +67,7 @@ export default function RootLayout({ children }) {
             method: "GET",
             headers: {
                 "Key": "Authorization",
-                "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
+                "Authorization": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
             },
             mode: "cors",
         })

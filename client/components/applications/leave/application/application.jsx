@@ -96,7 +96,7 @@ export default function Application({ openedApplicationId, setOpenedApplicationI
             method: "GET",
             headers: {
                 "Key": "Authorization",
-                "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
+                "Authorization": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
             },
             signal: controller.signal
         })
