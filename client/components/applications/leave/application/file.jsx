@@ -43,7 +43,7 @@ export default function File({ info, setFileActionModal }) {
         fetch(`${SERVER_URL}${info?.src}`, {
             headers: {
                 "Key": "Authorization",
-                "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
+                "Authorization": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
             },
             mode: "cors"
         })

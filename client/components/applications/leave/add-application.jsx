@@ -56,7 +56,7 @@ export default function AddApplication({ modalInfo, setModalInfo }) {
             method: "GET",
             headers: {
                 "Key": "Authorization",
-                "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
+                "Authorization": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
             },
             signal: controller.signal
         })
@@ -105,7 +105,7 @@ export default function AddApplication({ modalInfo, setModalInfo }) {
                 headers: {
                     "Content-Type": "application/json",
                     "Key": "Authorization",
-                    "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
+                    "Authorization": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
                 },
                 mode: "cors",
                 body: JSON.stringify({

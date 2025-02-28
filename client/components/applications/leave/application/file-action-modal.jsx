@@ -34,7 +34,7 @@ export default function FileActionModal({ applicationId, modalInfo, setModalInfo
                 method: "POST",
                 headers: {
                     "Key": "Authorization",
-                    "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
+                    "Authorization": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
                 },
                 mode: "cors",
                 body: data
@@ -75,7 +75,7 @@ export default function FileActionModal({ applicationId, modalInfo, setModalInfo
                 method: "DELETE",
                 headers: {
                     "Key": "Authorization",
-                    "Value": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
+                    "Authorization": `Bearer ${JSON.parse(localStorage.getItem("AUTH_TOKEN"))}`
                 },
                 mode: "cors"
             })
