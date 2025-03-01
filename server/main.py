@@ -792,6 +792,7 @@ async def get_leave_journal(current_user: dict = Depends(get_current_user)):
     for item in data:
         item['leave'] = item.pop('leave_time', None)
         item['return'] = item.pop('return_time', None)
+        item['class'] = item.pop('class_name', None)
     
     conn.close()
     return {"success": True, "data": data}
