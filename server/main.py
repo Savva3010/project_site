@@ -1,5 +1,4 @@
 from fastapi import FastAPI, WebSocket, Depends, UploadFile, File, WebSocketDisconnect, HTTPException
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.responses import FileResponse
@@ -22,7 +21,6 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-app.mount("/", StaticFiles(directory="uploads"), name="static")
 
 app.add_middleware(
     CORSMiddleware,
@@ -1129,8 +1127,6 @@ async def create_leave_application_json(
         return error_response("Ошибка сервера", "DB_ERROR", 500)
     finally:
         db.close()
-
-@app.get("/{filename}", response_model=BaseResponse)
 
 @app.post("/applications/leave/{application_id}/file", response_model=BaseResponse)
 async def upload_application_file(
