@@ -1,5 +1,4 @@
 from fastapi import FastAPI, WebSocket, Depends, UploadFile, File, WebSocketDisconnect, HTTPException
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.responses import FileResponse
@@ -22,7 +21,6 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-app.mount("/", StaticFiles(directory="uploads"), name="static")
 
 app.add_middleware(
     CORSMiddleware,
@@ -455,6 +453,26 @@ async def get_profile(current_user: dict = Depends(get_current_user)):
             "lastname": lastname
         }
     }
+
+@app.get("/{src}", response_model=BaseResponse)
+async def get_file(
+    src: str,
+    current_user: dict = Depends(get_current_user)
+):
+    file_path = os.path.join(os.getcwd(), "uploads", src)
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Image not found")
+
+    return FileResponse(
+        path=file_path,
+        media_type="image/png",
+        filename=src,
+        headers={
+            "Cache-Control": "public, max-age=86400",
+            "Content-Disposition": "inline"
+        }
+    )
 
 @app.get("/residents", response_model=dict)
 async def get_residents(current_user: dict = Depends(get_current_user)):
@@ -1375,23 +1393,6 @@ async def update_cleaning_mark(
         return {"success": True, "data": {}}
     finally:
         conn.close()
-
-@app.get("/no_img.png")
-async def get_no_image():
-    file_path = os.path.join(os.getcwd(), "uploads", "no_img.png")
-
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="Image not found")
-
-    return FileResponse(
-        path=file_path,
-        media_type="image/png",
-        filename="no_img.png",
-        headers={
-            "Cache-Control": "public, max-age=86400",
-            "Content-Disposition": "inline"
-        }
-    )
 
 if __name__ == "__main__":
     import uvicorn
