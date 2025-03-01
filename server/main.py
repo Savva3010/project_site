@@ -880,9 +880,9 @@ async def update_leave_status(
 
     update_params = {'status': new_status}
     if new_status != 'inside':
-        update_params['leave_marked'] = str(int(datetime.utcnow().timestamp()) * 1000 + 3600000)
+        update_params['leave_marked'] = str(int(datetime.utcnow().timestamp()) * 1000 + 10800000)
     if new_status == 'returned':
-        update_params['return_marked'] = str(int(datetime.utcnow().timestamp()) * 1000 + 3600000)
+        update_params['return_marked'] = str(int(datetime.utcnow().timestamp()) * 1000 + 10800000)
 
     set_clause = ', '.join(f"{k} = ?" for k in update_params)
     conn.execute(f'''
@@ -1274,7 +1274,7 @@ async def update_application_status(
             "path": "/applications/leave",
             "data": {
                 "id": application_id,
-                "status": {"status": status_data.status}
+                "status": status_data.status
             }
         }
         asyncio.create_task(broadcast_message(message))
