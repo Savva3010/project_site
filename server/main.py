@@ -880,9 +880,9 @@ async def update_leave_status(
 
     update_params = {'status': new_status}
     if new_status != 'inside':
-        update_params['leave_marked'] = str(int(datetime.utcnow().timestamp()))
+        update_params['leave_marked'] = str(int(datetime.utcnow().timestamp()) * 1000)
     if new_status == 'returned':
-        update_params['return_marked'] = str(int(datetime.utcnow().timestamp()))
+        update_params['return_marked'] = str(int(datetime.utcnow().timestamp()) * 1000)
 
     set_clause = ', '.join(f"{k} = ?" for k in update_params)
     conn.execute(f'''
