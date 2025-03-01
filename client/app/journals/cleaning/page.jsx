@@ -218,6 +218,35 @@ export default function Cleaning() {
             })
         })
         .then(data => {
+            const monthToIdxSorted = {
+                "ЯНВ": 5,
+                "ФЕВ": 6,
+                "МАР": 7,
+                "АПР": 8,
+                "МАЯ": 9,
+                "ИЮН": 10,
+                "ИЮЛ": 11,
+                "АВГ": 12,
+                "СЕН": 1,
+                "ОКТ": 2,
+                "НОЯ": 3,
+                "ДЕК": 4
+            }
+            data.data.dates.sort((a, b) => {
+                let [l_d, l_m] = a.split(" ")
+                let [r_d, r_m] = b.split(" ")
+
+                l_d = parseInt(l_d)
+                l_m = monthToIdxSorted[l_m]
+                r_d = parseInt(r_d)
+                r_m = monthToIdxSorted[r_m]
+
+                if (l_m > r_m) return 1
+                if (l_m < r_m) return -1
+                if (l_d > r_d) return 1
+                if (l_d < r_d) return -1
+                return 0;
+            })
             setData({type: "SUCCESS", payload: data.data})
         })
         .catch(err => {
@@ -276,7 +305,7 @@ export default function Cleaning() {
                 </thead>
                 <tbody>
                 {data.data.rooms.map((room, idx) => {
-                    return <Row key={idx} rowIdx={idx} dates={data.data.dates} room={room} isGrey={idx % 2 === 0}
+                    return <Row key={idx} rowIdx={idx} isInv={idx > data.data.rooms.length - 8} dates={data.data.dates} room={room} isGrey={idx % 2 === 0}
                         markModal={markModal} setMarkModal={setMarkModal} setMark={setMark}/>
                 })}
                 </tbody>

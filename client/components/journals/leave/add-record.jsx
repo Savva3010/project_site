@@ -167,7 +167,7 @@ export default function AddRecord({ modalInfo, setModalInfo }) {
             data = {
                 "type": "self",
                 "resident_id": resident,
-                "leave_time": leave_time.getTIme(),
+                "leave_time": leave_time.getTime(),
                 "address": address,
                 "return_time": return_time.getTime(),
             }
@@ -186,7 +186,7 @@ export default function AddRecord({ modalInfo, setModalInfo }) {
 
         closeModal()
         let promise = new Promise((resolve, reject) => {
-            fetch(SERVER_URL + "/applications/leave", {
+            fetch(SERVER_URL + "/journals/leave", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

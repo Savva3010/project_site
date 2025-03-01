@@ -1,3 +1,19 @@
+let token = "Bearer "
+
+fetch("http://localhost:3001/token", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        "username": "admin",
+        "password": "admin"
+    }),
+    mode: "cors"
+})
+.then(res => res.json())
+.then(data => token += data.data.access_token)
+
 const readline = require('node:readline');
 const { stdin: input, stdout: output } = require('node:process');
 
@@ -13,7 +29,7 @@ const rl = readline.createInterface({ input, output });
 
 rl.question(`Введите кол-во дат(макс ${30 * randoms.months.length}): `, (need_dates) => {
 
-    rl.question(`Введите кол-во комнат(макс ${randoms.rooms.length}): `, (need_rooms) => {
+    rl.question(`Введите кол-во комнат(макс ${randoms.rooms.length}): `, async (need_rooms) => {
     
         if (need_dates > 30 * randoms.months.length ||
             need_rooms > randoms.rooms.length) {
@@ -23,7 +39,22 @@ rl.question(`Введите кол-во дат(макс ${30 * randoms.months.le
         }
     
         for (let date = 0; date < need_dates; ++date) {
-            let push = date % 30 + 1 + " " + randoms.months[Math.floor(date / 30)]
+            let day = date % 30 + 1
+            let month = Math.floor(date / 30) + 1
+            let push = day + " " + randoms.months[month - 1]
+            await fetch("http://localhost:3001/journals/cleaning/dates", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Key": "Authorization",
+                    "Authorization": token
+                },
+                body: JSON.stringify({
+                    "day": day,
+                    "month": (month + 8) % randoms.months.length
+                }),
+                mode: "cors"
+            })
             data.dates.push(push)
         }
 
@@ -38,16 +69,34 @@ rl.question(`Введите кол-во дат(макс ${30 * randoms.months.le
 
                 let mark = randoms.marks[Math.floor(Math.random() * randoms.marks.length)]
 
+                let day = date % 30 + 1
+                let month = Math.floor(date / 30) + 1
+
                 let add = {
-                    "date": date % 30 + 1 + " " + randoms.months[Math.floor(date / 30)],
+                    "date": day + " " + randoms.months[month - 1],
                     "mark": mark
                 }
+
+                await fetch("http://localhost:3001/journals/cleaning/marks", {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Key": "Authorization",
+                        "Authorization": token
+                    },
+                    body: JSON.stringify({
+                        "date": day + " " + randoms.months[month - 1],
+                        "room": push.room_number,
+                        "mark": mark
+                    }),
+                    mode: "cors"
+                })
                 push.marks.push(add)
             }
 
             data.rooms.push(push)
         }
-    
+
         fs.writeFileSync("output/journals_cleaning.json", JSON.stringify(data), (err) => {
             if (err) {
                 console.log(err)
