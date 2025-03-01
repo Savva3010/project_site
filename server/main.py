@@ -63,7 +63,7 @@ async def websocket_endpoint(websocket: WebSocket):
 async def send_heartbeats(websocket: WebSocket):
     try:
         while True:
-            await asyncio.sleep(120)  # Send ping every 2 minutes
+            await asyncio.sleep(120)
             await websocket.send_json({"op": "ping"})
     except asyncio.CancelledError:
         pass
@@ -172,7 +172,7 @@ def init_db():
         UNIQUE(date, room),
         FOREIGN KEY(date) REFERENCES cleaning_dates(date)
     )''')
-    
+
     c.execute('''CREATE TABLE IF NOT EXISTS leave_journal (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         resident_id INTEGER NOT NULL,
@@ -271,7 +271,7 @@ class ResidentCreate(BaseModel):
 
 class NotesCreate(BaseModel):
     content: str
-    
+
 class NotesDelete(BaseModel):
     id: int
 
@@ -403,14 +403,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
             error_response("Неправильный токен", "BAD_TOKEN", 401)
     except jwt.PyJWTError:
         error_response("Неправильный токен", "BAD_TOKEN", 401)
-        
+
     db = get_db()
     user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
     db.close()
-    
+
     if not user:
         error_response("Пользователь не найден", "USER_NOT_FOUND", 401)
-    
+
     return dict(user)
 
 @app.post("/register", response_model=BaseResponse)
@@ -464,11 +464,11 @@ async def login(user: UserLogin):
 async def get_profile(current_user: dict = Depends(get_current_user)):
     full_name = current_user.get('full_name', '')
     parts = full_name.split(maxsplit=2)
-    
+
     surname = parts[0] if len(parts) > 0 else ''
     name = parts[1] if len(parts) > 1 else ''
     lastname = parts[2] if len(parts) > 2 else ''
-    
+
     return {
         "success": True,
         "data": {
@@ -531,7 +531,6 @@ async def get_resident(
 
     resident_dict = dict(resident)
 
-    # Парсинг JSON полей
     parents = json.loads(resident_dict['parents_json']) if resident_dict['parents_json'] else []
     notes = json.loads(resident_dict['comments']) if resident_dict['comments'] else []
     warns = json.loads(resident_dict['warnings']) if resident_dict['warnings'] else []
@@ -595,7 +594,7 @@ def create_note(
 @app.delete("/residents/{resident_id}/notes")
 def delete_note(
     resident_id: int,
-    data: NotesDelete,  # Теперь принимаем JSON-тело
+    data: NotesDelete,  
     current_user: dict = Depends(get_current_user)
 ):
     conn = get_db()
@@ -605,7 +604,7 @@ def delete_note(
             return error_response("Интернатовец не найден", "RESIDENT_NOT_FOUND", 404)
 
         comments = json.loads(resident['comments']) if resident['comments'] else []
-        updated_comments = [note for note in comments if note.get('id') != data.id]  # Используем data.id
+        updated_comments = [note for note in comments if note.get('id') != data.id]
 
         conn.execute("UPDATE residents SET comments = ? WHERE id = ?",
                     (json.dumps(updated_comments), resident_id))
@@ -647,7 +646,7 @@ def create_warn(
 @app.delete("/residents/{resident_id}/warns")
 def delete_warn(
     resident_id: int,
-    data: WarnsDelete,  # Теперь принимаем JSON-тело
+    data: WarnsDelete,
     current_user: dict = Depends(get_current_user)
 ):
     conn = get_db()
@@ -657,7 +656,7 @@ def delete_warn(
             return error_response("Интернатовец не найден", "RESIDENT_NOT_FOUND", 404)
 
         warnings = json.loads(resident['warnings']) if resident['warnings'] else []
-        updated_warnings = [warn for warn in warnings if warn.get('id') != data.id]  # Используем data.id
+        updated_warnings = [warn for warn in warnings if warn.get('id') != data.id]
 
         conn.execute("UPDATE residents SET warnings = ? WHERE id = ?",
                      (json.dumps(updated_warnings), resident_id))
@@ -665,7 +664,7 @@ def delete_warn(
 
         return {"success": True, "data": {}}
     finally:
-        conn.close() 
+        conn.close()
 
 @app.post("/residents", status_code=201)
 async def create_resident(
@@ -735,7 +734,6 @@ async def update_resident(
             ))
         db.commit()
 
-        # WebSocket broadcast for status update
         resident_status = {
             "id": resident_id,
             "status": {
@@ -770,7 +768,6 @@ async def delete_cleaning_date(
         conn.execute("DELETE FROM cleaning_marks WHERE date = ?", (date_data.date,))
         conn.commit()
 
-        # WebSocket broadcast
         message = {
             "op": "date:delete",
             "path": "/journals/cleaning",
@@ -791,6 +788,11 @@ async def get_leave_journal(current_user: dict = Depends(get_current_user)):
         JOIN residents r ON lj.resident_id = r.id
     ''')
     data = [dict(row) for row in cursor.fetchall()]
+    
+    for item in data:
+        item['leave'] = item.pop('leave_time', None)
+        item['return'] = item.pop('return_time', None)
+    
     conn.close()
     return {"success": True, "data": data}
 
@@ -831,10 +833,14 @@ async def get_leave_detail(leave_id: int, current_user: dict = Depends(get_curre
         "parents": json.loads(leave['parents_json'])
     }
     
+    leave_dict = dict(leave)
+    leave_dict['leave'] = leave_dict.pop('leave_time', None)
+    leave_dict['return'] = leave_dict.pop('return_time', None)
+    
     return {
         "success": True,
         "data": {
-            **dict(leave),
+            **leave_dict,
             "resident": resident_data
         }
     }
@@ -863,21 +869,20 @@ async def update_leave_status(
 ):
     conn = get_db()
     leave = conn.execute('SELECT address FROM leave_journal WHERE id = ?', (leave_id,)).fetchone()
-    
+
     if not leave:
         raise HTTPException(status_code=404, detail="Leave record not found")
-    
-    # Логика изменения статуса
+
     new_status = status_data.status
     if new_status == 'outside' and leave['address'] == 'ФТЛ':
         new_status = 'school'
-    
+
     update_params = {'status': new_status}
     if new_status != 'inside':
         update_params['leave_marked'] = str(int(datetime.utcnow().timestamp()))
     if new_status == 'returned':
         update_params['return_marked'] = str(int(datetime.utcnow().timestamp()))
-    
+
     set_clause = ', '.join(f"{k} = ?" for k in update_params)
     conn.execute(f'''
         UPDATE leave_journal
@@ -886,14 +891,14 @@ async def update_leave_status(
     ''', (*update_params.values(), leave_id))
     conn.commit()
     conn.close()
-    
+
     message = {
-        "op": "leave:update",
+        "op": "status:update",
         "path": "/journals/leave",
         "data": {"id": leave_id, "status": new_status}
     }
     asyncio.create_task(broadcast_message(message))
-    
+
     return {"success": True, "data": {}}
 
 @app.post("/journals/leave", response_model=BaseResponse)
@@ -902,21 +907,18 @@ async def create_leave_entry(
     current_user: dict = Depends(get_current_user)
 ):
     conn = get_db()
-    
-    # Проверка resident_id
+
     resident = conn.execute('SELECT 1 FROM residents WHERE id = ?', (entry.resident_id,)).fetchone()
     if not resident:
         raise HTTPException(status_code=404, detail="Resident not found")
-    
-    # Проверка application_id для типа application
+
     if entry.type == 'application':
         app_exists = conn.execute('SELECT 1 FROM applications WHERE id = ?', (entry.application_id,)).fetchone()
         if not app_exists:
             raise HTTPException(status_code=404, detail="Application not found")
-    
-    # Вставка записи
+
     cursor = conn.execute('''
-        INSERT INTO leave_journal 
+        INSERT INTO leave_journal
         (resident_id, application_id, leave_time, return_time, address, type)
         VALUES (?, ?, ?, ?, ?, ?)
     ''', (
@@ -927,11 +929,11 @@ async def create_leave_entry(
         entry.address,
         entry.type
     ))
-    
+
     conn.commit()
     new_id = cursor.lastrowid
     conn.close()
-    
+
     return {"success": True, "data": {"id": new_id}}
 
 @app.get("/rooms", dependencies=[Depends(get_current_user)])
@@ -1266,7 +1268,6 @@ async def update_application_status(
 
         conn.commit()
 
-        # WebSocket broadcast
         message = {
             "op": "status:update",
             "path": "/applications/leave",
@@ -1319,8 +1320,7 @@ async def add_cleaning_date(
     current_user: dict = Depends(get_current_user)
 ):
     month_names = [
-        "января", "февраля", "марта", "апреля", "мая", "июня",
-        "июля", "августа", "сентября", "октября", "ноября", "декабря"
+        "СЕН", "ОКТ", "НОЯ", "ДЕК", "ЯНВ", "ФЕВ", "МАР", "АПР", "МАЯ", "ИЮН", "ИЮЛ", "АВГ"]
     ]
 
     try:
@@ -1333,7 +1333,6 @@ async def add_cleaning_date(
         conn.execute("INSERT INTO cleaning_dates (date) VALUES (?)", (date_str,))
         conn.commit()
 
-        # WebSocket broadcast
         message = {
             "op": "date:add",
             "path": "/journals/cleaning",
@@ -1368,7 +1367,6 @@ async def update_cleaning_mark(
 
         conn.commit()
 
-        # WebSocket broadcast
         message = {
             "op": "mark:update",
             "path": "/journals/cleaning",
@@ -1386,12 +1384,11 @@ async def update_cleaning_mark(
 
 @app.get("/no_img.png")
 async def get_no_image():
-    # Путь к файлу изображения
     file_path = os.path.join(os.getcwd(), "uploads", "no_img.png")
-    
+
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Image not found")
-    
+
     return FileResponse(
         path=file_path,
         media_type="image/png",
