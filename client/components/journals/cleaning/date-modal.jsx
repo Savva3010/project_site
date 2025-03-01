@@ -93,7 +93,6 @@ export default function DateModal({ dates, modalInfo, setModalInfo }) {
                 arr.push({"value": i, "text": i})
             }
         }
-        setSelectedDay((arr.length != 0 ? arr[0].value : "NO"))
 
         return arr
     }, [selectedMonth])

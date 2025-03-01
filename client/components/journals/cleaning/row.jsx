@@ -7,7 +7,7 @@ import { useEffect, useReducer } from 'react';
 
 import MarkModal from './mark-modal';
 
-export default function Row({ isGrey, dates, room, rowIdx, markModal, setMarkModal, setMark } ) {
+export default function Row({ isGrey, dates, room, rowIdx, isInv, markModal, setMarkModal, setMark } ) {
     let sum = 0
     let ammount = 0
 
@@ -23,7 +23,7 @@ export default function Row({ isGrey, dates, room, rowIdx, markModal, setMarkMod
                 return <td key={idx}><div>
                         {rowIdx != markModal.room || idx != markModal.date ?
                         <></> :
-                        <MarkModal setMark={setMark} isInv={rowIdx > dates.length - 8}/>}
+                        <MarkModal setMark={setMark} isInv={isInv}/>}
                         <button onClick={() => setMarkModal({type: "OPEN", payload: {room: rowIdx, date: idx}})}>
                             <p>{mark?.mark || ""}</p>
                         </button>
