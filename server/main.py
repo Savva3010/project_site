@@ -1100,7 +1100,7 @@ async def get_leave_application(
         "status": app_data['status'],
         "comment": app_data['comment'],
         "created_at": app_data['created_at'],
-        "files": [{'filename': file['filename'], 'src': f"/{dict(file)['src'][9:]}" } for file in files]
+        "files": [{'filename': file['filename'], 'src': '/' + dict(file)['src'][9:] } for file in files]
     }
 
     return {"success": True, "data": formatted_response}
@@ -1147,8 +1147,6 @@ async def create_leave_application_json(
         return error_response("Ошибка сервера", "DB_ERROR", 500)
     finally:
         db.close()
-
-@app.get("/{filename}", response_model=BaseResponse)
 
 @app.post("/applications/leave/{application_id}/file", response_model=BaseResponse)
 async def upload_application_file(
