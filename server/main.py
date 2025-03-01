@@ -1268,7 +1268,18 @@ async def get_cleaning_journal(current_user: dict = Depends(get_current_user)):
     dates = conn.execute("SELECT date FROM cleaning_dates ORDER BY date").fetchall()
     formatted_dates = [d['date'] for d in dates]
 
-    rooms = conn.execute("SELECT DISTINCT room FROM cleaning_marks").fetchall()
+    rooms = conn.execute("SELECT DISTINCT room FROM residents").fetchall()
+
+    marks = conn.execute('''
+        SELECT room, date, mark 
+        FROM cleaning_marks
+    ''').fetchall()
+
+    mark_dict = {}
+    for mark in marks:
+        formatted_date = mark['date']
+        key = (mark['room'], formatted_date)
+        mark_dict[key] = mark['mark']
 
     result = {
         "dates": formatted_dates,
@@ -1276,26 +1287,20 @@ async def get_cleaning_journal(current_user: dict = Depends(get_current_user)):
     }
 
     for room in rooms:
-        marks = conn.execute('''
-            SELECT date, mark FROM cleaning_marks
-            WHERE room = ? ORDER BY date
-        ''', (room['room'],)).fetchall()
-
+        room_number = room['room']
         room_marks = []
         for date in formatted_dates:
-            mark = next((m['mark'] for m in marks if m['date'] == date), None)
+            key = (room_number, date)
             room_marks.append({
                 "date": date,
-                "mark": mark
+                "mark": mark_dict.get(key)
             })
-
         result["rooms"].append({
-            "room_number": room['room'],
+            "room_number": room_number,
             "marks": room_marks
         })
 
     conn.close()
-    return {"success": True, "data": result}
     
 @app.post("/journals/cleaning/dates")
 async def add_cleaning_date(
