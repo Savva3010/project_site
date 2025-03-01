@@ -1301,7 +1301,7 @@ async def get_cleaning_journal(current_user: dict = Depends(get_current_user)):
         })
 
     conn.close()
-    return result
+    return {"success": True, "data": result}
     
 @app.post("/journals/cleaning/dates")
 async def add_cleaning_date(
