@@ -1080,7 +1080,7 @@ async def get_leave_application(
         "status": app_data['status'],
         "comment": app_data['comment'],
         "created_at": app_data['created_at'],
-        "files": ['/' + dict(file)['src'][9:] for file in files]
+        "files": [{'filename': file['filename'], 'src': '/' + dict(file)['src'][9:] } for file in files]
     }
 
     return {"success": True, "data": formatted_response}
