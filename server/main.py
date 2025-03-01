@@ -1,7 +1,7 @@
 from fastapi import FastAPI, WebSocket, Depends, UploadFile, File, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Union, Literal
 from datetime import datetime, timedelta
@@ -177,10 +177,10 @@ class BaseResponse(BaseModel):
     success: bool
     data: Union[dict, list]
 
-def error_response(message: str, error_id: str, status_code: int = 400) -> JSONResponse:
-    return JSONResponse(
+def error_response(message: str, error_id: str, status_code: int = 400):
+    raise HTTPException(
         status_code=status_code,
-        content={
+        detail={
             "success": False,
             "data": {
                 "message": message,
@@ -787,7 +787,7 @@ async def get_leave_detail(leave_id: int, current_user: dict = Depends(get_curre
     ''', (leave_id,)).fetchone()
     
     if not leave:
-        return error_response("Заявка на выход не найдена", "LEAVE_RECORD_NOT_FOUND", 404)
+        raise HTTPException(status_code=404, detail="Leave record not found")
     
     resident_data = {
         "id": leave['resident_id'],
@@ -848,7 +848,7 @@ async def update_leave_status(
     leave = conn.execute('SELECT address FROM leave_journal WHERE id = ?', (leave_id,)).fetchone()
 
     if not leave:
-        return error_response("Заявка на выход не найдена", "LEAVE_RECORD_NOT_FOUND", 404)
+        raise HTTPException(status_code=404, detail="Leave record not found")
 
     new_status = status_data.status
     if new_status == 'outside' and leave['address'] == 'ФТЛ':
@@ -887,12 +887,12 @@ async def create_leave_entry(
 
     resident = conn.execute('SELECT 1 FROM residents WHERE id = ?', (entry.resident_id,)).fetchone()
     if not resident:
-        return error_response("Интернатовец не найден", "RESIDENT_NOT_FOUND", 404)
+        raise HTTPException(status_code=404, detail="Resident not found")
 
     if entry.type == 'application':
         app_exists = conn.execute('SELECT 1 FROM applications WHERE id = ?', (entry.application_id,)).fetchone()
         if not app_exists:
-            return error_response("Заявка не найдена", "APPLICATION_NOT_FOUND", 404)
+            raise HTTPException(status_code=404, detail="Application not found")
 
     cursor = conn.execute('''
         INSERT INTO leave_journal
@@ -1376,7 +1376,7 @@ async def get_no_image():
     file_path = os.path.join(os.getcwd(), "uploads", "no_img.png")
 
     if not os.path.exists(file_path):
-        return error_response("Картинка не найдена", "IMAGE_NOT_FOUND", 404)
+        raise HTTPException(status_code=404, detail="Image not found")
 
     return FileResponse(
         path=file_path,
