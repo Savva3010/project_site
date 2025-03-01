@@ -1266,11 +1266,12 @@ async def get_cleaning_journal(current_user: dict = Depends(get_current_user)):
     conn = get_db()
 
     dates = conn.execute("SELECT date FROM cleaning_dates ORDER BY date").fetchall()
+    formatted_dates = [d['date'] for d in dates]
 
     rooms = conn.execute("SELECT DISTINCT room FROM cleaning_marks").fetchall()
 
     result = {
-        "dates": [d['date'] for d in dates],
+        "dates": formatted_dates,
         "rooms": []
     }
 
@@ -1280,17 +1281,22 @@ async def get_cleaning_journal(current_user: dict = Depends(get_current_user)):
             WHERE room = ? ORDER BY date
         ''', (room['room'],)).fetchall()
 
+        room_marks = []
+        for date in formatted_dates:
+            mark = next((m['mark'] for m in marks if m['date'] == date), None)
+            room_marks.append({
+                "date": date,
+                "mark": mark
+            })
+
         result["rooms"].append({
             "room_number": room['room'],
-            "marks": [{
-                "date": m['date'],
-                "mark": m['mark']
-            } for m in marks]
+            "marks": room_marks
         })
 
     conn.close()
     return {"success": True, "data": result}
-
+    
 @app.post("/journals/cleaning/dates")
 async def add_cleaning_date(
     date_req: CleaningDateRequest,
