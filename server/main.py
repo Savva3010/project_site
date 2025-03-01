@@ -454,7 +454,7 @@ async def get_profile(current_user: dict = Depends(get_current_user)):
         }
     }
 
-@app.get("/{src}", response_model=BaseResponse)
+@app.get("/files/{src}", response_model=BaseResponse)
 async def get_file(
     src: str,
     current_user: dict = Depends(get_current_user)
@@ -1100,7 +1100,7 @@ async def get_leave_application(
         "status": app_data['status'],
         "comment": app_data['comment'],
         "created_at": app_data['created_at'],
-        "files": [{'filename': file['filename'], 'src': '/' + dict(file)['src'][9:] } for file in files]
+        "files": [{'filename': file['filename'], 'src': f"/files/{dict(file)['src'][9:]}"} for file in files]
     }
 
     return {"success": True, "data": formatted_response}
