@@ -457,9 +457,8 @@ async def get_profile(current_user: dict = Depends(get_current_user)):
 @app.get("/files/{src}", response_model=BaseResponse)
 async def get_file(
     src: str,
-    current_user: dict = Depends(get_current_user)
 ):
-    file_path = os.path.join(os.getcwd(), "uploads", src)
+    file_path = os.path.join(os.getcwd(), "uploads", src[6:])
 
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Image not found")
