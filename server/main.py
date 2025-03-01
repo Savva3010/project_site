@@ -458,7 +458,7 @@ async def get_profile(current_user: dict = Depends(get_current_user)):
 async def get_file(
     src: str,
 ):
-    file_path = os.path.join(os.getcwd(), "uploads", src[6:])
+    file_path = os.path.join(os.getcwd(), "uploads", src)
 
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Image not found")
@@ -1099,7 +1099,7 @@ async def get_leave_application(
         "status": app_data['status'],
         "comment": app_data['comment'],
         "created_at": app_data['created_at'],
-        "files": [{'filename': file['filename'], 'src': f"/files/{dict(file)['src'][9:]}"} for file in files]
+        "files": [{'filename': file['filename'], 'src': f"/files/{dict(file)['src'][8:]}"} for file in files]
     }
 
     return {"success": True, "data": formatted_response}
@@ -1193,22 +1193,15 @@ async def delete_application_file(
 ):
     conn = get_db()
     try:
-        file_info = conn.execute('''
-            SELECT filepath FROM application_files
-            WHERE application_id = ? AND filename = ?
-        ''', (application_id, path)).fetchone()
-
-        if not file_info:
-            return error_response("Файл не найден", "FILE_NOT_FOUND", 404)
-
+        # path = f"/{path[7:]}"
         try:
-            os.remove(file_info['filepath'])
+            os.remove(path)
         except FileNotFoundError:
             pass
 
         conn.execute('''
             DELETE FROM application_files
-            WHERE application_id = ? AND filename = ?
+            WHERE application_id = ? AND filepath = ?
         ''', (application_id, path))
         conn.commit()
 
