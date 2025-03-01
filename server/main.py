@@ -454,6 +454,26 @@ async def get_profile(current_user: dict = Depends(get_current_user)):
         }
     }
 
+@app.get("/files/{src}", response_model=BaseResponse)
+async def get_file(
+    src: str,
+    current_user: dict = Depends(get_current_user)
+):
+    file_path = os.path.join(os.getcwd(), "uploads", src)
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Image not found")
+
+    return FileResponse(
+        path=file_path,
+        media_type="image/png",
+        filename=src,
+        headers={
+            "Cache-Control": "public, max-age=86400",
+            "Content-Disposition": "inline"
+        }
+    )
+
 @app.get("/residents", response_model=dict)
 async def get_residents(current_user: dict = Depends(get_current_user)):
     conn = get_db()
@@ -1080,7 +1100,7 @@ async def get_leave_application(
         "status": app_data['status'],
         "comment": app_data['comment'],
         "created_at": app_data['created_at'],
-        "files": [{'filename': file['filename'], 'src': '/' + dict(file)['src'][9:] } for file in files]
+        "files": [{'filename': file['filename'], 'src': f"/files/{dict(file)['src'][9:]}"} for file in files]
     }
 
     return {"success": True, "data": formatted_response}
@@ -1371,23 +1391,6 @@ async def update_cleaning_mark(
         return {"success": True, "data": {}}
     finally:
         conn.close()
-
-@app.get("/no_img.png")
-async def get_no_image():
-    file_path = os.path.join(os.getcwd(), "uploads", "no_img.png")
-
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="Image not found")
-
-    return FileResponse(
-        path=file_path,
-        media_type="image/png",
-        filename="no_img.png",
-        headers={
-            "Cache-Control": "public, max-age=86400",
-            "Content-Disposition": "inline"
-        }
-    )
 
 if __name__ == "__main__":
     import uvicorn
