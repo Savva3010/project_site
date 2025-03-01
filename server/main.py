@@ -68,30 +68,6 @@ async def send_heartbeats(websocket: WebSocket):
     except asyncio.CancelledError:
         pass
 
-def format_date(date_str: str) -> str:
-    month_map = {
-        "ЯНВ": "января",
-        "ФЕВ": "февраля",
-        "МАР": "марта",
-        "АПР": "апреля",
-        "МАЙ": "мая",
-        "ИЮН": "июня",
-        "ИЮЛ": "июля",
-        "АВГ": "августа",
-        "СЕН": "сентября",
-        "ОКТ": "октября",
-        "НОЯ": "ноября",
-        "ДЕК": "декабря"
-    }
-
-    try:
-        day_part, month_part = date_str.split()
-        formatted_month = month_map.get(month_part, month_part.lower())
-        return f"{day_part} {formatted_month}"
-    except ValueError:
-        return date_str
-
-
 def init_db():
     conn = sqlite3.connect('internat.db')
     c = conn.cursor()
@@ -1294,7 +1270,7 @@ async def get_cleaning_journal(current_user: dict = Depends(get_current_user)):
     rooms = conn.execute("SELECT DISTINCT room FROM cleaning_marks").fetchall()
 
     result = {
-        "dates": [format_date(d['date']) for d in dates],
+        "dates": [d['date'] for d in dates],
         "rooms": []
     }
 
@@ -1307,7 +1283,7 @@ async def get_cleaning_journal(current_user: dict = Depends(get_current_user)):
         result["rooms"].append({
             "room_number": room['room'],
             "marks": [{
-                "date": format_date(m['date']),
+                "date": m['date'],
                 "mark": m['mark']
             } for m in marks]
         })
