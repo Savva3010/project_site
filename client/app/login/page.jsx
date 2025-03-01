@@ -41,9 +41,9 @@ export default function Login() {
         .then(res => res.json())
         .then((res) => {
             if (!res.success) {
-                setErrorId(res.data.error_id)
+                setErrorId(res.detail.data.error_id)
             } else {
-                setErrorId(200)
+                setErrorId("200")
                 localStorage.setItem("AUTH_TOKEN", JSON.stringify(res.data.access_token))
                 localStorage.setItem("AUTH_TOKEN_EXPIRE", JSON.stringify(new Date(currDate + 24 * 60 * 60 * 1000).getTime()))
                 router.push("/", { scroll: false })
@@ -58,7 +58,7 @@ export default function Login() {
         return <div className={`${css["error"]}`}>
             <p>Что-то пошло не так.</p>
             <p>&nbsp;</p>
-            {errorId == "401" ?
+            {errorId == "AUTH_ERROR" ?
                 <p>Неверное имя пользователя или пароль</p> :
                 <p>Повторите попытку позднее</p>
             }
