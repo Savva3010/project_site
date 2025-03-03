@@ -176,10 +176,15 @@ export default function AddRecord({ modalInfo, setModalInfo }) {
             let resident = Number(formData.get("resident"))
             let application = Number(formData.get("application"))
 
+            let applicationObj = avail_apps.find(app => app.id === application)
+
             data = {
                 "type": "application",
                 "resident_id": resident,
-                "application_id": application
+                "application_id": application,
+                "leave_time": applicationObj.leave,
+                "return_time": applicationObj.return,
+                "address": applicationObj.address
             }
         }
 

@@ -1031,7 +1031,8 @@ async def get_leave_applications(current_user: dict = Depends(get_current_user))
             a.return_ts as return,
             a.address,
             a.accompany,
-            a.status
+            a.status,
+            a.created_at
         FROM applications a
         JOIN residents r ON a.resident_id = r.id
     ''')
@@ -1193,7 +1194,7 @@ async def delete_application_file(
 ):
     conn = get_db()
     try:
-        # path = f"/{path[7:]}"
+        path = f"uploads/{path[7:]}"
         try:
             os.remove(path)
         except FileNotFoundError:
@@ -1202,7 +1203,7 @@ async def delete_application_file(
         conn.execute('''
             DELETE FROM application_files
             WHERE application_id = ? AND filepath = ?
-        ''', (application_id, path))
+        ''', (application_id, path[8:]))
         conn.commit()
 
         return {"success": True, "data": {}}

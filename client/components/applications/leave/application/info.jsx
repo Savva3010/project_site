@@ -153,9 +153,9 @@ export default function Info({ info, closePanel, setSortParams }) {
                         }}>Заявления</button>
                         <button className={`${css["col2-link"]}`} onClick={() => { 
                             let newParams = new URLSearchParams()
-                            let newFilter = `${info?.room} ${info?.full_name} ${info?.class}`
+                            let newFilter = `${info?.resident.room} ${info?.resident.full_name} ${info?.resident.class}`
                             newParams.set("q", newFilter)
-                            router.push(`/journals/leave/?${newParams.toString()}`, { scroll: false })
+                            router.push(`/journals/leave?${newParams.toString()}`, { scroll: false })
                             closePanel()
                         }}>Журнал входов/выходов</button>
                     </div>
