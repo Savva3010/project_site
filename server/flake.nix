@@ -20,14 +20,16 @@
         packages = with pkgs; [ # Python and pip is already in the venv
           (with pkgs.python312Packages; [
             venvShellHook
+            python-lsp-server
+            basedpyright
+            ruff
             fastapi
             pydantic
             python-multipart
             uvicorn
             pyjwt
-              passlib
-              websockets
-
+            passlib
+            websockets
           ])
         ];
       };

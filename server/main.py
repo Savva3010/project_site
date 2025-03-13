@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field, validator
-from typing import List, Optional, Union, Literal
+from typing import Any, List, Optional, Union, Literal
 from datetime import datetime, timedelta
 import sqlite3
 import os
@@ -33,7 +33,7 @@ app.add_middleware(
 active_connections = set()
 connections_lock = asyncio.Lock()
 
-async def broadcast_message(message: dict):
+async def broadcast_message(message: dict[Any, Any]):
     async with connections_lock:
         for connection in list(active_connections):
             try:
@@ -175,7 +175,7 @@ init_db()
 
 class BaseResponse(BaseModel):
     success: bool
-    data: Union[dict, list]
+    data: dict[Any, Any] | list[Any]
 
 def error_response(message: str, error_id: str, status_code: int = 400):
     raise HTTPException(
@@ -287,7 +287,7 @@ class CleaningMarkUpdate(BaseModel):
 
 class ResidentResponse(BaseModel):
     id: int
-    profile_image: dict = {
+    profile_image: dict[str, str] = {
         "src": "",
         "blur_hash": ""
     }
@@ -298,8 +298,8 @@ class ResidentResponse(BaseModel):
     class_teacher: str
     class_mentor: str
     mobile: str
-    status: dict
-    parents: list
+    status: dict[str, str | int]
+    parents: list[dict[str, str]]
 
 class LeaveEntry(BaseModel):
     id: int
@@ -352,7 +352,7 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
-def create_access_token(data: dict):
+def create_access_token(data):
     expires = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     data.update({"exp": expires})
     return jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
@@ -437,7 +437,7 @@ async def login(user: UserLogin):
     }
 
 @app.get("/profile", response_model=BaseResponse)
-async def get_profile(current_user: dict = Depends(get_current_user)):
+async def get_profile(current_user = Depends(get_current_user)):
     full_name = current_user.get('full_name', '')
     parts = full_name.split(maxsplit=2)
 
@@ -474,7 +474,7 @@ async def get_file(
     )
 
 @app.get("/residents", response_model=dict)
-async def get_residents(current_user: dict = Depends(get_current_user)):
+async def get_residents(current_user = Depends(get_current_user)):
     conn = get_db()
     cursor = conn.execute('SELECT * FROM residents')
     residents = cursor.fetchall()
@@ -513,7 +513,7 @@ async def get_residents(current_user: dict = Depends(get_current_user)):
 @app.get("/residents/{resident_id}", response_model=dict)
 async def get_resident(
     resident_id: int,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     conn = get_db()
     resident = conn.execute('''
@@ -561,7 +561,7 @@ async def get_resident(
 def create_note(
     resident_id: int,
     note_data: NotesCreate,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     conn = get_db()
     try:
@@ -589,8 +589,8 @@ def create_note(
 @app.delete("/residents/{resident_id}/notes")
 def delete_note(
     resident_id: int,
-    data: NotesDelete,  
-    current_user: dict = Depends(get_current_user)
+    data: NotesDelete,
+    current_user = Depends(get_current_user)
 ):
     conn = get_db()
     try:
@@ -613,7 +613,7 @@ def delete_note(
 def create_warn(
     resident_id: int,
     warn_data: NotesCreate,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     conn = get_db()
     try:
@@ -642,7 +642,7 @@ def create_warn(
 def delete_warn(
     resident_id: int,
     data: WarnsDelete,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     conn = get_db()
     try:
@@ -664,7 +664,7 @@ def delete_warn(
 @app.post("/residents", status_code=201)
 async def create_resident(
     resident: ResidentCreate,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     parents_json = json.dumps([p.dict() for p in resident.parents])
 
@@ -710,7 +710,7 @@ async def create_resident(
 async def update_resident(
     resident_id: int,
     resident: ResidentCreate,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     db = get_db()
     try:
@@ -755,7 +755,7 @@ async def update_resident(
 @app.delete("/journals/cleaning/dates")
 async def delete_cleaning_date(
     date_data: CleaningDateDelete,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     conn = get_db()
     try:
@@ -775,28 +775,28 @@ async def delete_cleaning_date(
         conn.close()
 
 @app.get("/journals/leave", response_model=BaseResponse)
-async def get_leave_journal(current_user: dict = Depends(get_current_user)):
+async def get_leave_journal(current_user = Depends(get_current_user)):
     conn = get_db()
     cursor = conn.execute('''
-        SELECT lj.*, r.full_name, r.class_name, r.room 
+        SELECT lj.*, r.full_name, r.class_name, r.room
         FROM leave_journal lj
         JOIN residents r ON lj.resident_id = r.id
     ''')
     data = [dict(row) for row in cursor.fetchall()]
-    
+
     for item in data:
         item['leave'] = item.pop('leave_time', None)
         item['return'] = item.pop('return_time', None)
         item['class'] = item.pop('class_name', None)
-    
+
     conn.close()
     return {"success": True, "data": data}
 
 @app.get("/journals/leave/{leave_id}", response_model=BaseResponse)
-async def get_leave_detail(leave_id: int, current_user: dict = Depends(get_current_user)):
+async def get_leave_detail(leave_id: int, current_user = Depends(get_current_user)):
     conn = get_db()
     leave = conn.execute('''
-        SELECT lj.*, 
+        SELECT lj.*,
                r.full_name, r.class_name, r.age, r.room, r.class_teacher, r.class_mentor,
                r.mobile, r.status_type, r.status_place, r.status_until,
                r.parents_json, r.profile_image, r.blur_hash
@@ -804,10 +804,10 @@ async def get_leave_detail(leave_id: int, current_user: dict = Depends(get_curre
         JOIN residents r ON lj.resident_id = r.id
         WHERE lj.id = ?
     ''', (leave_id,)).fetchone()
-    
+
     if not leave:
         raise HTTPException(status_code=404, detail="Leave record not found")
-    
+
     resident_data = {
         "id": leave['resident_id'],
         "profile_image": {
@@ -828,11 +828,11 @@ async def get_leave_detail(leave_id: int, current_user: dict = Depends(get_curre
         },
         "parents": json.loads(leave['parents_json'])
     }
-    
+
     leave_dict = dict(leave)
     leave_dict['leave'] = leave_dict.pop('leave_time', None)
     leave_dict['return'] = leave_dict.pop('return_time', None)
-    
+
     return {
         "success": True,
         "data": {
@@ -845,7 +845,7 @@ async def get_leave_detail(leave_id: int, current_user: dict = Depends(get_curre
 async def update_leave_comment(
     leave_id: int,
     comment: CommentCreate,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     conn = get_db()
     conn.execute('''
@@ -861,7 +861,7 @@ async def update_leave_comment(
 async def update_leave_status(
     leave_id: int,
     status_data: LeaveStatusUpdate,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     conn = get_db()
     leave = conn.execute('SELECT address FROM leave_journal WHERE id = ?', (leave_id,)).fetchone()
@@ -900,7 +900,7 @@ async def update_leave_status(
 @app.post("/journals/leave", response_model=BaseResponse)
 async def create_leave_entry(
     entry: LeaveCreate,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     conn = get_db()
 
@@ -956,7 +956,7 @@ async def get_rooms():
 @app.get("/rooms/{room_number}", response_model=dict)
 async def get_room(
     room_number: str,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     conn = get_db()
     cursor = conn.execute('''
@@ -1012,13 +1012,13 @@ async def get_room(
 async def get_subroom(
     main_room: str,
     sub_room: str,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     full_room = f"{main_room}/{sub_room}"
     return await get_room(full_room, current_user)
 
 @app.get("/applications/leave", response_model=BaseResponse)
-async def get_leave_applications(current_user: dict = Depends(get_current_user)):
+async def get_leave_applications(current_user = Depends(get_current_user)):
     conn = get_db()
     cursor = conn.execute('''
         SELECT
@@ -1043,7 +1043,7 @@ async def get_leave_applications(current_user: dict = Depends(get_current_user))
 @app.get("/applications/leave/{application_id}", response_model=BaseResponse)
 async def get_leave_application(
     application_id: int,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     conn = get_db()
 
@@ -1064,7 +1064,7 @@ async def get_leave_application(
         FROM application_files
         WHERE application_id = ?
     ''', (application_id,)).fetchall()
-    
+
 
     conn.close()
 
@@ -1108,7 +1108,7 @@ async def get_leave_application(
 @app.post("/applications/leave", response_model=BaseResponse, status_code=201)
 async def create_leave_application_json(
     application: ApplicationCreate,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     db = get_db()
     resident = db.execute("SELECT 1 FROM residents WHERE id = ?", (application.resident_id,)).fetchone()
@@ -1152,7 +1152,7 @@ async def create_leave_application_json(
 async def upload_application_file(
     application_id: int,
     file: UploadFile = File(..., alias="main"),
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     conn = get_db()
     app_exists = conn.execute('''
@@ -1190,11 +1190,12 @@ async def upload_application_file(
 async def delete_application_file(
     application_id: int,
     path: str,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     conn = get_db()
     try:
-        path = f"uploads/{path[7:]}"
+        path = f"uploads\\{path[7:]}"
+        print(path)
         try:
             os.remove(path)
         except FileNotFoundError:
@@ -1203,7 +1204,7 @@ async def delete_application_file(
         conn.execute('''
             DELETE FROM application_files
             WHERE application_id = ? AND filepath = ?
-        ''', (application_id, path[8:]))
+        ''', (application_id, path))
         conn.commit()
 
         return {"success": True, "data": {}}
@@ -1216,7 +1217,7 @@ async def delete_application_file(
 async def update_application_comment(
     application_id: int,
     comment: ApplicationComment,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     conn = get_db()
     try:
@@ -1240,7 +1241,7 @@ async def update_application_comment(
 async def update_application_status(
     application_id: int,
     status_data: ApplicationStatusUpdate,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     valid_statuses = {'review', 'denied', 'cancelled', 'accepted'}
     if status_data.status not in valid_statuses:
@@ -1276,7 +1277,7 @@ async def update_application_status(
         conn.close()
 
 @app.get("/journals/cleaning", response_model=dict)
-async def get_cleaning_journal(current_user: dict = Depends(get_current_user)):
+async def get_cleaning_journal(current_user = Depends(get_current_user)):
     conn = get_db()
 
     dates = conn.execute("SELECT date FROM cleaning_dates ORDER BY date").fetchall()
@@ -1285,7 +1286,7 @@ async def get_cleaning_journal(current_user: dict = Depends(get_current_user)):
     rooms = conn.execute("SELECT DISTINCT room FROM residents").fetchall()
 
     marks = conn.execute('''
-        SELECT room, date, mark 
+        SELECT room, date, mark
         FROM cleaning_marks
     ''').fetchall()
 
@@ -1316,11 +1317,11 @@ async def get_cleaning_journal(current_user: dict = Depends(get_current_user)):
 
     conn.close()
     return {"success": True, "data": result}
-    
+
 @app.post("/journals/cleaning/dates")
 async def add_cleaning_date(
     date_req: CleaningDateRequest,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     month_names = [
         "ЯНВ", "ФЕВ", "МАР", "АПР", "МАЯ", "ИЮН", "ИЮЛ", "АВГ", "СЕН", "ОКТ", "НОЯ", "ДЕК",
@@ -1353,7 +1354,7 @@ async def add_cleaning_date(
 @app.put("/journals/cleaning/marks")
 async def update_cleaning_mark(
     mark_data: CleaningMarkUpdate,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     conn = get_db()
     try:

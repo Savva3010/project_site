@@ -24,7 +24,7 @@
 
     devShells = forEachSupportedSystem ({pkgs}: {
       default = pkgs.mkShell {
-        packages = with pkgs; [yarn2nix nodejs_22 nodePackages.pnpm yarn ];
+        packages = with pkgs; [ yarn tailwindcss-language-server eslint vtsls];
       };
     });
   };
