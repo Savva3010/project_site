@@ -1,6 +1,19 @@
-let token = "Bearer "
+const { Agent, setGlobalDispatcher } = require('undici')
 
-fetch("http://localhost:3001/token", {
+const agent = new Agent({
+    connect: {
+        rejectUnauthorized: false
+    }
+})
+
+setGlobalDispatcher(agent)
+
+let token = "Bearer "
+let url = "https://api.school-project.savva3010.ru"
+
+
+
+fetch(url + "/token", {
     method: "POST",
     headers: {
         "Content-Type": "application/json"
@@ -42,7 +55,7 @@ rl.question(`Введите кол-во дат(макс ${30 * randoms.months.le
             let day = date % 30 + 1
             let month = Math.floor(date / 30) + 1
             let push = day + " " + randoms.months[month - 1]
-            await fetch("http://localhost:3001/journals/cleaning/dates", {
+            await fetch(url + "/journals/cleaning/dates", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -77,7 +90,7 @@ rl.question(`Введите кол-во дат(макс ${30 * randoms.months.le
                     "mark": mark
                 }
 
-                await fetch("http://localhost:3001/journals/cleaning/marks", {
+                await fetch(url + "/journals/cleaning/marks", {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",

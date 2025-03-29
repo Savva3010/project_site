@@ -1,6 +1,19 @@
-let token = "Bearer "
+const { Agent, setGlobalDispatcher } = require('undici')
 
-fetch("http://localhost:3001/token", {
+const agent = new Agent({
+    connect: {
+        rejectUnauthorized: false
+    }
+})
+
+setGlobalDispatcher(agent)
+
+let token = "Bearer "
+let url = "https://api.school-project.savva3010.ru"
+
+
+
+fetch(url + "/token", {
     method: "POST",
     headers: {
         "Content-Type": "application/json"
@@ -130,7 +143,7 @@ rl.question(`Введите кол-во проживающих(макс ${availa
     }
 
     residents.forEach(push => {
-        fetch("http://localhost:3001/residents", {
+        fetch(url + "/residents", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
