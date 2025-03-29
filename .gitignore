@@ -1,0 +1,27 @@
+# vscode settings
+/.vscode
+
+
+# generators
+# modules
+/generators/*/node_modules/
+
+
+# client
+# modules
+/client/node_modules/
+# nextjs builds
+/client/.next
+
+
+# temp_server
+# modules
+/temp_server/node_modules/
+
+
+# server
+# cache
+/server/__pycache__
+# databases
+/server/internat.db
+/server/internat filled.db
